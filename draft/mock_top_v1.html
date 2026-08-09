@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>北大心理ゼミ｜トップページ モック v1</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oi&family=Zen+Kaku+Gothic+New:wght@400;700&family=Shippori+Mincho:wght@400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   デザイントークン（draft/デザイン大本資料_v1.md 第4章）
+   ============================================================ */
+:root{
+  --ink:#0E0E0E; --paper:#F4F1EA; --paper-card:#E8E5DE; --white:#FFF;
+  --shu:#E8402A; --shu-on-light:#C4321F; --shu-on-dark:#FF6B54;
+  --sub-on-light:#6B6862; --sub-on-dark:#B8B3A8;
+
+  --font-display:"Oi",serif;
+  --font-sans:"Switzer","Zen Kaku Gothic New","Yu Gothic",YuGothic,"Hiragino Kaku Gothic ProN",sans-serif;
+  --font-serif:"Shippori Mincho","Yu Mincho",YuMincho,serif;
+  --font-mono:"Space Mono","M PLUS 1 Code",monospace;
+
+  --sp-1:.5rem; --sp-2:1rem; --sp-3:1.5rem; --sp-4:2rem;
+  --sp-6:3rem; --sp-8:4rem; --sp-12:6rem; --sp-16:8rem; --sp-24:12rem;
+  --radius:24px; --radius-pill:999px; --frame:8px; --measure:34em;
+
+  --ease-out-expo:cubic-bezier(.16,1,.3,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;color-scheme:light}
+
+/* ── 額装：ページ全体を墨で囲み、内側を紙にする（資料6-1）── */
+body{
+  background:var(--ink); padding:var(--frame);
+  font-family:var(--font-sans); font-size:17px; line-height:1.9; letter-spacing:.08em;
+  color:var(--ink); line-break:strict; overflow-wrap:anywhere;
+}
+main{background:var(--paper); border-radius:var(--radius); overflow:hidden}
+
+/* 紙のノイズ（資料4-4 案3） */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── タイポグラフィ（資料5-1）── */
+h1,h2,h3,.display{font-feature-settings:"palt" 1; word-break:auto-phrase}
+.display{
+  font-family:var(--font-display); font-weight:400;
+  font-size:clamp(48px,11vw,160px); line-height:.9; letter-spacing:-.02em;
+}
+h1{font-size:clamp(32px,4.6vw,48px);font-weight:700;line-height:1.2;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.2vw,32px);font-weight:700;line-height:1.3;letter-spacing:-.02em}
+h3{font-size:clamp(18px,1.6vw,20px);font-weight:700;line-height:1.6;letter-spacing:.02em}
+p{max-width:var(--measure)}
+.lead{font-size:clamp(16px,1.5vw,19px);line-height:1.9}
+.quote{font-family:var(--font-serif);font-size:clamp(20px,2.4vw,24px);line-height:2;letter-spacing:.06em}
+.cap{font-size:14px;line-height:1.7;letter-spacing:.06em;color:var(--sub-on-light)}
+.label{
+  font-family:var(--font-mono);font-size:12px;line-height:1.5;letter-spacing:.12em;
+  font-variant-numeric:tabular-nums;text-transform:uppercase;
+}
+/* 「囲み」＝日本語で効く強調（資料5-3） */
+.box{border:2px solid currentColor;border-radius:var(--radius-pill);padding:.06em .5em;display:inline-block}
+
+.wrap{max-width:1280px;margin-inline:auto;padding-inline:clamp(var(--sp-3),4vw,var(--sp-8))}
+section{padding-block:clamp(var(--sp-12),12vw,var(--sp-24))}
+
+/* ── ナビ（資料7-1）── */
+.nav{
+  position:sticky;top:0;z-index:100;background:var(--paper);
+  border-bottom:1px solid rgba(14,14,14,.12);
+}
+.nav__in{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);
+  padding-block:var(--sp-3);flex-wrap:wrap}
+.brand{display:grid;gap:2px;text-decoration:none;color:inherit}
+.brand b{font-size:15px;font-weight:700;letter-spacing:.02em;line-height:1.2}
+.nav ul{display:flex;gap:clamp(var(--sp-2),2.4vw,var(--sp-6));list-style:none;flex-wrap:wrap}
+.nav a{text-decoration:none;color:inherit;display:grid;gap:1px;padding-bottom:4px;
+  border-bottom:2px solid transparent;transition:border-color .16s ease-out}
+.nav a:hover{border-color:var(--shu-on-light)}
+.nav a[aria-current]{border-color:var(--shu-on-light)}
+.nav a span:first-child{font-size:15px;letter-spacing:.04em}
+
+/* ── ヒーロー ── */
+.hero{padding-top:clamp(var(--sp-8),9vw,var(--sp-16));padding-bottom:clamp(var(--sp-8),8vw,var(--sp-12))}
+.hero .display{margin-block:var(--sp-4) var(--sp-6)}
+.hero__meta{display:flex;gap:var(--sp-4);flex-wrap:wrap;color:var(--sub-on-light);max-width:none}
+.hero h1{margin-bottom:var(--sp-4)}
+.hero .shu{color:var(--shu-on-light)}
+
+/* ── 型C：散らしたピル群（資料6-3／原理1）── */
+.pills{display:flex;flex-wrap:wrap;gap:.7rem 1rem;align-items:center;max-width:none}
+.pill{
+  font:400 clamp(13px,1.3vw,15px)/1 var(--font-sans);letter-spacing:.04em;
+  padding:.62em 1.15em;border-radius:var(--radius-pill);white-space:nowrap;
+  transition:transform .35s var(--ease-out-expo);
+}
+.pill:hover{transform:translateY(-3px)}
+.pill--fill{background:var(--shu);color:var(--ink)}          /* 4.78 AA */
+.pill--outline{border:1.5px solid var(--ink);color:var(--ink)}
+.pill--invert{background:var(--ink);color:var(--shu-on-dark)} /* 6.88 AA */
+/* Y座標を意図的にばらす */
+.pills>:nth-child(3n){transform:translateY(-.7rem)}
+.pills>:nth-child(4n){transform:translateY(.6rem)}
+.pills>:nth-child(5n){transform:translateY(-.3rem)}
+.pills>:nth-child(3n):hover,.pills>:nth-child(4n):hover,.pills>:nth-child(5n):hover{transform:translateY(-1rem)}
+
+/* ── 型B：フルブリード作品行（資料6-3）── */
+.work{position:relative;display:block;text-decoration:none;color:inherit;
+  border-top:1px solid rgba(14,14,14,.14)}
+.work__media{
+  position:relative;aspect-ratio:16/7;background:var(--paper-card);
+  display:grid;place-items:center;overflow:hidden;
+}
+.work__cap{position:absolute;inset:0;padding:clamp(var(--sp-3),2.4vw,var(--sp-6));
+  display:flex;justify-content:space-between;align-items:flex-start;gap:var(--sp-4);z-index:2}
+.work__title{font-size:clamp(20px,2.6vw,28px);font-weight:700;line-height:1.3;letter-spacing:-.02em}
+.work__sub{font-size:14px;letter-spacing:.06em;color:var(--sub-on-light)}
+.work__more{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;white-space:nowrap}
+.work:hover .work__more{color:var(--shu-on-light)}
+.work:hover .ph{transform:scale(1.02)}
+.ph{transition:transform .5s var(--ease-out-expo)}
+
+/* 写真未設定のフォールバック（資料6-4）*/
+.ph{width:100%;height:100%;display:grid;place-items:center;position:absolute;inset:0}
+.ph svg{width:min(46%,340px);height:auto;opacity:.5}
+.ph__note{position:absolute;right:clamp(var(--sp-3),2.4vw,var(--sp-6));
+  bottom:clamp(var(--sp-3),2.4vw,var(--sp-6));color:var(--sub-on-light)}
+
+/* ── 型A：ラベル／本文の2カラム（資料6-3）── */
+.two{display:grid;grid-template-columns:minmax(56px,2fr) 10fr;gap:var(--sp-4)}
+.two__label{writing-mode:vertical-rl;font-family:var(--font-mono);font-size:12px;
+  letter-spacing:.24em;color:var(--sub-on-light);height:100%}
+.rows{display:grid}
+.row{display:grid;grid-template-columns:1fr auto;gap:var(--sp-4);align-items:baseline;
+  padding-block:var(--sp-3);border-top:1px solid rgba(14,14,14,.14)}
+.row:last-child{border-bottom:1px solid rgba(14,14,14,.14)}
+.row__name{font-size:clamp(18px,2vw,22px);font-weight:700;letter-spacing:.02em}
+.row__meta{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--sub-on-light);
+  font-variant-numeric:tabular-nums}
+
+/* ── 反転層：団体紹介＝墨地の新聞紙面（資料6-1／7-6）── */
+.invert{background:var(--ink);color:var(--paper)}
+.invert .cap,.invert .two__label,.invert .row__meta{color:var(--sub-on-dark)}
+.invert .row,.invert .row:last-child{border-color:rgba(244,241,234,.2)}
+.paper-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-4);
+  padding-bottom:var(--sp-2);border-bottom:3px double rgba(244,241,234,.45);flex-wrap:wrap}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:var(--sp-8)}
+.col{padding-inline:clamp(var(--sp-3),2.4vw,var(--sp-6));border-left:1px solid rgba(244,241,234,.22)}
+.col:first-child{padding-left:0;border-left:0}
+.col:last-child{padding-right:0}
+.col h3{color:var(--shu-on-dark);margin-bottom:var(--sp-2)}
+.col .quote{color:var(--paper)}
+.figs{display:grid;gap:var(--sp-3)}
+.fig{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);
+  border-bottom:1px dotted rgba(244,241,234,.3);padding-bottom:var(--sp-1)}
+.fig__n{font-family:var(--font-mono);font-size:clamp(26px,3.4vw,40px);line-height:1;
+  color:var(--shu-on-dark);font-variant-numeric:tabular-nums}
+
+/* ── フッター ── */
+.foot{background:var(--ink);color:var(--paper);padding-block:var(--sp-12) var(--sp-8)}
+.foot a{color:var(--paper)}
+.foot__grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:var(--sp-6)}
+.foot .display{font-size:clamp(36px,7vw,88px);color:var(--paper)}
+.foot ul{list-style:none;display:grid;gap:var(--sp-1)}
+
+/* ── モック注記 ── */
+.note{background:var(--paper-card);padding:var(--sp-4);border-radius:var(--radius);
+  margin-block:var(--sp-8);font-size:14px;line-height:1.9;letter-spacing:.06em}
+.note b{display:block;font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;
+  margin-bottom:var(--sp-1)}
+.note ul{margin:var(--sp-1) 0 0 1.2em}
+
+/* ── モーション（資料8）：対応環境でのみ隠す ── */
+@supports (animation-timeline:view()){
+  @keyframes reveal{from{opacity:0;translate:0 2rem}to{opacity:1;translate:0 0}}
+  .reveal{animation:reveal linear both;animation-timeline:view();animation-range:entry 0% cover 26%}
+}
+:focus-visible{outline:3px solid var(--shu);outline-offset:3px}
+.invert :focus-visible,.foot :focus-visible{outline-color:var(--shu-on-dark)}
+
+@media (max-width:900px){
+  .cols{grid-template-columns:1fr;gap:var(--sp-6)}
+  .col{padding-inline:0;border-left:0;border-top:1px solid rgba(244,241,234,.22);padding-top:var(--sp-4)}
+  .col:first-child{border-top:0;padding-top:0}
+  .foot__grid{grid-template-columns:1fr;gap:var(--sp-4)}
+  .two{grid-template-columns:1fr;gap:var(--sp-2)}
+  .two__label{writing-mode:horizontal-tb;height:auto}
+  .work__cap{flex-direction:column}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .pills>*{transform:none!important}
+}
+</style>
+</head>
+<body>
+<main>
+
+<!-- ══════════ ナビ ══════════ -->
+<nav class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#">
+      <b>北大心理ゼミ</b>
+      <span class="label">KITADAI PSYCHOLOGY SEMINAR</span>
+    </a>
+    <ul>
+      <li><a href="#works" aria-current="page"><span>作品集</span><span class="label">WORKS</span></a></li>
+      <li><a href="#event"><span>イベント</span><span class="label">EVENT</span></a></li>
+      <li><a href="#club"><span>部活</span><span class="label">CLUB</span></a></li>
+      <li><a href="#pj"><span>PJ</span><span class="label">PROJECT</span></a></li>
+      <li><a href="#about"><span>団体紹介</span><span class="label">ABOUT</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════ ヒーロー ══════════ -->
+<header class="hero wrap">
+  <p class="label">2026 — HOKKAIDO UNIVERSITY — VOL.01</p>
+  <p class="display">KITADAI<br>PSYCHOLOGY</p>
+  <h1>大学生の溢れ出す妄想を、<br><span class="shu box">形にする</span>。</h1>
+  <p class="lead">
+    イベント、部活、プロジェクト。頭の中にしかなかったものが、
+    人を巻き込んで動きはじめ、やがて誰かに届くかたちになる。
+    このサイトは、その変換の記録を綴じた一冊です。
+  </p>
+  <p class="hero__meta label" style="margin-top:var(--sp-6)">
+    <span>MISSION／妄想を形にする</span>
+    <span>VISION／北大で最も大量におもろいことが生まれる場所へ</span>
+  </p>
+</header>
+
+<!-- ══════════ 原理1：数が説得力である ══════════ -->
+<section class="wrap reveal" style="padding-top:0">
+  <div class="two">
+    <div class="two__label">NOW RUNNING ／ 進行中</div>
+    <div>
+      <div class="pills">
+        <span class="pill pill--outline">読書部</span>
+        <span class="pill pill--fill">豆腐ゲームPJ</span>
+        <span class="pill pill--outline">すこやか部</span>
+        <span class="pill pill--invert">実験再現PJ</span>
+        <span class="pill pill--outline">ふらっと部</span>
+        <span class="pill pill--fill">詩タイピングPJ</span>
+        <span class="pill pill--outline">料理部</span>
+        <span class="pill pill--invert">新歓イベント</span>
+      </div>
+      <p class="cap" style="margin-top:var(--sp-4)">
+        ここに並ぶタグは、増えるほど画面が賑やかになります。活動が増えることが、そのままVisionの証明になる設計です。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 型B：作品集（フルブリード行） ══════════ -->
+<section id="works" style="padding-bottom:0">
+  <div class="wrap" style="margin-bottom:var(--sp-8)">
+    <p class="label">01 — WORKS</p>
+    <h2>作品集</h2>
+    <p class="cap" style="margin-top:var(--sp-2)">妄想が形になったもの。</p>
+  </div>
+
+  <a class="work reveal" href="#">
+    <div class="work__media">
+      <div class="ph"><svg viewBox="0 0 200 90" fill="none" stroke="#0E0E0E" stroke-width="1.2" aria-hidden="true"><rect x="1" y="1" width="198" height="88"/><path d="M1 89 199 1M1 1l198 88"/></svg></div>
+      <div class="work__cap">
+        <div>
+          <p class="label" style="color:var(--sub-on-light)">2026 — PROJECT — #01</p>
+          <h3 class="work__title">豆腐ゲームPJ</h3>
+          <p class="work__sub">制作者・未設定</p>
+        </div>
+        <span class="work__more">詳細を見る →</span>
+      </div>
+      <p class="ph__note label">写真未設定 ／ NO IMAGE</p>
+    </div>
+  </a>
+
+  <a class="work reveal" href="#">
+    <div class="work__media">
+      <div class="ph"><svg viewBox="0 0 200 90" fill="none" stroke="#0E0E0E" stroke-width="1.2" aria-hidden="true"><rect x="1" y="1" width="198" height="88"/><path d="M1 89 199 1M1 1l198 88"/></svg></div>
+      <div class="work__cap">
+        <div>
+          <p class="label" style="color:var(--sub-on-light)">2026 — PROJECT — #02</p>
+          <h3 class="work__title">実験再現PJ</h3>
+          <p class="work__sub">制作者・未設定</p>
+        </div>
+        <span class="work__more">詳細を見る →</span>
+      </div>
+      <p class="ph__note label">写真未設定 ／ NO IMAGE</p>
+    </div>
+  </a>
+
+  <a class="work reveal" href="#" style="border-bottom:1px solid rgba(14,14,14,.14)">
+    <div class="work__media">
+      <div class="ph"><svg viewBox="0 0 200 90" fill="none" stroke="#0E0E0E" stroke-width="1.2" aria-hidden="true"><rect x="1" y="1" width="198" height="88"/><path d="M1 89 199 1M1 1l198 88"/></svg></div>
+      <div class="work__cap">
+        <div>
+          <p class="label" style="color:var(--sub-on-light)">2026 — PROJECT — #03</p>
+          <h3 class="work__title">詩タイピングPJ</h3>
+          <p class="work__sub">制作者・未設定</p>
+        </div>
+        <span class="work__more">詳細を見る →</span>
+      </div>
+      <p class="ph__note label">写真未設定 ／ NO IMAGE</p>
+    </div>
+  </a>
+</section>
+
+<!-- ══════════ 型A：部活（ラベル／本文の2カラム） ══════════ -->
+<section id="club" class="wrap reveal">
+  <p class="label">02 — CLUB</p>
+  <h2 style="margin-bottom:var(--sp-8)">部活</h2>
+  <div class="two">
+    <div class="two__label">興味を、続くかたちに</div>
+    <div class="rows">
+      <div class="row"><h3 class="row__name">読書部</h3><span class="row__meta">設立年・未設定／部員数・未設定</span></div>
+      <div class="row"><h3 class="row__name">すこやか部</h3><span class="row__meta">設立年・未設定／部員数・未設定</span></div>
+      <div class="row"><h3 class="row__name">ふらっと部</h3><span class="row__meta">設立年・未設定／部員数・未設定</span></div>
+      <div class="row"><h3 class="row__name">料理部</h3><span class="row__meta">設立年・未設定／部員数・未設定</span></div>
+    </div>
+  </div>
+  <p class="quote" style="margin-top:var(--sp-8);max-width:var(--measure)">
+    「大学生が自分の興味を部活として立ち上げ、他者と共有しながら続けていく。」
+  </p>
+</section>
+
+<!-- ══════════ 反転層：団体紹介＝墨地の新聞紙面 ══════════ -->
+<section id="about" class="invert">
+  <div class="wrap">
+    <p class="label" style="color:var(--sub-on-dark)">03 — ABOUT</p>
+    <div class="paper-head" style="margin-top:var(--sp-2)">
+      <h2 style="letter-spacing:.02em">北大心理ゼミ</h2>
+      <p class="label">2026年8月9日 ／ VOL.01</p>
+    </div>
+
+    <div class="cols">
+      <div class="col">
+        <h3>MISSION</h3>
+        <p class="quote">大学生の溢れ出す妄想を形にする</p>
+        <h3 style="margin-top:var(--sp-6)">VISION</h3>
+        <p class="quote">北大で最も大量におもろいことが生まれる場所になる</p>
+        <h3 style="margin-top:var(--sp-6)">VALUE</h3>
+        <p class="cap">誰を幸せにできるのかを問い続ける／過去から学ぶことを忘れない</p>
+      </div>
+
+      <div class="col">
+        <h3>組織</h3>
+        <div class="rows">
+          <div class="row"><span class="row__name" style="font-size:18px">代表・副代表</span><span class="row__meta">任期 — 5月末</span></div>
+          <div class="row"><span class="row__name" style="font-size:18px">運営部</span><span class="row__meta">全体運営</span></div>
+          <div class="row"><span class="row__name" style="font-size:18px">企画部</span><span class="row__meta">部活・イベント</span></div>
+          <div class="row"><span class="row__name" style="font-size:18px">プロジェクトチーム</span><span class="row__meta">個人の挑戦</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <h3>数字</h3>
+        <div class="figs">
+          <div class="fig"><span class="cap">部活</span><span class="fig__n">––</span></div>
+          <div class="fig"><span class="cap">プロジェクト</span><span class="fig__n">––</span></div>
+          <div class="fig"><span class="cap">年間の企画</span><span class="fig__n">––</span></div>
+          <div class="fig"><span class="cap">メンバー</span><span class="fig__n">––</span></div>
+        </div>
+        <p class="cap" style="margin-top:var(--sp-3)">
+          ※ 実数が未確認のため空欄にしています。<br>数字は必ず実データを入れます。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ フッター ══════════ -->
+<footer class="foot">
+  <div class="wrap">
+    <p class="display">KITADAI</p>
+    <div class="foot__grid" style="margin-top:var(--sp-8)">
+      <div>
+        <p class="cap">北海道大学の学生団体。<br>イベント・部活・プロジェクトを通じて、<br>学生の興味と挑戦を形にしています。</p>
+      </div>
+      <div>
+        <p class="label" style="color:var(--sub-on-dark);margin-bottom:var(--sp-2)">MENU</p>
+        <ul class="cap"><li>作品集</li><li>イベント</li><li>部活</li><li>PJ</li><li>団体紹介</li></ul>
+      </div>
+      <div>
+        <p class="label" style="color:var(--sub-on-dark);margin-bottom:var(--sp-2)">CONTACT</p>
+        <ul class="cap">
+          <li>連絡先・未設定</li>
+          <li>SNS・未設定</li>
+          <li>スポンサーの方へ・未設定</li>
+        </ul>
+      </div>
+    </div>
+    <p class="label" style="color:var(--sub-on-dark);margin-top:var(--sp-8)">© 2026 KITADAI PSYCHOLOGY SEMINAR</p>
+  </div>
+</footer>
+
+<!-- ══════════ モック注記 ══════════ -->
+<div class="wrap">
+  <div class="note">
+    <b>MOCK NOTE ／ このモックについて</b>
+    確認していただきたいのは <strong>書体・朱・額装レイアウトの相性</strong>です。以下は事実ではないため入れていません。
+    <ul>
+      <li>写真 → 資料6-4で決めた<strong>「写真未設定」フォールバック</strong>をそのまま表示しています（この状態でも成立するかの検証を兼ねています）</li>
+      <li>部活の設立年・部員数、団体の各種実数 → <strong>すべて「未設定」「––」</strong>のまま</li>
+      <li>作品名は、基本情報に実在した3つのPJ名を暫定で使用</li>
+      <li>連絡先・SNS → 未設定</li>
+    </ul>
+    実装している設計：額装／二層構造の地の色反転／型A・型B・型Cの3レイアウト／新聞紙面ブロック／散らしたピル群／モノスペースのラベル／「囲み」強調／縦組みラベル／CSSのみのスクロール出現／prefers-reduced-motion対応。
+  </div>
+</div>
+
+</main>
+</body>
+</html>
