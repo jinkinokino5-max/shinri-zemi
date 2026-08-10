@@ -20,6 +20,14 @@ const OUT = join(root, 'out');
 const errors = [];
 const warns = [];
 
+// ⚠ GitHub Pages では /<リポジトリ名>/ 配下に配信されるため、
+//   HTML内のリンクは basePath 付き（例：/shinri-zemi/clubs/）になる。
+//   一方 out/ の中身は basePath を含まない。照合前に取り除く必要がある。
+//   next.config.mjs と同じ環境変数を見る。
+const BASE_PATH = process.env.BASE_PATH ?? '';
+const stripBase = (u) =>
+  BASE_PATH && u.startsWith(BASE_PATH) ? u.slice(BASE_PATH.length) || '/' : u;
+
 if (!existsSync(OUT)) {
   console.error('❌ out/ がありません。先に `npm run build` を実行してください。');
   process.exit(1);
@@ -90,13 +98,23 @@ for (const file of files) {
   // 6) box-shadow を使っていない（大本資料 原理3）
   if (/box-shadow\s*:/.test(html)) warns.push(`${rel}：box-shadow が使われている`);
 
-  // 7) 内部リンクの飛び先が実在する
-  for (const href of html.match(/href="(\/[^"#?]*)"/g) ?? []) {
-    const u = href.slice(6, -1);
-    if (u.startsWith('/_next/')) continue;
+  // 7) 内部リンク・アセットの飛び先が実在する
+  //    ⚠ basePath の付け忘れ／付けすぎは、GitHub Pages で全ページが崩れる事故に直結する。
+  //      CSSやJSも実在確認する（href/src 両方）。
+  const refs = [
+    ...(html.match(/href="(\/[^"#?]*)"/g) ?? []).map((s) => s.slice(6, -1)),
+    ...(html.match(/src="(\/[^"#?]*)"/g) ?? []).map((s) => s.slice(5, -1)),
+  ];
+  for (const raw of refs) {
+    // basePath を指定しているのに付いていない参照は、その時点で誤り。
+    if (BASE_PATH && !raw.startsWith(BASE_PATH)) {
+      errors.push(`${rel}：basePath が付いていない参照 ${raw}`);
+      continue;
+    }
+    const u = stripBase(raw);
     const withSlash = u.endsWith('/') ? u : `${u}/`;
     if (!urls.has(withSlash) && !existsSync(join(OUT, u))) {
-      errors.push(`${rel}：リンク切れ ${u}`);
+      errors.push(`${rel}：リンク切れ ${raw}`);
     }
   }
 
