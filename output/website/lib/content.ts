@@ -52,6 +52,27 @@ function readCollection<K extends CollectionName>(name: K): Entry<K>[] {
             `   項目名と形式は lib/schema.ts を見てください。\n`,
         );
       }
+
+      // ⚠ cover に書いた写真が実在するかを確かめる。
+      //   書き間違いや置き忘れがあると、公開サイトで画像が壊れて表示される。
+      //   「写真が無い」のは 6-4 のフォールバックで正しく処理されるが、
+      //   「あるはずの写真が無い」は事故なので、ここで止める。
+      const cover = (parsed.data as { cover?: { src: string } }).cover;
+      if (cover?.src && cover.src.startsWith('/')) {
+        const filePath = join(process.cwd(), 'public', cover.src);
+        if (!existsSync(filePath)) {
+          throw new Error(
+            `\n❌ content/${name}/${file} が指している写真が見つかりません。\n` +
+              `      指定：${cover.src}\n` +
+              `      探した場所：public${cover.src}\n\n` +
+              `   どちらかをしてください。\n` +
+              `     ・写真を public${cover.src} に置く\n` +
+              `     ・写真がまだ無いなら、cover: の3行の先頭に # を付けて無効にする\n` +
+              `       （写真が無くても、名前だけの落ち着いた枠で正しく表示されます）\n`,
+          );
+        }
+      }
+
       return parsed.data;
     });
 }
