@@ -9,7 +9,7 @@
     "prebuild": "node scripts/build-font-subset.mjs",
     "build": "next build",
     "start": "npx serve out",
-    "check": "node scripts/check-content.mjs && tsc --noEmit"
+    "check": "node scripts/check-custom-pages.mjs && node scripts/check-content.mjs"
   },
   "dependencies": {
     "next": "^16.3.0",
