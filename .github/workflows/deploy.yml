@@ -33,6 +33,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # ⚠ ジョブ全体で共有する。ビルドと検査で値がずれると、
+    #   「ビルドは basePath 付き／検査は無し」となり誤検出で必ず落ちる（実際に起きた）。
+    #   独自ドメインを設定したら、この2行を削除すること（BASE_PATH="" になる）。
+    env:
+      BASE_PATH: /shinri-zemi
     steps:
       - uses: actions/checkout@v4
 
@@ -45,11 +50,6 @@ jobs:
 
       - name: ビルド（明朝サブセットの自動生成を含む）
         run: npm run build
-        env:
-          # ⚠ GitHub Pages は /<リポジトリ名>/ の下で配信される。
-          #   これを指定しないと CSS も画像もリンクも全部404になる。
-          #   独自ドメインを設定したら、この2行を削除すること（BASE_PATH="" になる）。
-          BASE_PATH: /shinri-zemi
 
       - name: 公開前の自動検査
         # ⚠ ここで落ちたらデプロイしない。
