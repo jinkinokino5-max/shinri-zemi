@@ -124,19 +124,10 @@ main{
   padding:var(--sp-12) var(--sp-6);
 }
 
-/* スクロールに応じて額が深くなる（動く要素はこの1つだけ）
-   ⚠ margin-inline のアニメーションは再レイアウトを伴う。
-     対象を1要素に限っているため実用上は問題ないが、増やさないこと */
-.sheet--hero{
-  padding-block:var(--sp-16);
-  animation:deepen linear both;
-  animation-timeline:view();
-  animation-range:entry 0% cover 55%;
-}
-@keyframes deepen{
-  from{ margin-inline:var(--sp-2); }
-  to  { margin-inline:var(--sp-12); }
-}
+/* ⚠ 当初、額がスクロールで深くなる動き（@keyframes deepen）を入れていたが、
+     ページを開いた直後に最も目立つ位置で幅が動くため邪魔になる。2026-08-10 削除。
+     額装は「静止した3層」として使う。 */
+.sheet--hero{ padding-block:var(--sp-12) var(--sp-16); }
 
 .wrap{ max-width:1140px; margin-inline:auto; padding-inline:var(--sp-4); }
 section{ padding-block:var(--sp-24); }
@@ -163,8 +154,8 @@ section{ padding-block:var(--sp-24); }
   line-height:2.0;
   letter-spacing:.06em;
 }
-.mvv--lg{ font-size:34px; line-height:1.85; }
 .mvv--md{ font-size:24px; }
+/* ▸ .mvv--lg は、Missionをゴシック＋圏点（v1の扱い）に戻したことで不要になり削除した */
 
 /* ════════════════════════════════════════════════════════
    5. ナビゲーション（大本資料 7-1）
@@ -196,7 +187,25 @@ section{ padding-block:var(--sp-24); }
    ════════════════════════════════════════════════════════ */
 .logomark{ display:block; width:100%; height:auto; color:inherit; }
 .logomark path,.logomark use{ fill:currentColor; }
-.hero__logo{ max-width:640px; margin-bottom:var(--sp-8); }
+/* v1の扱いを採用（2026-08-10）：題字は大きく取る */
+.hero__logo{ max-width:1040px; margin-block:var(--sp-4) var(--sp-8); }
+
+/* ── ヒーローのMission。v1の扱いを採用 ──────────────
+   明朝ではなくゴシックの極太で組み、核心の1語「妄想」にだけ朱の圏点を打つ。
+   ▸ 圏点は日本語だけが持つ強調で、調査した事例70件のいずれも使っていない（大本資料 5-3）
+   ⚠ 圏点は行の上に出るため、line-height を 1.55 に広げる必要がある
+   ⚠ 強調は1見出しに1種類まで。ここでは囲み・朱の面を併用しない */
+.hero__mission{
+  font-size:clamp(26px,3.6vw,40px);
+  font-weight:700; line-height:1.55; letter-spacing:-.02em;
+  max-width:none;
+  margin-bottom:0;      /* 額の動きを外したぶん、下端の空きを詰める */
+}
+.kenten{
+  text-emphasis:filled sesame;        -webkit-text-emphasis:filled sesame;
+  text-emphasis-color:var(--shu-on-light);
+  -webkit-text-emphasis-color:var(--shu-on-light);   /* 生成り地 4.87 AA */
+}
 
 /* ════════════════════════════════════════════════════════
    7. 整列 ALIGNMENT（モック案_10案 案3）
@@ -360,10 +369,9 @@ section{ padding-block:var(--sp-24); }
 @media (max-width:760px){
   body{ font-size:16px; }
   .h1{ font-size:26px; } .h2{ font-size:24px; } .h3{ font-size:18px; }
-  .mvv--lg{ font-size:23px; } .mvv--md{ font-size:19px; }
+  .mvv--md{ font-size:19px; }
   .sheet{ margin-inline:var(--sp-2); padding:var(--sp-8) var(--sp-3); }
   .sheet--hero{ padding-block:var(--sp-8); }   /* PCのsp-16のままだと余白が過大になる */
-  @keyframes deepen{ from{ margin-inline:var(--sp-1);} to{ margin-inline:var(--sp-4);} }
   section{ padding-block:var(--sp-12); }
   .two{ grid-template-columns:1fr; }
   .two__label{ writing-mode:horizontal-tb; border-right:0;
@@ -414,12 +422,14 @@ section{ padding-block:var(--sp-24); }
   <!-- ══ ヒーロー：額装の入れ子（第3層）══ -->
   <section class="sheet sheet--hero">
     <div class="wrap">
+      <p class="label">2026 — VOL.01</p>
       <p class="hero__logo">
         <svg class="logomark" aria-hidden="true"><use href="#logomark"/></svg>
         <span class="vh">北大心理ゼミ</span>
       </p>
-      <!-- ⚠ Mission：原文どおり。句読点の追加・語尾の変更・要約はしない -->
-      <h1 class="mvv mvv--lg">大学生の溢れ出す妄想を形にする</h1>
+      <!-- ⚠ Mission：原文どおり。句読点の追加・語尾の変更・要約はしない
+           圏点の <span> は文字を一切増減させていない（囲んでいるだけ） -->
+      <h1 class="hero__mission">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</h1>
     </div>
   </section>
 
