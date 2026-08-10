@@ -260,11 +260,18 @@ section{ padding-block:var(--sp-24); }
 .chip:hover{ background:var(--ink); color:var(--paper); }
 .chip:hover .chip__meta{ color:var(--sub-on-dark); }
 
-/* 進行中の札だけ朱の面にする。⚠ 朱の面には必ず墨の文字（4.78 AA）*/
+/* 近日開催のイベントだけ朱の面にする。⚠ 朱の面には必ず墨の文字（4.78 AA）
+   ⚠ 朱は画面に1枚だけ。進行中PJ6件まで朱にすると朱が意味を失う */
 .chip--live{ background:var(--shu); border-color:var(--shu); color:var(--ink); }
 .chip--live .chip__meta{ color:var(--ink); }
 .chip--live:hover{ background:var(--ink); border-color:var(--ink); color:var(--shu-on-dark); }
 .chip--live:hover .chip__meta{ color:var(--shu-on-dark); }
+
+/* 終了したPJ。消さずに残す（Value「過去から学ぶことを忘れない」に対応）
+   ⚠ 枠線を薄くするのは装飾。状態は必ず文字（終了）でも示す。
+     色だけで情報を伝えると、色が見えない人に伝わらない */
+.chip--done{ border-color:var(--sub-on-light); }
+.chip--done .chip__name{ color:var(--sub-on-light); }
 
 /* ════════════════════════════════════════════════════════
    8. 朱の乗算 MULTIPLY（大本忠実10案 案9 / 大本資料 6-5）
@@ -451,28 +458,27 @@ section{ padding-block:var(--sp-24); }
         <li><a class="chip" href="#"><span class="chip__name">ノンアルカクテル部</span><span class="chip__meta">Club / 2026.04</span></a></li>
 
         <!-- イベント ── 唯一、朱の面にする札
-             ⚠ 2026-08-10 訂正：道東PJ は PJ ではなくイベント。分類を Event に変更した。
-             ⚠ 名称に「PJ」が付いたままなので、サイト上で PJ と誤読される。
-               イベントとしての正式名称が判明したら差し替えること。 -->
-        <li><a class="chip chip--live" href="#"><span class="chip__name">道東PJ</span><span class="chip__meta">Event / 2026.09.04–06</span></a></li>
+             2026-08-10：道東PJ → 「道東合宿」に改称し、分類を PJ → Event に変更 -->
+        <li><a class="chip chip--live" href="#"><span class="chip__name">道東合宿</span><span class="chip__meta">Event / 2026.09.04–06</span></a></li>
 
-        <!-- PJ
-             ⚠ 道東PJ がイベントに移ったため、現在進行中の PJ は1件も特定できていない。
-               各PJが「進行中」か「終了」かの区分は未確定のため、状態を ―― にしてある。
-               確定するまで、この札に完了・終了・進行中などの断定的な表示を入れないこと。 -->
-        <li><a class="chip" href="#"><span class="chip__name">哲学カフェPJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">落書き本PJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">豆腐ゲームPJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">カードゲームPJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">詩タイピングPJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">実験再現PJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">快眠お届けPJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">瞑想習慣化PJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">運動PJ</span><span class="chip__meta">Project / ––</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">トーク力向上PJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <!-- PJ：進行中 6件（2026-08-10 確定） -->
+        <li><a class="chip" href="#"><span class="chip__name">哲学カフェPJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">落書き本PJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">豆腐ゲームPJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">カードゲームPJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">詩タイピングPJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">トーク力向上PJ</span><span class="chip__meta">Project / 進行中</span></a></li>
+
+        <!-- PJ：終了 4件。⚠ 消さずに残す（Value「過去から学ぶことを忘れない」） -->
+        <li><a class="chip chip--done" href="#"><span class="chip__name">瞑想習慣化PJ</span><span class="chip__meta">Project / 終了</span></a></li>
+        <li><a class="chip chip--done" href="#"><span class="chip__name">実験再現PJ</span><span class="chip__meta">Project / 終了</span></a></li>
+        <li><a class="chip chip--done" href="#"><span class="chip__name">快眠お届けPJ</span><span class="chip__meta">Project / 終了</span></a></li>
+        <li><a class="chip chip--done" href="#"><span class="chip__name">運動PJ</span><span class="chip__meta">Project / 終了</span></a></li>
       </ul>
 
-      <p class="cap">札は画面に入るとひとりでに整列します。※ この一文は仮コピー（団体の言葉ではありません）</p>
+      <!-- 制作側が書いた文。2026-08-10 承認済み（大本資料 0-1 の「仮コピー」明示は不要になった）
+           ⚠ ただし団体のMVVとは別物。文言を変えたいときは団体側の判断で自由に変えてよい -->
+      <p class="cap">札は画面に入るとひとりでに整列します。</p>
     </div>
   </section>
 
@@ -483,9 +489,8 @@ section{ padding-block:var(--sp-24); }
         <div class="fig"><dt>Established</dt><dd class="num">2022<small>.04</small></dd></div>
         <div class="fig"><dt>Members</dt><dd class="num">56<small> 名</small></dd></div>
         <div class="fig"><dt>Clubs</dt><dd class="num">7</dd></div>
-        <!-- ⚠ 2026-08-10 訂正：道東PJ がイベントに移動したため、進行中PJの件数は未確定に戻った。
-             推測で 1 や 0 を入れてはならない。区分が判明するまで ―― のままにすること。 -->
-        <div class="fig"><dt>Project / Active</dt><dd class="is-unknown">––</dd></div>
+        <!-- 2026-08-10 確定：PJ 進行中6 / 終了4。終了分も併記して積み重ねを示す -->
+        <div class="fig"><dt>Project / Active</dt><dd class="num">6<small>（終了 4）</small></dd></div>
         <!-- ⚠ 年間の企画数は増え続けるため確定不能。推測で埋めない -->
         <div class="fig"><dt>Events / Year</dt><dd class="is-unknown">––</dd></div>
       </dl>
@@ -543,8 +548,9 @@ section{ padding-block:var(--sp-24); }
               <p class="card__meta">2026.04 —</p>
             </a></li>
           </ul>
+          <!-- 制作側が書いた文。2026-08-10 承認済み。写真が全部入ったら削除する -->
           <p class="cap" style="margin-top:var(--sp-4)">
-            写真は準備中です。※ この一文は仮コピー（団体の言葉ではありません）
+            写真は準備中です。
           </p>
         </div>
       </div>
@@ -557,9 +563,9 @@ section{ padding-block:var(--sp-24); }
       <div class="two">
         <p class="two__label">近日開催</p>
         <div>
-          <!-- ⚠ 2026-08-10 訂正：Project → Event。道東PJ はイベントである。 -->
+          <!-- 2026-08-10：道東PJ → 「道東合宿」に改称。分類も Project → Event -->
           <p class="label">Event</p>
-          <h2 class="h1" style="margin:var(--sp-2) 0 var(--sp-4)">道東PJ</h2>
+          <h2 class="h1" style="margin:var(--sp-2) 0 var(--sp-4)">道東合宿</h2>
           <dl class="figures" style="margin-bottom:var(--sp-6)">
             <div class="fig"><dt>Date</dt><dd class="num" style="font-size:20px">2026.09.04–06</dd></div>
             <!-- ⚠ 主催が運営部か企画部かは未確認。対象者・参加人数も未集計 -->
@@ -612,12 +618,11 @@ section{ padding-block:var(--sp-24); }
         </div>
       </div>
 
-      <!-- ⚠ 非公認であることの明記（大本資料 0-0）。
-           スポンサーが最も気にする点であり、実態と違う書き方をしてはならない。
-           ※ この文面は仮コピー。団体として正しい表現に差し替えてください。 -->
+      <!-- 非公認であることの明記（大本資料 0-0）。
+           2026-08-10 文面確定。スポンサーが最も気にする点であり、
+           ⚠ この一文を削除・弱化してはならない。 -->
       <p class="foot__note">
-        北大心理ゼミは「未来開拓倶楽部」の傘下プロジェクトであり、北海道大学の公認団体ではありません。
-        <br>※ この一文は仮コピー（団体の言葉ではありません）
+        北大心理ゼミは、北海道大学の公認サークルではありません。
       </p>
     </div>
   </footer>
