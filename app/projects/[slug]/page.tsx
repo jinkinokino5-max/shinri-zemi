@@ -4,6 +4,20 @@ import { SiteNav } from '@/components/SiteNav';
 import { getProjects } from '@/lib/content';
 import { ORG } from '@/lib/org';
 
+/* ══════════════════════════════════════════════════════════════════
+   PJの個別ページ
+   URL：/projects/<slug>/   ⚠ 部活と同じく案A採用 ＝ 1PJ 1URL。
+
+   ⚠ PJも独自にデザインしたページを持てる（2026-08-10 整理）。
+     元の要望は「PJや部活」であり、PJも最初から対象だった。
+     独自ページを作った場合、それがそのままこのURLの中身になる（案A）。
+     JavaScript は禁止（R-1）。最上部の帯は団体側が差し込み消せない（R-2）。
+
+   ⚠ PJは終了しても消えない（status: 'done'）。
+     終了したPJの独自ページは、そのまま活動の記録として残る。
+     Value「過去から学ぶことを忘れない」に対応する。
+   ══════════════════════════════════════════════════════════════════ */
+
 type Params = { slug: string };
 
 export function generateStaticParams(): Params[] {
