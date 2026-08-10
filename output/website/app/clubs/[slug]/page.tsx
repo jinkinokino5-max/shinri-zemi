@@ -64,8 +64,8 @@ export default async function ClubPage({ params }: { params: Promise<Params> }) 
             <Fig label="Founded" value={yearMonth(club.foundedYearMonth)} />
             {done && <Fig label="Ended" value={yearMonth(club.endedYearMonth)} />}
             {/* ⚠ 未回答は「––」。0 で埋めない。 */}
-            <Fig label="Members" value={count(club.memberCount)} />
-            <Fig label="活動" value={textOr(club.meetingInfo)} />
+            <Fig label="Organizers" value={count(club.organizerCount)} />
+            <Fig label="Meeting" value={textOr(club.meetingInfo)} />
           </dl>
 
           <div style={{ marginBottom: 'var(--sp-8)' }}>

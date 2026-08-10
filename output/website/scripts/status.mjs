@@ -47,7 +47,7 @@ for (const kind of Object.keys(LABEL)) {
 
     if (kind === 'clubs') {
       if (!has(data.leaderDisplayName)) missing.push('部長');
-      if (!has(data.memberCount)) missing.push('部員数');
+      if (!has(data.organizerCount)) missing.push('運営メンバー数');
       if (!has(data.meetingInfo)) missing.push('活動日時・場所');
     }
     if (kind === 'projects') {

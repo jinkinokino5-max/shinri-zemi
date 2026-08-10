@@ -53,8 +53,12 @@ export const Club = z.object({
   endedYearMonth: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   /** ⚠ 表示名のみ。本名は保存しない（B-1）。 */
   leaderDisplayName: z.string().optional(),
-  /** ⚠ optional。分からないとき 0 を入れない。 */
-  memberCount: z.number().int().positive().optional(),
+  /** 運営メンバー数（その部活を回している人の数）。
+   *  ⚠ 2026-08-10：「部員数」から変更した。
+   *    部活は参加が流動的で「部員」の線引きが曖昧になりやすい。
+   *    実態を偽らずに書ける数字として、運営している人の数を採る。
+   *  ⚠ optional。分からないとき 0 を入れない。 */
+  organizerCount: z.number().int().positive().optional(),
   /** 新入生が最も知りたい情報（必要情報更新 C-2）。 */
   meetingInfo: z.string().optional(),
 });
