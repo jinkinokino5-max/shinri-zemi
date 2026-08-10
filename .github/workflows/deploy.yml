@@ -38,6 +38,12 @@ jobs:
     #   独自ドメインを設定したら、この2行を削除すること（BASE_PATH="" になる）。
     env:
       BASE_PATH: /shinri-zemi
+    # ⚠ サイトのコードは output/website/ にある（2026-08-10 移動）。
+    #   reference/ と draft/ はプロジェクト直下のままなので、
+    #   scripts はそこから2階層上を見ている。
+    defaults:
+      run:
+        working-directory: output/website
     steps:
       - uses: actions/checkout@v4
 
@@ -45,6 +51,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          # ⚠ setup-node は defaults.working-directory を見ない。
+          #   package-lock.json の場所を明示しないとキャッシュに失敗する。
+          cache-dependency-path: output/website/package-lock.json
 
       - run: npm ci
 
@@ -64,7 +73,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./output/website/out
 
   deploy:
     needs: build

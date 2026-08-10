@@ -32,8 +32,8 @@ Thumbs.db
 *.db
 *.log
 
-# Next.js
-/.next/
-/out/
+# Next.js（サイトのコードは output/website/ にある）
+.next/
+out/
 next-env.d.ts
 *.tsbuildinfo
