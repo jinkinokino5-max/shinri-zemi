@@ -267,11 +267,14 @@ section{ padding-block:var(--sp-24); }
 .chip--live:hover{ background:var(--ink); border-color:var(--ink); color:var(--shu-on-dark); }
 .chip--live:hover .chip__meta{ color:var(--shu-on-dark); }
 
-/* 終了したPJ。消さずに残す（Value「過去から学ぶことを忘れない」に対応）
-   ⚠ 枠線を薄くするのは装飾。状態は必ず文字（終了）でも示す。
-     色だけで情報を伝えると、色が見えない人に伝わらない */
+/* ── 終了したもの（部活・PJ の両方に使う）─────────────
+   ⚠ 部活も終了する（2026-08-10）。状態は Club / Project / Event の3種が持つ。
+   ⚠ 消さずに残す。Value「過去から学ぶことを忘れない」に対応し、
+     かつ終了した部活・PJに紐づく作品がリンク切れにならないため。
+   ⚠ 枠線を薄くするのは装飾にすぎない。状態は必ず文字（終了）でも示す。
+     色や濃さだけで情報を伝えると、色が見えない人に伝わらない。 */
 .chip--done{ border-color:var(--sub-on-light); }
-.chip--done .chip__name{ color:var(--sub-on-light); }
+.chip--done .chip__name{ color:var(--sub-on-light); }   /* 生成り地 4.92 AA */
 
 /* ════════════════════════════════════════════════════════
    8. 朱の乗算 MULTIPLY（大本忠実10案 案9 / 大本資料 6-5）
@@ -318,6 +321,12 @@ section{ padding-block:var(--sp-24); }
              letter-spacing:.02em; line-height:1.6; }
 .card__meta{ font:400 12px/1.5 var(--font-mono); letter-spacing:.12em;
              color:var(--sub-on-light); }
+/* 状態のバッジ。⚠ 色ではなく文字で状態を示す（色だけに頼らない） */
+.card__state{ font-size:12px; letter-spacing:.06em; color:var(--sub-on-light); }
+/* 終了した部活・PJのカード。写真は乗算を弱め、名前を副色にする。
+   ⚠ ただし読めなくはしない。終了＝隠すではなく、終了＝記録として残す */
+.card--done .card__name{ color:var(--sub-on-light); }   /* 生成り地 4.92 AA */
+.card--done .thumb::after{ opacity:.14; }
 .card:hover .card__name{ border-bottom:2px solid var(--shu-on-light);
                          display:inline-block; }
 
@@ -448,14 +457,16 @@ section{ padding-block:var(--sp-24); }
       <h2 class="mvv mvv--md" style="margin-top:var(--sp-2)">北大で最も大量におもろいことが生まれる場所になる</h2>
 
       <ul class="field">
-        <!-- 部活 7つ ── 設立年は暫定値（後日変更予定） -->
-        <li><a class="chip" href="#"><span class="chip__name">読書部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">すこやか部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">料理部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">ふらっと部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">言葉もてあそ部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">研究室訪問部</span><span class="chip__meta">Club / 2026.04</span></a></li>
-        <li><a class="chip" href="#"><span class="chip__name">ノンアルカクテル部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <!-- 部活 7つ ── すべて活動中（2026-08-10 時点）。設立年は暫定値（後日変更予定）
+             ⚠ 終了した部活が出たら chip--done を付け、meta を「Club / 終了」にする。
+               PJ と同じ仕組みで、削除はしない。 -->
+        <li><a class="chip" href="#"><span class="chip__name">読書部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">すこやか部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">料理部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">ふらっと部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">言葉もてあそ部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">研究室訪問部</span><span class="chip__meta">Club / 活動中</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">ノンアルカクテル部</span><span class="chip__meta">Club / 活動中</span></a></li>
 
         <!-- イベント ── 唯一、朱の面にする札
              2026-08-10：道東PJ → 「道東合宿」に改称し、分類を PJ → Event に変更 -->
@@ -476,9 +487,8 @@ section{ padding-block:var(--sp-24); }
         <li><a class="chip chip--done" href="#"><span class="chip__name">運動PJ</span><span class="chip__meta">Project / 終了</span></a></li>
       </ul>
 
-      <!-- 制作側が書いた文。2026-08-10 承認済み（大本資料 0-1 の「仮コピー」明示は不要になった）
-           ⚠ ただし団体のMVVとは別物。文言を変えたいときは団体側の判断で自由に変えてよい -->
-      <p class="cap">札は画面に入るとひとりでに整列します。</p>
+      <!-- ▸ ここにあった「札は画面に入るとひとりでに整列します。」は 2026-08-10 に削除した。
+             自分の演出を自分で説明する文であり、黙って動くほうが効果的なため。 -->
     </div>
   </section>
 
@@ -516,36 +526,43 @@ section{ padding-block:var(--sp-24); }
               <div class="thumb"></div>
               <p class="card__name">読書部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">すこやか部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">料理部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">ふらっと部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">言葉もてあそ部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">研究室訪問部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
             <li><a class="card" href="#">
               <div class="thumb"></div>
               <p class="card__name">ノンアルカクテル部</p>
               <p class="card__meta">2026.04 —</p>
+              <p class="card__state">活動中</p>
             </a></li>
           </ul>
           <!-- 制作側が書いた文。2026-08-10 承認済み。写真が全部入ったら削除する -->
