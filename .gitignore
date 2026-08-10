@@ -31,3 +31,9 @@ Thumbs.db
 # その他
 *.db
 *.log
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo

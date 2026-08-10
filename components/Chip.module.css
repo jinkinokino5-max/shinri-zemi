@@ -1,0 +1,72 @@
+/* 整列 ALIGNMENT。詳細は Chip.tsx のコメントを参照。 */
+
+.field {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-6) 0;
+}
+
+.chip {
+  /* ⚠ 既定値＝整列後の状態。
+       animation-timeline 未対応でも、ここに落ちるので散らばったままにならない。 */
+  --rot: 0deg;
+  --tx: 0px;
+  --ty: 0px;
+
+  display: flex;
+  flex-direction: column;
+  gap: .35em;
+  padding: var(--sp-3);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-decoration: none;
+
+  animation: align linear both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 45%;
+  transition: background var(--dur-hover) ease-out, color var(--dur-hover) ease-out;
+}
+
+@keyframes align {
+  from { rotate: var(--rot); translate: var(--tx) var(--ty); }
+  to   { rotate: 0deg;       translate: 0 0; }
+}
+
+/* ⚠ 散らばりは乱数ではなく規則でずらす。真のランダムは汚くなる。
+     角度は最大4°まで。それ以上は日本語が読みにくくなる。 */
+.field li:nth-child(6n+1) .chip { --rot: -3deg;   --tx: -16px; --ty:  20px; }
+.field li:nth-child(6n+2) .chip { --rot:  2.5deg; --tx:  14px; --ty: -18px; }
+.field li:nth-child(6n+3) .chip { --rot: -1.5deg; --tx:  20px; --ty:  12px; }
+.field li:nth-child(6n+4) .chip { --rot:  3.5deg; --tx: -20px; --ty: -14px; }
+.field li:nth-child(6n+5) .chip { --rot: -2.5deg; --tx:   8px; --ty:  22px; }
+.field li:nth-child(6n+6) .chip { --rot:  1.5deg; --tx: -12px; --ty: -20px; }
+
+.name { font-size: 17px; font-weight: 700; letter-spacing: .02em; line-height: 1.5; }
+.meta {
+  font: 400 11px/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);            /* 生成り地 4.92 AA */
+}
+
+.chip:hover { background: var(--ink); color: var(--paper); }
+.chip:hover .meta { color: var(--sub-on-dark); }
+
+/* 近日開催。⚠ 朱の面には必ず墨の文字（4.78 AA）。白は 4.04 で不足。 */
+.live { background: var(--shu); border-color: var(--shu); color: var(--ink); }
+.live .meta { color: var(--ink); }
+.live:hover { background: var(--ink); border-color: var(--ink); color: var(--shu-on-dark); }
+.live:hover .meta { color: var(--shu-on-dark); }
+
+/* 終了したもの。
+   ⚠ 枠線と文字を薄くするのは装飾にすぎない。状態は必ず文字（終了）でも示す。
+     色や濃さだけで情報を伝えると、色が見えない人に伝わらない。 */
+.done { border-color: var(--sub-on-light); }
+.done .name { color: var(--sub-on-light); }   /* 生成り地 4.92 AA */
+
+/* ⚠ スクロール連動は base.css の一括指定では止まらない。個別に無効化する。
+     既定値＝整列後なので、動きを切っても正しく並ぶ。 */
+@media (prefers-reduced-motion: reduce) {
+  .chip { animation: none !important; }
+}

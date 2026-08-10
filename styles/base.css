@@ -1,0 +1,212 @@
+/* ══════════════════════════════════════════════════════════════════
+   基本設定・共通コンポーネント
+   根拠：draft/デザイン大本資料_v1.md 5-2 / 6-1 / 7章 / 8章
+   ══════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ink);      /* ══ 額装 第1層：墨の額 ══ */
+  padding: var(--frame);
+  font: 400 17px/1.9 var(--font-sans);
+  letter-spacing: .08em;
+  color: var(--ink);
+  line-break: strict;
+  overflow-wrap: anywhere;
+  overflow-x: clip;
+  /* ⚠ 日本語の本文が lh 1.9 / ls .08em なのは、実測に基づく。
+       武蔵野美術大学 lh 2.00 / ls .10em、JAGDA lh 1.80 / ls .071em。
+       欧文サイトの見出し lh 1.0 をそのまま持ち込むと日本語は窒息する。 */
+}
+
+h1, h2, h3 { margin: 0; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+a { color: inherit; }
+img { max-width: 100%; height: auto; display: block; }
+
+/* ⚠ palt は見出しのみ。本文に適用すると詰まりすぎて読みにくくなる。 */
+h1, h2, h3, .display { font-feature-settings: 'palt' 1; word-break: auto-phrase; }
+
+/* 数字を等幅に（桁が揃う） */
+.num, time, .meta { font-variant-numeric: tabular-nums; }
+
+/* ⚠ キーボード操作の可視化を消さない（06資料 2章） */
+:focus-visible { outline: 3px solid var(--shu-on-light); outline-offset: 2px; }
+
+/* 読み上げ専用。題字SVGの実テキストなどに使う。
+   ⚠ musabi は <h1> が空だった（画像で組んでいた）。同じ失敗をしない。 */
+.vh {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ══ 額装（大本資料 6-1）══════════════════════════════
+   body[墨] → main[生成り] → .sheet[紙灰] の3層。
+   ⚠ 入れ子は2段まで。3段以上はスマホで本文幅が死ぬ。 */
+.frame {
+  background: var(--paper);    /* ══ 額装 第2層：生成りの紙 ══ */
+  border-radius: var(--radius);
+  min-height: calc(100svh - var(--frame) * 2);
+  overflow: clip;
+}
+.sheet {                        /* ══ 額装 第3層：紙灰の面 ══ */
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  margin-inline: var(--sp-6);
+  padding: var(--sp-12) var(--sp-6);
+}
+
+.wrap { max-width: 1140px; margin-inline: auto; padding-inline: var(--sp-4); }
+.section { padding-block: var(--sp-24); }
+
+/* ══ タイポグラフィ（大本資料 5-1）══════════════════ */
+.label {
+  font: 400 12px/1.5 var(--font-mono);   /* ⚠ 英数字のみ */
+  letter-spacing: .12em;
+  color: var(--sub-on-light);
+  text-transform: uppercase;
+}
+.h1 { font-size: clamp(26px, 3.6vw, 40px); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; }
+.h2 { font-size: clamp(24px, 3.2vw, 32px); font-weight: 700; line-height: 1.3; letter-spacing: -.02em; }
+.h3 { font-size: clamp(18px, 1.6vw, 20px); font-weight: 700; line-height: 1.6; letter-spacing: .02em; }
+.body { max-width: var(--measure); }
+.cap { font-size: 14px; line-height: 1.7; letter-spacing: .06em; color: var(--sub-on-light); }
+
+/* MVV。⚠ 明朝は42字のサブセット。ここ以外に使わない。 */
+.mvv { font-family: var(--font-serif); font-weight: 400; line-height: 2.0; letter-spacing: .06em; }
+.mvv--md { font-size: clamp(19px, 2.4vw, 24px); }
+
+/* 圏点（ゴマ点）＝日本語だけが持つ強調。事例70件のいずれも使っていない。
+   ⚠ 圏点は行の上に出るため、その行の line-height を 1.5 以上に広げる必要がある。
+   ⚠ 強調は1つの見出しに1種類まで。囲みと併用しない。 */
+.kenten {
+  text-emphasis: filled sesame;
+  -webkit-text-emphasis: filled sesame;
+  text-emphasis-color: var(--shu-on-light);        /* 生成り地 4.87 AA */
+  -webkit-text-emphasis-color: var(--shu-on-light);
+}
+.has-kenten { line-height: 1.55; }
+
+/* ⚠ <i> / font-style:italic を日本語に使わない。
+     和文書体にイタリックは無く、ブラウザが機械的に傾ける「疑似イタリック」になる。 */
+
+/* ══ 題字（大本資料 4-2-1）════════════════════════════
+   キルゴU をアウトライン化したインラインSVG。
+   ⚠ フォントファイルは同梱も配信もしない（ライセンス）。
+   ⚠ fill:currentColor  地が反転しても自動で追随する。
+   ⚠ 表示高さは 32px 相当以上を確保する（24px未満で「理」が潰れる）。 */
+.logomark { display: block; width: 100%; height: auto; color: inherit; }
+.logomark path, .logomark use { fill: currentColor; }
+
+/* ══ ナビ（大本資料 7-1）══════════════════════════════
+   ⚠ ブランド名にキルゴUを使わない。16pxでは字が潰れる。 */
+.nav {
+  display: flex; flex-wrap: wrap; gap: var(--sp-4);
+  align-items: flex-end; justify-content: space-between;
+  padding: var(--sp-4) var(--sp-6) var(--sp-2);
+}
+.nav__brand { text-decoration: none; }
+.nav__brand b { display: block; font-size: 16px; font-weight: 700; letter-spacing: .04em; line-height: 1.3; }
+.nav__list { display: flex; flex-wrap: wrap; gap: var(--sp-4); }
+.nav__link { text-decoration: none; }
+.nav__ja { display: block; font-size: 15px; }
+.nav__en { display: block; font: 400 11px/1.5 var(--font-mono); letter-spacing: .12em; color: var(--sub-on-light); }
+.nav__item[aria-current='page'] .nav__ja { border-bottom: 2px solid var(--shu-on-light); }
+
+/* ══ フッター ══════════════════════════════════════ */
+.foot {
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--radius);
+  margin: var(--sp-6); padding: var(--sp-12) var(--sp-6);
+}
+.foot .label { color: var(--sub-on-dark); }
+.foot a { color: var(--shu-on-dark); }        /* 墨地の朱 6.88 AA */
+.foot__logo { max-width: 340px; margin-bottom: var(--sp-6); }
+.foot__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-6); }
+.foot__note {
+  margin-top: var(--sp-8); padding-top: var(--sp-4);
+  border-top: 1px solid var(--sub-on-dark);
+  font-size: 14px; line-height: 1.9; color: var(--sub-on-dark);
+}
+
+/* ══ レスポンシブ ══════════════════════════════════ */
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .sheet { margin-inline: var(--sp-2); padding: var(--sp-8) var(--sp-3); }
+  .section { padding-block: var(--sp-12); }
+  .foot { margin-inline: var(--sp-2); }
+}
+
+/* ══ 動きの停止（大本資料 8-4／必須）══════════════════
+   ⚠ 前庭障害・偏頭痛のある人にとって大きな動きは実害がある。
+     これは配慮であると同時に、外部に出すサイトの最低限の品格。 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* ⚠ スクロール連動（animation-timeline）は上記だけでは止まらない。
+       個別に animation:none を当てる必要がある。各コンポーネント側で対応する。 */
+}
+
+/* ══ 数字（メタバー／大本資料 7-4）════════════════════
+   ⚠ モノスペースのラベル＋等幅数字が、記事に「記録」としての重みを与える。
+     スポンサー向けの信頼感に直結する（02資料・The Defense Reformation の実測）。 */
+.figures {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-4);
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  padding-block: var(--sp-4);
+}
+.fig dt { font: 400 11px/1.5 var(--font-mono); letter-spacing: .12em; color: var(--sub-on-light); }
+.fig dd { margin: .25em 0 0; font-size: 28px; font-weight: 700; letter-spacing: -.01em; line-height: 1.3; }
+.fig dd small { font-size: 15px; font-weight: 400; letter-spacing: .06em; }
+/* ⚠ 未確定の数値。0 で埋めず「––」を出す（CLAUDE.md 3-4）。 */
+.fig dd.is-unknown { color: var(--sub-on-light); font-weight: 400; }
+
+/* ══ 型A：ラベル／本文の2カラム（大本資料 6-3）════════
+   ⚠ 左ラベルは短いリストに対して使う型。
+     1,500px級のカードグリッドに使うと巨大な空白になる（批評 問題4）。 */
+.two { display: grid; grid-template-columns: 2fr 10fr; gap: var(--sp-6); }
+.two__label {
+  writing-mode: vertical-rl;
+  font-size: 22px; font-weight: 700; letter-spacing: .3em;
+  border-right: 1px solid var(--ink); padding-right: var(--sp-2); height: 100%;
+}
+@media (max-width: 760px) {
+  .two { grid-template-columns: 1fr; }
+  .two__label {
+    writing-mode: horizontal-tb; border-right: 0;
+    border-bottom: 1px solid var(--ink);
+    padding: 0 0 var(--sp-1); letter-spacing: .2em; height: auto;
+  }
+}
+
+/* ══ 一覧の行（部活・PJ・イベント・作品）════════════ */
+.rows { display: grid; }
+.row { border-top: 1px solid rgba(14, 14, 14, .14); }
+.row:last-child { border-bottom: 1px solid rgba(14, 14, 14, .14); }
+.row__link, .row { display: grid; }
+.row__link {
+  grid-template-columns: 1fr auto; gap: var(--sp-4); align-items: baseline;
+  padding-block: var(--sp-3); text-decoration: none;
+}
+.row__link:hover .row__name { border-bottom: 2px solid var(--shu-on-light); }
+.row__name { font-size: clamp(18px, 2vw, 22px); font-weight: 700; letter-spacing: .02em; }
+.row__meta {
+  font: 400 12px/1.5 var(--font-mono); letter-spacing: .1em;
+  color: var(--sub-on-light); font-variant-numeric: tabular-nums;
+}
+
+/* ══ 目的の箇条書き ════════════════════════════════ */
+.purpose { display: grid; gap: var(--sp-2); max-width: var(--measure); }
+.purpose li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2); align-items: baseline; }
+.purpose__n {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em;
+  color: var(--shu-on-light);                       /* 生成り地 4.87 AA */
+}
