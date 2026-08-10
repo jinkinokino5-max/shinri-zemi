@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>北大心理ゼミ｜トップページ モック v2</title>
+<meta name="description" content="大学生の溢れ出す妄想を形にする。北大心理ゼミのウェブサイト（モック）">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     モック v2 ── 3案の合成
+       ① 整列（ALIGNMENT）  モック案_10案 案3
+          散らばった札が、スクロールすると格子に吸い込まれる
+       ② 額装の入れ子（FRAME IN FRAME）  大本忠実10案 案1
+          墨の額 → 生成りの紙 → 紙灰の面、の3層構造
+       ③ 朱の乗算（MULTIPLY）  大本忠実10案 案9
+          写真をモノクロ化し朱を乗算。ホバーで原色に戻る
+          ⚠ 写真は未取得のため、枠は空欄。仕組みだけ動く状態にしてある
+
+     根拠：draft/デザイン大本資料_v1.md
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 未確認の数値は ―― のまま。推測で埋めない（CLAUDE.md 3-4）
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- 本文・UI（全字）＋ ラベル用モノスペース -->
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- MVV専用の明朝。text= で42字だけをサブセット（実測 11,980 bytes / 約95%削減）
+     ⚠ この42字以外を流すと、その文字だけ別書体になる（大本資料 4-2 サブセット絶対ルール）
+     収録字：いおかがきけこすせでとなにのぶまもらるれろを出北去問場大妄学幸形忘想所最溢生続誰過量 -->
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+
+<!-- 欧文（和欧混植の先頭。英数字だけがこの書体になる） -->
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   1. デザイントークン（大本資料 4章）
+   ════════════════════════════════════════════════════════ */
+:root{
+  /* ── 色 ─────────────────────────────────
+     カッコ内は WCAG 2.1 相対輝度式による自前計算値 */
+  --ink:          #0E0E0E;  /* 墨      / paper上 17.11 AAA */
+  --paper:        #F4F1EA;  /* 生成り                       */
+  --paper-card:   #E8E5DE;  /* 紙灰   ⚠ paperとの差は1.115。
+                               面を分ける装飾であって、境界に
+                               意味を持たせてはならない       */
+  --white:        #FFFFFF;
+  --shu:          #E8402A;  /* 朱：面として使う。上には墨 4.78 */
+  --shu-on-light: #C4321F;  /* 生成り地の小文字 4.87 AA       */
+  --shu-on-dark:  #FF6B54;  /* 墨地の小文字     6.88 AA       */
+  --sub-on-light: #6B6862;  /* 生成り地の副文字 4.92 AA       */
+  --sub-on-dark:  #B8B3A8;  /* 墨地の副文字     9.24 AAA      */
+
+  /* ── 書体 ─────────────────────────────── */
+  --font-sans: "Switzer","Zen Kaku Gothic New","Yu Gothic",YuGothic,
+               "Hiragino Kaku Gothic ProN",sans-serif;
+  --font-serif:"Shippori Mincho","Yu Mincho",YuMincho,serif; /* ⚠ MVV専用・42字 */
+  --font-mono: "Space Mono",monospace;                       /* ⚠ 英数字のみ    */
+
+  /* ── 余白（8px基本単位）───────────────── */
+  --sp-1:.5rem; --sp-2:1rem;  --sp-3:1.5rem; --sp-4:2rem;
+  --sp-6:3rem;  --sp-8:4rem;  --sp-12:6rem;  --sp-16:8rem; --sp-24:12rem;
+
+  --radius:24px;          /* ⚠ 角丸はこの2種類だけ */
+  --radius-pill:999px;
+  --frame:8px;            /* 額装の外周 */
+  --measure:34em;         /* 本文1行の最大幅（和文40〜45字）*/
+
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  color-scheme: light;    /* ダークモードは実装しない（調査 05章の判断）*/
+}
+
+/* ════════════════════════════════════════════════════════
+   2. 基本設定（大本資料 5-2）
+   ════════════════════════════════════════════════════════ */
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+  margin:0;
+  background:var(--ink);        /* ══ 額装 第1層：墨の額 ══ */
+  padding:var(--frame);
+  font:400 17px/1.9 var(--font-sans);
+  letter-spacing:.08em;
+  color:var(--ink);
+  line-break:strict;
+  overflow-wrap:anywhere;
+  overflow-x:clip;              /* 整列の散らばりで横スクロールを出さない */
+}
+
+h1,h2,h3,.display{ font-feature-settings:"palt" 1; word-break:auto-phrase; }
+h1,h2,h3{ margin:0; }
+p{ margin:0; }
+ul,ol{ margin:0; padding:0; list-style:none; }
+a{ color:inherit; }
+img{ max-width:100%; height:auto; display:block; }
+.meta,time,.num{ font-variant-numeric:tabular-nums; }
+
+/* 読み上げ専用（題字SVGの実テキスト等） */
+.vh{ position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+     overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+
+/* ⚠ box-shadow は全面禁止（大本資料 原理3）。面は色で分ける */
+
+/* ════════════════════════════════════════════════════════
+   3. 額装の入れ子（大本忠実10案 案1 / 大本資料 6-1）
+      body[墨] → main[生成り] → .sheet[紙灰]
+      ⚠ 入れ子は2段まで。3段以上はスマホで本文幅が死ぬ
+   ════════════════════════════════════════════════════════ */
+main{
+  background:var(--paper);      /* ══ 額装 第2層：生成りの紙 ══ */
+  border-radius:var(--radius);
+  min-height:calc(100svh - var(--frame)*2);
+  overflow:clip;
+}
+
+.sheet{                          /* ══ 額装 第3層：紙灰の面 ══ */
+  background:var(--paper-card);
+  border-radius:var(--radius);
+  margin-inline:var(--sp-6);
+  padding:var(--sp-12) var(--sp-6);
+}
+
+/* スクロールに応じて額が深くなる（動く要素はこの1つだけ）
+   ⚠ margin-inline のアニメーションは再レイアウトを伴う。
+     対象を1要素に限っているため実用上は問題ないが、増やさないこと */
+.sheet--hero{
+  padding-block:var(--sp-16);
+  animation:deepen linear both;
+  animation-timeline:view();
+  animation-range:entry 0% cover 55%;
+}
+@keyframes deepen{
+  from{ margin-inline:var(--sp-2); }
+  to  { margin-inline:var(--sp-12); }
+}
+
+.wrap{ max-width:1140px; margin-inline:auto; padding-inline:var(--sp-4); }
+section{ padding-block:var(--sp-24); }
+
+/* ════════════════════════════════════════════════════════
+   4. タイポグラフィ（大本資料 5-1）
+   ════════════════════════════════════════════════════════ */
+.label{                          /* ラベル：英数字のみ */
+  font:400 12px/1.5 var(--font-mono);
+  letter-spacing:.12em;
+  color:var(--sub-on-light);
+  text-transform:uppercase;
+}
+.h1{ font-size:40px; font-weight:700; line-height:1.2; letter-spacing:-.02em; }
+.h2{ font-size:32px; font-weight:700; line-height:1.3; letter-spacing:-.02em; }
+.h3{ font-size:20px; font-weight:700; line-height:1.6; letter-spacing:.02em; }
+.body{ max-width:var(--measure); }
+.cap{ font-size:14px; line-height:1.7; letter-spacing:.06em; color:var(--sub-on-light); }
+
+/* MVV。⚠ 明朝は42字のサブセット。ここ以外に使わない */
+.mvv{
+  font-family:var(--font-serif);
+  font-weight:400;
+  line-height:2.0;
+  letter-spacing:.06em;
+}
+.mvv--lg{ font-size:34px; line-height:1.85; }
+.mvv--md{ font-size:24px; }
+
+/* ════════════════════════════════════════════════════════
+   5. ナビゲーション（大本資料 7-1）
+      ⚠ ブランド名にキルゴUを使わない（16pxでは字が潰れる／4-2-1）
+   ════════════════════════════════════════════════════════ */
+.nav{
+  display:flex; flex-wrap:wrap; gap:var(--sp-4);
+  align-items:flex-end; justify-content:space-between;
+  padding:var(--sp-4) var(--sp-6) var(--sp-2);
+}
+.brand{ text-decoration:none; }
+.brand b{ display:block; font-size:16px; font-weight:700;
+          letter-spacing:.04em; line-height:1.3; }
+.nav ul{ display:flex; flex-wrap:wrap; gap:var(--sp-4); }
+.nav a{ text-decoration:none; }
+.nav__ja{ display:block; font-size:15px; }
+.nav__en{ display:block; font:400 11px/1.5 var(--font-mono);
+          letter-spacing:.12em; color:var(--sub-on-light); }
+.nav li[aria-current="page"] .nav__ja{
+  border-bottom:2px solid var(--shu-on-light); /* 現在地は朱の下線 */
+}
+
+/* ════════════════════════════════════════════════════════
+   6. 題字（大本資料 4-2-1）
+      キルゴU をアウトライン化したインラインSVG。
+      ⚠ フォントファイルは同梱も配信もしない（ライセンス）
+      ⚠ fill:currentColor  地が反転しても自動で追随する
+      ⚠ 高さは32px相当以上を確保する
+   ════════════════════════════════════════════════════════ */
+.logomark{ display:block; width:100%; height:auto; color:inherit; }
+.logomark path,.logomark use{ fill:currentColor; }
+.hero__logo{ max-width:640px; margin-bottom:var(--sp-8); }
+
+/* ════════════════════════════════════════════════════════
+   7. 整列 ALIGNMENT（モック案_10案 案3）
+      札が散らばった状態から、スクロールで格子に吸い込まれる。
+      「妄想（散乱）→ 形にする（整列）」を画面で演じる。
+
+      ⚠ 設計上の注意（大本資料 8-4 との関係）
+        大本資料は「1画面に同時に動く要素は3つまで」と定めている。
+        本セクションは18枚が同時に動くため、字義的には抵触する。
+        ただし全札が同一タイムライン・同一イージングで動くため、
+        知覚されるのは「18個の動き」ではなく「1つの動き」である。
+        この読み替えを前提に採用している。増やす方向には拡張しないこと。
+
+      ⚠ 安全な劣化：animation-timeline 未対応ブラウザでは
+        animation-duration が既定の0sとなり即座に終端＝整列状態になる。
+        散らばったまま固まることはない。
+   ════════════════════════════════════════════════════════ */
+.field{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:var(--sp-3);
+  padding:var(--sp-6) 0;
+}
+.chip{
+  --rot:0deg; --tx:0px; --ty:0px;   /* ← 既定＝整列後。未対応環境でもここに落ちる */
+  display:flex; flex-direction:column; gap:.35em;
+  padding:var(--sp-3) var(--sp-3);
+  border:1.5px solid var(--ink);
+  border-radius:var(--radius);
+  background:var(--paper);
+  text-decoration:none;
+  animation:align linear both;
+  animation-timeline:view();
+  animation-range:entry 0% cover 45%;
+  transition:background .16s ease-out, color .16s ease-out;
+}
+@keyframes align{
+  from{ rotate:var(--rot); translate:var(--tx) var(--ty); }
+  to  { rotate:0deg;       translate:0 0; }
+}
+/* 散らばりは乱数ではなく規則でずらす（乱数は汚くなる）*/
+.field li:nth-child(6n+1) .chip{ --rot:-3deg;   --tx:-16px; --ty: 20px; }
+.field li:nth-child(6n+2) .chip{ --rot: 2.5deg; --tx: 14px; --ty:-18px; }
+.field li:nth-child(6n+3) .chip{ --rot:-1.5deg; --tx: 20px; --ty: 12px; }
+.field li:nth-child(6n+4) .chip{ --rot: 3.5deg; --tx:-20px; --ty:-14px; }
+.field li:nth-child(6n+5) .chip{ --rot:-2.5deg; --tx:  8px; --ty: 22px; }
+.field li:nth-child(6n+6) .chip{ --rot: 1.5deg; --tx:-12px; --ty:-20px; }
+
+.chip__name{ font-size:17px; font-weight:700; letter-spacing:.02em; line-height:1.5; }
+.chip__meta{ font:400 11px/1.5 var(--font-mono); letter-spacing:.12em;
+             color:var(--sub-on-light); }
+.chip:hover{ background:var(--ink); color:var(--paper); }
+.chip:hover .chip__meta{ color:var(--sub-on-dark); }
+
+/* 進行中の札だけ朱の面にする。⚠ 朱の面には必ず墨の文字（4.78 AA）*/
+.chip--live{ background:var(--shu); border-color:var(--shu); color:var(--ink); }
+.chip--live .chip__meta{ color:var(--ink); }
+.chip--live:hover{ background:var(--ink); border-color:var(--ink); color:var(--shu-on-dark); }
+.chip--live:hover .chip__meta{ color:var(--shu-on-dark); }
+
+/* ════════════════════════════════════════════════════════
+   8. 朱の乗算 MULTIPLY（大本忠実10案 案9 / 大本資料 6-5）
+      写真をモノクロ＋朱の乗算で沈め、ホバーした1枚だけ原色に戻す。
+      学生が撮った写真の品質差を、サイト側で吸収する装置。
+
+      ⚠ 写真は未取得のため .thumb__img は空。枠は空欄のまま。
+        画像が入った瞬間に、この処理がそのまま効く。
+      ⚠ 大本資料 6-5 の元コードは .thumb 自身に filter を掛けていたが、
+        それだと朱のオーバーレイまでグレースケール化されてしまう。
+        filter は内側の画像に、乗算は ::after に分離するのが正しい。
+      ⚠ 作品集ページには適用しない（作品そのものの色を変えてはならない）
+   ════════════════════════════════════════════════════════ */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:var(--sp-6) var(--sp-4);
+}
+.card{ text-decoration:none; display:block; }
+.thumb{
+  position:relative;
+  aspect-ratio:4/3;
+  border-radius:var(--radius);
+  background:var(--paper);   /* 写真が入るまでの地 */
+  overflow:hidden;
+}
+.thumb__img{
+  width:100%; height:100%; object-fit:cover;
+  filter:grayscale(1) contrast(1.12);
+  transition:filter .4s var(--ease-out);
+}
+.thumb::after{                /* ← 朱の乗算レイヤー */
+  content:""; position:absolute; inset:0;
+  background:var(--shu);
+  mix-blend-mode:multiply;
+  opacity:.28;
+  transition:opacity .4s var(--ease-out);
+  pointer-events:none;
+}
+.card:hover .thumb__img{ filter:none; }
+.card:hover .thumb::after{ opacity:0; }
+
+.card__name{ margin-top:var(--sp-2); font-size:20px; font-weight:700;
+             letter-spacing:.02em; line-height:1.6; }
+.card__meta{ font:400 12px/1.5 var(--font-mono); letter-spacing:.12em;
+             color:var(--sub-on-light); }
+.card:hover .card__name{ border-bottom:2px solid var(--shu-on-light);
+                         display:inline-block; }
+
+/* ════════════════════════════════════════════════════════
+   9. 数字（メタバー／大本資料 7-4）
+   ════════════════════════════════════════════════════════ */
+.figures{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:var(--sp-4);
+  border-top:1px solid var(--ink); border-bottom:1px solid var(--ink);
+  padding-block:var(--sp-4);
+}
+.fig dt{ font:400 11px/1.5 var(--font-mono); letter-spacing:.12em;
+         color:var(--sub-on-light); }
+.fig dd{ margin:.25em 0 0; font-size:28px; font-weight:700;
+         letter-spacing:-.01em; line-height:1.3; }
+.fig dd small{ font-size:15px; font-weight:400; letter-spacing:.06em; }
+.fig dd.is-unknown{ color:var(--sub-on-light); }  /* ―― は推測で埋めない */
+
+/* ════════════════════════════════════════════════════════
+   10. 型A：ラベル／本文の2カラム（大本資料 6-3）
+       左のラベルだけ縦組みにして対立させる＝雑誌の柱
+   ════════════════════════════════════════════════════════ */
+.two{ display:grid; grid-template-columns:2fr 10fr; gap:var(--sp-6); }
+.two__label{
+  writing-mode:vertical-rl;
+  font-size:22px; font-weight:700; letter-spacing:.3em;
+  border-right:1px solid var(--ink);
+  padding-right:var(--sp-2);
+  height:100%;
+}
+
+/* ════════════════════════════════════════════════════════
+   11. フッター
+   ════════════════════════════════════════════════════════ */
+.foot{
+  background:var(--ink); color:var(--paper);
+  border-radius:var(--radius);
+  margin:var(--sp-6);
+  padding:var(--sp-12) var(--sp-6);
+}
+.foot .label{ color:var(--sub-on-dark); }
+.foot a{ color:var(--shu-on-dark); }        /* 墨地の朱 6.88 AA */
+.foot__logo{ max-width:340px; margin-bottom:var(--sp-6); }
+.foot__grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+             gap:var(--sp-6); }
+.foot__note{
+  margin-top:var(--sp-8); padding-top:var(--sp-4);
+  border-top:1px solid var(--sub-on-dark);
+  font-size:14px; line-height:1.9; color:var(--sub-on-dark);
+}
+
+/* ════════════════════════════════════════════════════════
+   12. レスポンシブ
+   ════════════════════════════════════════════════════════ */
+@media (max-width:760px){
+  body{ font-size:16px; }
+  .h1{ font-size:26px; } .h2{ font-size:24px; } .h3{ font-size:18px; }
+  .mvv--lg{ font-size:23px; } .mvv--md{ font-size:19px; }
+  .sheet{ margin-inline:var(--sp-2); padding:var(--sp-8) var(--sp-3); }
+  .sheet--hero{ padding-block:var(--sp-8); }   /* PCのsp-16のままだと余白が過大になる */
+  @keyframes deepen{ from{ margin-inline:var(--sp-1);} to{ margin-inline:var(--sp-4);} }
+  section{ padding-block:var(--sp-12); }
+  .two{ grid-template-columns:1fr; }
+  .two__label{ writing-mode:horizontal-tb; border-right:0;
+               border-bottom:1px solid var(--ink);
+               padding:0 0 var(--sp-1); letter-spacing:.2em; height:auto; }
+  .foot,.foot__logo{ margin-inline:var(--sp-2); }
+}
+
+/* ════════════════════════════════════════════════════════
+   13. 動きの停止（大本資料 8-4／必須）
+   ════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important; scroll-behavior:auto !important;
+  }
+  /* スクロール連動は上記だけでは止まらないため明示的に無効化。
+     既定値＝整列後・額装は初期幅、に落ちる */
+  .chip,.sheet--hero{ animation:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- 題字：キルゴU をアウトライン化したSVG（1,683 bytes・ネットワーク要求0回）
+     ページ先頭で1回だけ定義し、以降は <use> で参照する -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logomark" viewBox="6 -878 5652 1028"><path d="M780 -82 789 -328 1019 -307 991 135 505 127V-876H760L757 -688L973 -753L1023 -477L755 -428V-84ZM225 -876H482L483 134H224L228 -18L72 41L6 -219L228 -298V-444L13 -440V-695L228 -691Z M1027 -462V-718L1392 -714L1388 -878H1664L1660 -714L2025 -718V-462L1714 -466L2038 -24L1817 150L1526 -284L1235 150L1014 -24L1338 -466Z M2279 -654 2325 -876 2830 -796 2777 -549ZM2033 -11 2088 -507 2271 -494V-593L2517 -585V-93H2660L2669 -257L2799 -241L2784 -492L3004 -512L3047 -11L2875 16L2856 128H2268L2269 -203L2246 45Z M3583 -642H3602V-662H3584ZM3365 -582H3330V-515L3365 -516ZM3603 -482V-503H3583L3584 -482ZM3802 -482H3821V-503H3802ZM3406 -86V-67L3581 -66V-89ZM3092 -191V-284L3049 -281V-519L3093 -516V-583H3045V-818H3366V-861H4045V-298H3826V-275L4047 -279V-85L3826 -89V-66H4061V131L3316 130L3315 18L3055 67L3041 -186ZM3330 -214 3365 -218V-280L3581 -276V-299H3365V-280L3330 -284ZM3803 -641H3822V-661H3803Z M4222 72 4208 -391 4100 -386 4079 -658 4187 -660 4177 -808 4486 -801 4481 -681 4680 -685Q4683 -636 4723 -608Q4755 -586 4807 -588Q4855 -595 4883 -632Q4918 -612 4947 -620L4885 -248L4591 -319L4613 -420L4492 -416L4506 -198L4793 -213L4906 28ZM4773 -618Q4745 -625 4724 -650Q4703 -682 4711 -726Q4718 -753 4745 -772Q4778 -794 4824 -777Q4797 -708 4860 -652Q4819 -605 4773 -618ZM4848 -731Q4843 -765 4864 -793Q4884 -821 4918 -827Q4953 -832 4981 -812Q5009 -791 5014 -757Q5020 -722 5000 -694Q4979 -666 4944 -661Q4910 -655 4882 -676Q4854 -696 4848 -731Z M5059 12 5055 -240 5659 -208 5643 44ZM5531 -271 5167 -283 5161 -492 5531 -483ZM5083 -564 5075 -788 5607 -756 5595 -529Z"/></symbol></svg>
+
+<main>
+
+  <!-- ══ ナビゲーション ══ -->
+  <header class="nav">
+    <a class="brand" href="#">
+      <b>北大心理ゼミ</b>
+      <span class="label">HOKUDAI SHINRI ZEMI</span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="#"><span class="nav__ja">作品集</span><span class="nav__en">Works</span></a></li>
+        <li><a href="#"><span class="nav__ja">イベント</span><span class="nav__en">Event</span></a></li>
+        <li><a href="#"><span class="nav__ja">部活</span><span class="nav__en">Club</span></a></li>
+        <li><a href="#"><span class="nav__ja">PJ</span><span class="nav__en">Project</span></a></li>
+        <li><a href="#"><span class="nav__ja">団体紹介</span><span class="nav__en">About</span></a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ══ ヒーロー：額装の入れ子（第3層）══ -->
+  <section class="sheet sheet--hero">
+    <div class="wrap">
+      <p class="hero__logo">
+        <svg class="logomark" aria-hidden="true"><use href="#logomark"/></svg>
+        <span class="vh">北大心理ゼミ</span>
+      </p>
+      <!-- ⚠ Mission：原文どおり。句読点の追加・語尾の変更・要約はしない -->
+      <h1 class="mvv mvv--lg">大学生の溢れ出す妄想を形にする</h1>
+    </div>
+  </section>
+
+  <!-- ══ 整列 ALIGNMENT ══ -->
+  <section>
+    <div class="wrap">
+      <p class="label">Vision</p>
+      <!-- ⚠ Vision：原文どおり -->
+      <h2 class="mvv mvv--md" style="margin-top:var(--sp-2)">北大で最も大量におもろいことが生まれる場所になる</h2>
+
+      <ul class="field">
+        <!-- 部活 7つ ── 設立年は暫定値（後日変更予定） -->
+        <li><a class="chip" href="#"><span class="chip__name">読書部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">すこやか部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">料理部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">ふらっと部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">言葉もてあそ部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">研究室訪問部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">ノンアルカクテル部</span><span class="chip__meta">Club / 2026.04</span></a></li>
+
+        <!-- PJ：進行中 ── 唯一、朱の面にする札 -->
+        <li><a class="chip chip--live" href="#"><span class="chip__name">道東PJ</span><span class="chip__meta">Project / 2026.09.04–06</span></a></li>
+
+        <!-- PJ：進行中以外
+             ⚠ 各PJが「過去」か「別枠」かの区分は未確定のため、状態を ―― にしてある。
+               確定するまで、この札に完了・終了などの断定的な表示を入れないこと。 -->
+        <li><a class="chip" href="#"><span class="chip__name">哲学カフェPJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">落書き本PJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">豆腐ゲームPJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">カードゲームPJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">詩タイピングPJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">実験再現PJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">快眠お届けPJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">瞑想習慣化PJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">運動PJ</span><span class="chip__meta">Project / ––</span></a></li>
+        <li><a class="chip" href="#"><span class="chip__name">トーク力向上PJ</span><span class="chip__meta">Project / ––</span></a></li>
+      </ul>
+
+      <p class="cap">札は画面に入るとひとりでに整列します。※ この一文は仮コピー（団体の言葉ではありません）</p>
+    </div>
+  </section>
+
+  <!-- ══ 数字 ══ -->
+  <section style="padding-block:var(--sp-8)">
+    <div class="wrap">
+      <dl class="figures">
+        <div class="fig"><dt>Established</dt><dd class="num">2022<small>.04</small></dd></div>
+        <div class="fig"><dt>Members</dt><dd class="num">56<small> 名</small></dd></div>
+        <div class="fig"><dt>Clubs</dt><dd class="num">7</dd></div>
+        <div class="fig"><dt>Project / Active</dt><dd class="num">1</dd></div>
+        <!-- ⚠ 年間の企画数は増え続けるため確定不能。推測で埋めない -->
+        <div class="fig"><dt>Events / Year</dt><dd class="is-unknown">––</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ══ 部活：朱の乗算 MULTIPLY（額装の入れ子・第3層）══ -->
+  <section class="sheet">
+    <div class="wrap">
+      <div class="two">
+        <p class="two__label">部活</p>
+        <div>
+          <p class="body" style="margin-bottom:var(--sp-8)">
+            大学生が自分の興味を部活として立ち上げ、他者と共有しながら継続的に活動しています。
+          </p>
+
+          <!-- ⚠ 写真は未取得。枠は空欄のまま。
+               画像が用意できたら .thumb の中に
+               <img class="thumb__img" src="…" alt="…"> を1行入れるだけで、
+               モノクロ化＋朱の乗算＋ホバーで原色復帰がそのまま効きます。 -->
+          <ul class="cards">
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">読書部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">すこやか部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">料理部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">ふらっと部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">言葉もてあそ部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">研究室訪問部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+            <li><a class="card" href="#">
+              <div class="thumb"></div>
+              <p class="card__name">ノンアルカクテル部</p>
+              <p class="card__meta">2026.04 —</p>
+            </a></li>
+          </ul>
+          <p class="cap" style="margin-top:var(--sp-4)">
+            写真は準備中です。※ この一文は仮コピー（団体の言葉ではありません）
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 進行中のPJ ══ -->
+  <section>
+    <div class="wrap">
+      <div class="two">
+        <p class="two__label">進行中</p>
+        <div>
+          <p class="label">Project</p>
+          <h2 class="h1" style="margin:var(--sp-2) 0 var(--sp-4)">道東PJ</h2>
+          <dl class="figures" style="margin-bottom:var(--sp-6)">
+            <div class="fig"><dt>Period</dt><dd class="num" style="font-size:20px">2026.09.04–06</dd></div>
+            <div class="fig"><dt>Status</dt><dd style="font-size:20px">進行中</dd></div>
+            <!-- ⚠ 名簿はあるが確定人数が未集計 -->
+            <div class="fig"><dt>Members</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
+            <div class="fig"><dt>Purpose</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
+          </dl>
+          <!-- 写真枠（空欄）。1枚だけ大きく置く -->
+          <div class="thumb" style="aspect-ratio:16/9"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Value：額装の入れ子（第3層）══ -->
+  <section class="sheet">
+    <div class="wrap">
+      <p class="label">Value</p>
+      <!-- ⚠ Value：2つとも原文どおり -->
+      <p class="mvv mvv--md" style="margin-top:var(--sp-4)">誰を幸せにできるのかを問い続ける</p>
+      <p class="mvv mvv--md" style="margin-top:var(--sp-2)">過去から学ぶことを忘れない</p>
+    </div>
+  </section>
+
+  <!-- ══ フッター ══ -->
+  <footer class="foot">
+    <div class="wrap">
+      <p class="foot__logo">
+        <svg class="logomark" aria-hidden="true"><use href="#logomark"/></svg>
+        <span class="vh">北大心理ゼミ</span>
+      </p>
+
+      <div class="foot__grid">
+        <div>
+          <p class="label">Contact</p>
+          <p style="margin-top:var(--sp-1)">
+            <a href="mailto:hokkaido.u.psychology@gmail.com">hokkaido.u.psychology@gmail.com</a>
+          </p>
+        </div>
+        <div>
+          <p class="label">Social</p>
+          <ul style="margin-top:var(--sp-1)">
+            <li><a href="https://www.instagram.com/tan1_is_rational/">Instagram</a></li>
+            <li><a href="https://x.com/hokudaishinri">X</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="label">Established</p>
+          <p class="num" style="margin-top:var(--sp-1)">2022.04</p>
+        </div>
+      </div>
+
+      <!-- ⚠ 非公認であることの明記（大本資料 0-0）。
+           スポンサーが最も気にする点であり、実態と違う書き方をしてはならない。
+           ※ この文面は仮コピー。団体として正しい表現に差し替えてください。 -->
+      <p class="foot__note">
+        北大心理ゼミは「未来開拓倶楽部」の傘下プロジェクトであり、北海道大学の公認団体ではありません。
+        <br>※ この一文は仮コピー（団体の言葉ではありません）
+      </p>
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>
