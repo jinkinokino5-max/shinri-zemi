@@ -1,0 +1,72 @@
+# ══════════════════════════════════════════════════════════════════
+#  GitHub Pages への自動デプロイ
+#  根拠：draft/ロードマップ.md 1-1 / P4
+#
+#  main に push されるたびに、ビルド → 検査 → 公開 を自動で行う。
+#
+#  ⚠ 検査（scripts/check-content.mjs）が失敗したらデプロイしない。
+#    参考サイトが実測で失敗していた点（h1が無い・空、非公認の一文の欠落、
+#    リンク切れ、altの無いimg）を含む。壊れたまま公開されるのを仕組みで防ぐ。
+#
+#  ⚠ 1年以内に Cloudflare Pages へ移行する（投稿機能のため）。
+#    その際このファイルは差し替えるが、アプリ側のコードは変わらない。
+# ══════════════════════════════════════════════════════════════════
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 手動実行も可能にしておく（イベント終了後の再ビルド等で使う）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時実行を1つに絞る。実行中のデプロイは中断しない。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: ビルド（明朝サブセットの自動生成を含む）
+        run: npm run build
+        env:
+          # ⚠ GitHub Pages は /<リポジトリ名>/ の下で配信される。
+          #   これを指定しないと CSS も画像もリンクも全部404になる。
+          #   独自ドメインを設定したら、この2行を削除すること（BASE_PATH="" になる）。
+          BASE_PATH: /shinri-zemi
+
+      - name: 公開前の自動検査
+        # ⚠ ここで落ちたらデプロイしない。
+        run: node scripts/check-content.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

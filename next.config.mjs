@@ -12,8 +12,17 @@
 //  移行時に書き直す必要はない。この行を消して adapter を足すだけ。
 // ══════════════════════════════════════════════════════════════════
 
+// ⚠ GitHub Pages は https://<ユーザー名>.github.io/<リポジトリ名>/ で配信される。
+//   このサブディレクトリを basePath に指定しないと、CSSも画像もリンクも全部404になる。
+//   独自ドメインを設定したら不要になるため、環境変数で切り替えられるようにしている。
+//     独自ドメイン運用   → BASE_PATH を空にする（既定）
+//     github.io で確認   → BASE_PATH=/リポジトリ名
+const basePath = process.env.BASE_PATH ?? '';
+
 const nextConfig = {
   output: 'export',
+  basePath,
+  assetPrefix: basePath || undefined,
 
   // 静的書き出しでは末尾スラッシュ付きのディレクトリ出力にする。
   // /clubs/dokusho/ → out/clubs/dokusho/index.html
