@@ -9,6 +9,13 @@
      null のとき画面には「––」が出る。
    ══════════════════════════════════════════════════════════════════ */
 
+/* ⚠ サイトの公開URL。
+     いまは GitHub Pages の暫定URL。独自ドメインを取得したらここを書き換える。
+     sitemap.xml・OGP・構造化データがすべてこの値を使う。
+     ここを直し忘れると、SNSでシェアしたときに画像が出ない。 */
+export const SITE_URL =
+  process.env.SITE_URL ?? 'https://jinkinokino5-max.github.io/shinri-zemi';
+
 export const ORG = {
   name: '北大心理ゼミ',
   /** ⚠ 心理学とは無関係の団体。PSYCHOLOGY と英訳せず、ローマ字転写のみ使う。 */

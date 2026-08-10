@@ -85,13 +85,17 @@ export function getEvents() {
   return readCollection('events').sort((a, b) => b.date.localeCompare(a.date));
 }
 
-/** 今日以降に開催されるイベントのうち、最も近いもの。無ければ null。
+/** まだ終わっていないイベントか。
  *  ⚠ 静的書き出しなので「今日」はビルド時点。
- *    イベントが過ぎたら再ビルドが必要（ロードマップ P5 の運用事項）。 */
+ *    開催後に表示を切り替えるには再ビルドが要る（ロードマップ P5 の運用事項）。 */
+export function isUpcoming(e: { date: string; endDate?: string }, today = new Date()): boolean {
+  return (e.endDate ?? e.date) >= today.toISOString().slice(0, 10);
+}
+
+/** 今日以降に開催されるイベントのうち、最も近いもの。無ければ null。 */
 export function getUpcomingEvent(today = new Date()) {
-  const iso = today.toISOString().slice(0, 10);
   const upcoming = getEvents()
-    .filter((e) => (e.endDate ?? e.date) >= iso)
+    .filter((e) => isUpcoming(e, today))
     .sort((a, b) => a.date.localeCompare(b.date));
   return upcoming[0] ?? null;
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
+import { Thumb } from '@/components/Thumb';
 import { getClubs } from '@/lib/content';
+import { yearMonth, count, textOr } from '@/lib/format';
 import { ORG } from '@/lib/org';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -59,11 +61,16 @@ export default async function ClubPage({ params }: { params: Promise<Params> }) 
 
           <dl className="figures" style={{ marginBottom: 'var(--sp-8)' }}>
             <Fig label="Status" value={done ? '終了' : '活動中'} />
-            <Fig label="Founded" value={fmt(club.foundedYearMonth)} />
-            {done && <Fig label="Ended" value={fmt(club.endedYearMonth)} />}
+            <Fig label="Founded" value={yearMonth(club.foundedYearMonth)} />
+            {done && <Fig label="Ended" value={yearMonth(club.endedYearMonth)} />}
             {/* ⚠ 未回答は「––」。0 で埋めない。 */}
-            <Fig label="Members" value={club.memberCount ? String(club.memberCount) : '––'} />
+            <Fig label="Members" value={count(club.memberCount)} />
+            <Fig label="活動" value={textOr(club.meetingInfo)} />
           </dl>
+
+          <div style={{ marginBottom: 'var(--sp-8)' }}>
+            <Thumb cover={club.cover} name={club.name} done={done} ratio="16/9" />
+          </div>
 
           {club.body ? (
             <div className="body">{club.body}</div>
@@ -87,6 +94,3 @@ function Fig({ label, value }: { label: string; value: string }) {
   );
 }
 
-function fmt(ym?: string) {
-  return ym ? ym.replace('-', '.') : '––';
-}

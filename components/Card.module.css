@@ -1,0 +1,37 @@
+/* カード。詳細は Card.tsx のコメントを参照。 */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-6) var(--sp-4);
+}
+
+.card { display: block; text-decoration: none; }
+
+.name {
+  margin-top: var(--sp-2);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1.6;
+  display: inline-block;
+  border-bottom: 2px solid transparent;   /* ホバーで朱になる。高さを先に確保しておく */
+  transition: border-color var(--dur-hover) ease-out;
+}
+.card:hover .name { border-bottom-color: var(--shu-on-light); }  /* 4.87 AA */
+
+/* 終了したもの。⚠ 濃さを下げるのは装飾。状態は .state の文字で必ず示す。 */
+.nameDone { color: var(--sub-on-light); }                        /* 4.92 AA */
+
+.meta {
+  font: 400 12px/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);
+  font-variant-numeric: tabular-nums;
+}
+.state {
+  margin-top: .2em;
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--sub-on-light);
+}

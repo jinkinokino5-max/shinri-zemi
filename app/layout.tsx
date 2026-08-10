@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { LogomarkDefs } from '@/components/Logomark';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SERIF_SUBSET_URL } from '@/lib/generated/font-subset';
-import { ORG } from '@/lib/org';
+import { ORG, SITE_URL } from '@/lib/org';
 import '@/styles/tokens.css';
 import '@/styles/base.css';
 
@@ -19,14 +19,15 @@ export const metadata: Metadata = {
     template: `%s｜${ORG.name}`,
   },
   description: `${ORG.mission}。${ORG.name}のウェブサイト。`,
-  // ⚠ 独自ドメイン取得後に metadataBase を設定すること。
-  //   未設定だと OGP 画像が相対パスのままになり、SNSでカードが出ない。
-  //   （ドメイン名は未定。ロードマップ P0-E）
+  // ⚠ OGP画像を絶対URLにするために必須。未設定だとSNSでカードが出ない。
+  //   独自ドメイン取得後は lib/org.ts の SITE_URL を書き換えるだけでよい。
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
     siteName: ORG.name,
     locale: 'ja_JP',
   },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +58,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        {/* 構造化データ（06資料 4章）。団体は Organization。
+            ⚠ 非公認であることを偽らないため、大学との所属関係は書かない。 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: ORG.name,
+              alternateName: ORG.romaji,
+              url: SITE_URL,
+              email: ORG.email,
+              foundingDate: ORG.established,
+              slogan: ORG.mission,
+              description: ORG.affiliationNotice,
+              sameAs: ORG.social.map((s) => s.href),
+            }),
+          }}
+        />
+
         {/* 題字SVGの定義。ページ先頭で1回だけ。 */}
         <LogomarkDefs />
 

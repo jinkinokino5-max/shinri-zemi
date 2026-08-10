@@ -210,3 +210,120 @@ h1, h2, h3, .display { font-feature-settings: 'palt' 1; word-break: auto-phrase;
   font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em;
   color: var(--shu-on-light);                       /* 生成り地 4.87 AA */
 }
+
+/* ══ 告知帯（近日開催のイベント）════════════════════
+   ⚠ サイト上で唯一、期限のある情報。朱の面で最も強く出す。
+   ⚠ 朱の面には必ず墨の文字（4.78 AA）。白は 4.04 で不足する。
+   ⚠ 朱を使う場所は1画面に1箇所まで。増やすと効果が半減する。 */
+.notice {
+  display: block; text-decoration: none;
+  background: var(--shu); color: var(--ink);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  transition: background var(--dur-hover) ease-out, color var(--dur-hover) ease-out;
+}
+.notice:hover { background: var(--ink); color: var(--shu-on-dark); }  /* 6.88 AA */
+.notice__label {
+  font: 400 12px/1.5 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
+}
+.notice__name {
+  font-size: clamp(28px, 4vw, 44px); font-weight: 700;
+  line-height: 1.25; letter-spacing: -.02em; margin-top: .2em;
+}
+.notice__date { font-size: clamp(16px, 1.8vw, 20px); letter-spacing: .06em; margin-top: .3em; }
+
+/* ══ 装飾のないカード（イベント・作品）══════════════
+   ⚠ 作品の色を邪魔しないため、部活のカードより一段静かにする。 */
+.cards-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--sp-6) var(--sp-4); }
+.card-plain { display: block; text-decoration: none; }
+.card-plain__name {
+  margin-top: var(--sp-2); font-size: 20px; font-weight: 700; letter-spacing: .02em;
+  display: inline-block; border-bottom: 2px solid transparent;
+  transition: border-color var(--dur-hover) ease-out;
+}
+.card-plain:hover .card-plain__name { border-bottom-color: var(--shu-on-light); }
+.card-plain__meta {
+  font: 400 12px/1.5 var(--font-mono); letter-spacing: .12em; color: var(--sub-on-light);
+}
+
+/* ══ 新聞紙面（団体紹介ページ限定／大本資料 7-6）══════
+   ⚠ 層の切り替えは「地の色の反転」だけで表現する。別の装飾を足さない。
+   ⚠ 墨地では朱・副色を専用の値に差し替える。生成り地用のままだと
+     コントラスト不足になる（--shu は墨地で 4.78、--shu-on-light は不足）。 */
+.paper {
+  background: var(--ink);
+  color: var(--paper);                       /* 17.11 AAA */
+  border-radius: var(--radius);
+  margin: var(--sp-6);
+  padding: var(--sp-12) var(--sp-6);
+}
+@media (max-width: 760px) { .paper { margin: var(--sp-2); padding: var(--sp-8) var(--sp-3); } }
+
+.paper a { color: var(--shu-on-dark); }      /* 墨地の朱 6.88 AA */
+.paper .label { color: var(--sub-on-dark); } /* 9.24 AAA */
+
+.paper__head {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4);
+  align-items: baseline; justify-content: space-between;
+  padding-bottom: var(--sp-2);
+  border-bottom: 3px double var(--sub-on-dark);   /* 新聞の題字下の二重罫 */
+}
+.paper__title { font-size: clamp(22px, 3vw, 30px); font-weight: 700; letter-spacing: .04em; }
+.paper__sub {
+  font: 400 12px/1.5 var(--font-mono); letter-spacing: .12em; color: var(--sub-on-dark);
+}
+.paper__lead {
+  font-size: clamp(24px, 3.6vw, 40px); line-height: 1.7; letter-spacing: .04em;
+  margin: var(--sp-8) 0 var(--sp-4);
+}
+/* ⚠ 非公認の明記。目立たせすぎず、しかし確実に読める位置と濃さにする。 */
+.paper__notice {
+  font-size: 14px; line-height: 1.9; color: var(--sub-on-dark);   /* 9.24 AAA */
+  padding-bottom: var(--sp-8);
+  border-bottom: 1px solid var(--sub-on-dark);
+}
+
+/* 3段組。⚠ スマホでは1列に落とす（多段組はスマホで成立しない）。 */
+.cols {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0; margin-top: var(--sp-8);
+}
+.col { padding-inline: var(--sp-4); border-left: 1px solid rgba(244,241,234,.22); }
+.col:first-child { padding-left: 0; border-left: 0; }
+.col:last-child { padding-right: 0; }
+@media (max-width: 900px) {
+  .cols { grid-template-columns: 1fr; }
+  .col {
+    padding: var(--sp-6) 0 0; border-left: 0;
+    border-top: 1px solid rgba(244,241,234,.22);
+  }
+  .col:first-child { padding-top: 0; border-top: 0; }
+}
+
+.col__head {
+  font: 400 11px/1.5 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--sub-on-dark); padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--sub-on-dark); margin-bottom: var(--sp-3);
+}
+.col__label {
+  font: 400 11px/1.5 var(--font-mono); letter-spacing: .12em;
+  color: var(--shu-on-dark); margin-top: var(--sp-3);          /* 6.88 AA */
+}
+.col__mvv { font-size: clamp(16px, 1.6vw, 19px); line-height: 2.0; letter-spacing: .06em; }
+
+.org { margin: 0; }
+.org dt { font-weight: 700; font-size: 15px; margin-top: var(--sp-3); }
+/* ⚠ dd は既定で左に字下げが付く。紙面の段が狭いので消す。 */
+.org dd { margin: 0; font-size: 14px; line-height: 1.9; color: var(--paper); }
+.org__note { color: var(--sub-on-dark); }
+.purpose--dark .purpose__n { color: var(--shu-on-dark); }       /* 6.88 AA */
+.purpose--dark li { font-size: 14px; line-height: 1.9; }
+
+.stats { display: grid; gap: var(--sp-2); }
+.stats { margin: 0; }
+/* ⚠ 「（終了 2）」が入ると右段からはみ出すため、最小幅を明示して折り返させる。 */
+.stat { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: var(--sp-2); align-items: baseline; }
+.stat dt { font-size: 13px; color: var(--sub-on-dark); }
+.stat dd { margin: 0; font-size: 24px; font-weight: 700; line-height: 1.4; }
+.stat dd small { font-size: 13px; font-weight: 400; color: var(--sub-on-dark); }
+.stat dd.is-unknown { color: var(--sub-on-dark); font-weight: 400; }

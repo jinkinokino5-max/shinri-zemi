@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
+import { Thumb } from '@/components/Thumb';
 import { getProjects } from '@/lib/content';
+import { textOr, count } from '@/lib/format';
 import { ORG } from '@/lib/org';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -49,15 +51,19 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
 
           <dl className="figures" style={{ marginBottom: 'var(--sp-8)' }}>
             <Fig label="Status" value={pj.status === 'done' ? '終了' : '進行中'} />
-            <Fig label="Period" value={pj.period ?? '––'} />
+            <Fig label="Period" value={textOr(pj.period)} />
             {/* ⚠ 基本情報に「成果は目的が達成できているか」とあるため、目的の明示が重要。
                   未回答なので「––」のまま。推測で書かない。 */}
-            <Fig label="Purpose" value={pj.purpose ?? '––'} />
+            <Fig label="Purpose" value={textOr(pj.purpose)} />
             <Fig
               label="Members"
-              value={pj.memberDisplayNames.length ? String(pj.memberDisplayNames.length) : '––'}
+              value={pj.memberDisplayNames.length ? count(pj.memberDisplayNames.length) : '––'}
             />
           </dl>
+
+          <div style={{ marginBottom: 'var(--sp-8)' }}>
+            <Thumb cover={pj.cover} name={pj.name} done={pj.status === 'done'} ratio="16/9" />
+          </div>
 
           {pj.body ? <div className="body">{pj.body}</div> : <p className="cap">紹介文は準備中です。</p>}
         </div>
