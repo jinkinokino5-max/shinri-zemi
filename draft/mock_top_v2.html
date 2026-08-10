@@ -450,12 +450,16 @@ section{ padding-block:var(--sp-24); }
         <li><a class="chip" href="#"><span class="chip__name">研究室訪問部</span><span class="chip__meta">Club / 2026.04</span></a></li>
         <li><a class="chip" href="#"><span class="chip__name">ノンアルカクテル部</span><span class="chip__meta">Club / 2026.04</span></a></li>
 
-        <!-- PJ：進行中 ── 唯一、朱の面にする札 -->
-        <li><a class="chip chip--live" href="#"><span class="chip__name">道東PJ</span><span class="chip__meta">Project / 2026.09.04–06</span></a></li>
+        <!-- イベント ── 唯一、朱の面にする札
+             ⚠ 2026-08-10 訂正：道東PJ は PJ ではなくイベント。分類を Event に変更した。
+             ⚠ 名称に「PJ」が付いたままなので、サイト上で PJ と誤読される。
+               イベントとしての正式名称が判明したら差し替えること。 -->
+        <li><a class="chip chip--live" href="#"><span class="chip__name">道東PJ</span><span class="chip__meta">Event / 2026.09.04–06</span></a></li>
 
-        <!-- PJ：進行中以外
-             ⚠ 各PJが「過去」か「別枠」かの区分は未確定のため、状態を ―― にしてある。
-               確定するまで、この札に完了・終了などの断定的な表示を入れないこと。 -->
+        <!-- PJ
+             ⚠ 道東PJ がイベントに移ったため、現在進行中の PJ は1件も特定できていない。
+               各PJが「進行中」か「終了」かの区分は未確定のため、状態を ―― にしてある。
+               確定するまで、この札に完了・終了・進行中などの断定的な表示を入れないこと。 -->
         <li><a class="chip" href="#"><span class="chip__name">哲学カフェPJ</span><span class="chip__meta">Project / ––</span></a></li>
         <li><a class="chip" href="#"><span class="chip__name">落書き本PJ</span><span class="chip__meta">Project / ––</span></a></li>
         <li><a class="chip" href="#"><span class="chip__name">豆腐ゲームPJ</span><span class="chip__meta">Project / ––</span></a></li>
@@ -479,7 +483,9 @@ section{ padding-block:var(--sp-24); }
         <div class="fig"><dt>Established</dt><dd class="num">2022<small>.04</small></dd></div>
         <div class="fig"><dt>Members</dt><dd class="num">56<small> 名</small></dd></div>
         <div class="fig"><dt>Clubs</dt><dd class="num">7</dd></div>
-        <div class="fig"><dt>Project / Active</dt><dd class="num">1</dd></div>
+        <!-- ⚠ 2026-08-10 訂正：道東PJ がイベントに移動したため、進行中PJの件数は未確定に戻った。
+             推測で 1 や 0 を入れてはならない。区分が判明するまで ―― のままにすること。 -->
+        <div class="fig"><dt>Project / Active</dt><dd class="is-unknown">––</dd></div>
         <!-- ⚠ 年間の企画数は増え続けるため確定不能。推測で埋めない -->
         <div class="fig"><dt>Events / Year</dt><dd class="is-unknown">––</dd></div>
       </dl>
@@ -549,16 +555,17 @@ section{ padding-block:var(--sp-24); }
   <section>
     <div class="wrap">
       <div class="two">
-        <p class="two__label">進行中</p>
+        <p class="two__label">近日開催</p>
         <div>
-          <p class="label">Project</p>
+          <!-- ⚠ 2026-08-10 訂正：Project → Event。道東PJ はイベントである。 -->
+          <p class="label">Event</p>
           <h2 class="h1" style="margin:var(--sp-2) 0 var(--sp-4)">道東PJ</h2>
           <dl class="figures" style="margin-bottom:var(--sp-6)">
-            <div class="fig"><dt>Period</dt><dd class="num" style="font-size:20px">2026.09.04–06</dd></div>
-            <div class="fig"><dt>Status</dt><dd style="font-size:20px">進行中</dd></div>
-            <!-- ⚠ 名簿はあるが確定人数が未集計 -->
-            <div class="fig"><dt>Members</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
-            <div class="fig"><dt>Purpose</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
+            <div class="fig"><dt>Date</dt><dd class="num" style="font-size:20px">2026.09.04–06</dd></div>
+            <!-- ⚠ 主催が運営部か企画部かは未確認。対象者・参加人数も未集計 -->
+            <div class="fig"><dt>Organizer</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
+            <div class="fig"><dt>Audience</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
+            <div class="fig"><dt>Detail</dt><dd class="is-unknown" style="font-size:20px">––</dd></div>
           </dl>
           <!-- 写真枠（空欄）。1枚だけ大きく置く -->
           <div class="thumb" style="aspect-ratio:16/9"></div>
