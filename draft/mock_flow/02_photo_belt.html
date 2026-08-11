@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案02｜写真の帯｜北大心理ゼミ トップページ モック</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     案02｜写真の帯（朱の乗算・ホバーで原色に戻る）
+
+     考え方
+       活動写真を白黒＋朱の乗算で統一して横に流し、
+       マウスを乗せた1枚だけが元の色に戻る。
+       写真の明るさや色がバラバラでも見た目が揃うため、
+       学生が撮ったままの写真を無加工で投入できる
+       （public/photos/README.txt が学生に約束している挙動そのもの）。
+
+     ⚠ この案は写真が主役である。
+       現在 public/photos/ は0枚なので、実際には「写真なし」の枠が
+       21個並ぶことになる。下では一部だけ仮の絵を出して、
+       写真が入った状態と入っていない状態を同時に見えるようにしている。
+       ⚠ 仮の絵は CSS で描いたものであり、実写ではない。
+
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 書体・ウェイトは現行サイトから一切変更していない
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- MVV専用の明朝。42字サブセット。⚠ この42字以外を流すと別書体になる。活動名には使わない。 -->
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   案02 固有
+   ════════════════════════════════════════════════════════ */
+
+/* ヒーロー。⚠ 現行サイトの最大の欠点は、1画面目に題字しか無く
+   Mission がスクロールしないと出てこないこと。ここでは
+   「題字は小さく上に、Mission を1画面目の主役に」置き換えている。 */
+.hero{padding:var(--sp-8) 0 var(--sp-6)}
+.hero__logo{max-width:420px;margin-bottom:var(--sp-6)}
+.hero__h{font-size:clamp(30px,5.2vw,58px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+.hero__sub{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-4);
+           align-items:baseline;margin-top:var(--sp-4)}
+.hero__sub b{font-size:34px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+
+/* 帯。⚠ .wrap の外に出して画面幅いっぱいに流す。
+     両端で断ち切ると「切れた」に見え、「流れ」に見えない。 */
+.belt{padding-block:var(--sp-4) var(--sp-8)}
+.belt .tile{width:clamp(240px,28vw,360px);margin-inline:var(--sp-2)}
+
+/* ⚠ 「写真なし」の枠が連続すると帯が死ぬ。
+     写真が揃うまでの間は、名前を枠の中で大きく見せて間を持たせる。 */
+.tile .ph--none{display:grid;place-items:center;padding:var(--sp-3)}
+.tile .ph--none .ph__cap{position:static}
+</style>
+</head>
+<body>
+
+<!-- ⚠ モック閲覧用の見出し。本番には入らない。 -->
+<div class="mockbar">
+  <p class="mockbar__no">CASE 02</p>
+  <p class="mockbar__name">写真の帯（朱の乗算・ホバーで原色に戻る）</p>
+  <p class="mockbar__note">
+    活動写真を白黒＋朱の乗算で横に流し、マウスを乗せた1枚だけが元の色に戻る。
+    写真の色や明るさがバラバラでも揃って見えるので、撮ったままの写真を無加工で使える。
+    <b>⚠ 写真が主役の案。いま public/photos/ は0枚なので、実際には「写真なし」の枠が並ぶ。</b>
+    下の色つきの絵は CSS で描いた仮のもので、実写ではない。
+  </p>
+</div>
+
+<main class="frame">
+  <div data-slot="nav"></div>
+
+  <!-- ══ ヒーロー ══ -->
+  <section class="hero">
+    <div class="wrap">
+      <svg class="logomark hero__logo" aria-hidden="true"><use href="#logomark"/></svg>
+      <span class="vh">北大心理ゼミ</span>
+      <p class="label">Mission</p>
+      <!-- ⚠ 原文どおり。<span> は文字を1字も増減させていない（囲んでいるだけ）。 -->
+      <h1 class="hero__h has-kenten" style="margin-top:var(--sp-2)">
+        大学生の溢れ出す<span class="kenten">妄想</span>を形にする
+      </h1>
+      <dl class="hero__sub" style="margin-block:var(--sp-4) 0">
+        <dt class="label">これまでに生まれた企画</dt>
+        <dd style="margin:0"><b class="num">21</b><small style="letter-spacing:.06em"> 件</small></dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ══ 写真の帯 ══
+       ⚠ 帯は1画面に1本まで（大本資料 8-4 の読み替えの前提）。 -->
+  <section class="belt">
+    <div class="flow flow--l flow--fade" style="--speed:96s">
+      <div class="flow__track" id="belt"></div>
+    </div>
+  </section>
+
+  <div data-slot="below"></div>
+</main>
+
+<script src="_shared.js"></script>
+<script>
+/* ⚠ 本番では lib/content.ts の集計を map するだけになる。
+   ここで JS を使っているのは、21件を手書きして写し間違えるのを避けるため。 */
+document.addEventListener('DOMContentLoaded', () => {
+  const html = ACTIVITIES.map(a => `
+    <a class="tile ${a.status === 'done' ? 'tile--done' : ''}" href="#${a.slug}">
+      ${photoOf(a)}
+      <p class="tile__n">${a.name}</p>
+      <p class="tile__t">${metaOf(a)}</p>
+    </a>`).join('');
+  document.getElementById('belt').innerHTML = twoSets(html);
+});
+</script>
+</body>
+</html>

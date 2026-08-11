@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案02×04｜題字の背景を名前が流れる＋写真の帯｜北大心理ゼミ トップページ モック</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     案02 × 案04｜合体案
+
+     構成（上から）
+       ① 題字「北大心理ゼミ」を大きく出す（現行トップページの主役をそのまま残す）
+       ② その背後を、21件の活動名が2本の帯になって流れる  ← 案04
+       ③ 題字の下に Mission
+       ④ すぐ下に写真の帯                                  ← 案02
+       ⑤ 以降は他案と共通（告知帯 → Vision → 数字 → Value → フッター）
+
+     この構成の狙い
+       現行トップの最大の欠点は、1画面目が題字だけで
+       「何をしている団体か」がスクロールしないと分からないこと。
+       題字を小さくして解決するのではなく、
+       題字はそのまま大きく残したうえで、その背後と直下に「活動そのもの」を置く。
+
+     ⚠⚠ 大本資料 8-4「1画面に同時に動く要素は3つまで」を超えている
+       背景の帯3本 ＋ 写真の帯1本 ＝ 4本。上限を1つ超過している。
+       2026-08-11、上限超過を説明したうえで団体側が3列を選択した。
+       ⚠ これは意図的な逸脱であり、実装の見落としではない。
+       ⚠ 実機で「うるさい」と感じた場合、最初に戻すのはここ。
+         背景を2本に減らせば上限内に収まる（bg-c の div を消し、
+         JS の bgOf(2) と i%3 を i%2 に戻すだけ）。
+       ⚠ 帯は全要素が単一トラックを同一速度で動くため、
+         知覚されるのは「1本につき1つの動き」である
+         （既存 Chip.module.css が20枚の札に対して行っている読み替えと同じ）。
+
+     ⚠ 背景に流れる名前は「装飾」である。読ませる対象ではない。
+       ・コントラストを意図的に落としてある（題字と Mission を邪魔させないため）
+       ・aria-hidden を付け、リンクにもしていない
+       ・⚠ よって、ここにしか無い情報を置いてはならない。
+         同じ21件は必ず下の写真の帯にも出す（実際そうしてある）。
+
+     ⚠ 題字は透明な文字なので、背景の名前が字の抜き（「心」「理」の内側など）を
+       通り抜けて見える。これは意図した効果であり、不具合ではない。
+       ただし字が潰れて読めなくなっては本末転倒なので、
+       背景色は --paper との差が小さい値に固定してある。
+
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 書体・ウェイトは現行サイトから一切変更していない
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- MVV専用の明朝。42字サブセット。⚠ この42字以外を流すと別書体になる。活動名には使わない。 -->
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   案02×04 固有
+   ════════════════════════════════════════════════════════ */
+
+/* ── ヒーロー：題字＋背後を流れる名前 ──────────────────
+   ⚠ isolation:isolate で重ね順を閉じる。
+     これが無いと、後続セクションの stacking context に干渉しうる。 */
+.hero{
+  position:relative;
+  isolation:isolate;
+  overflow:clip;
+  padding-block:var(--sp-12) var(--sp-8);
+  /* ⚠ 題字と背景の帯が呼吸できる最低限の高さ。
+       これより低いと帯が題字に貼り付いて、ただの汚れに見える。
+       ⚠ 背景を2列→3列にしたぶん、縦を広げてある（620px → 700px）。 */
+  min-height:min(78svh,700px);
+  display:grid;align-content:center;
+}
+
+/* 背景の帯。⚠ 装飾。読ませない。 */
+.hero__bg{
+  position:absolute;inset:0;z-index:0;
+  display:grid;align-content:center;
+  /* ⚠ 3列に増やしたぶん、行間を詰めないと縦にはみ出す（--sp-6 → --sp-3）。 */
+  gap:var(--sp-3);
+  pointer-events:none;          /* ⚠ 題字の上のクリックを奪わせない */
+  user-select:none;
+}
+.hero__bg .tag{padding:0 var(--sp-4)}
+.hero__bg .tag__n{
+  /* ⚠ 生成り(#F4F1EA)地でコントラスト約1.7。これは「読めない」値だが、
+       背景装飾としては意図どおり。⚠ ここに読ませたい情報を置かないこと。
+       ⚠ これ以上濃くすると題字の抜き（「心」「理」の内側）が濁って字が潰れる。 */
+  color:#D6D1C4;
+  /* ⚠ 2列 → 3列にしたため、文字を一段小さくしてある（最大 88px → 64px）。
+       88px のまま3列にすると縦が溢れ、題字に文字が貼り付いて汚れに見える。
+       ⚠ ここを大きくするなら .hero の min-height も一緒に上げること。 */
+  font-size:clamp(30px,5.2vw,64px);
+  line-height:1.1;
+}
+/* ⚠ 上下も溶かす。帯の切り口が水平線に見えると、額装の面が割れて見える。 */
+.hero__bg .flow--fade{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+
+/* 前面：題字と Mission */
+.hero__fg{
+  position:relative;z-index:1;
+  max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4);
+  width:100%;
+}
+/* ⚠ 現行トップと同じく題字を主役の大きさで出す。
+     ⚠ 表示高さ 32px 相当を大きく上回るので判読性の問題は無い。 */
+.hero__logo{max-width:min(100%,900px)}
+
+/* Mission。⚠ 背面が動くため、必ず地を敷く。敷かないと可読性が落ちる。
+     box-decoration-break:clone で、折り返した2行目にも地が付く。 */
+.hero__label{
+  background:var(--paper);display:inline-block;padding:.25em .7em;
+  border-radius:var(--radius-pill);
+}
+.hero__h{
+  font-size:clamp(26px,3.8vw,44px);font-weight:700;line-height:1.5;letter-spacing:-.02em;
+  background:var(--paper);
+  box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  /* ⚠ 上だけ余白を厚くしている（.45em）。
+       圏点（ゴマ点）は文字の上に出るため、上下同じ余白だと
+       地の外にはみ出し、背後の流れる文字と重なって濁る。
+       ⚠ この値を下げないこと。下げると「妄想」の圏点が地から出る。 */
+  padding:.45em .4em .15em;display:inline;
+}
+.hero__hwrap{margin-top:var(--sp-4);line-height:2.0}
+
+/* ── 写真の帯（案02）────────────────────────────────
+   ⚠ .wrap の外に出して画面幅いっぱいに流す。
+     両端で断ち切ると「切れた」に見え、「流れ」に見えない。 */
+.belt{padding-block:var(--sp-6) var(--sp-8)}
+.belt .tile{width:clamp(240px,28vw,360px);margin-inline:var(--sp-2)}
+/* ⚠ 「写真なし」の枠が連続すると帯が死ぬ。
+     写真が揃うまでの間、枠の中で名前を見せて間を持たせる。 */
+.belt .ph--none{display:grid;place-items:center;padding:var(--sp-3)}
+.belt .ph--none .ph__cap{position:static}
+
+.beltcap{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);align-items:baseline;
+         max-width:1140px;margin:0 auto var(--sp-3);padding-inline:var(--sp-4)}
+.beltcap b{font-size:30px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+
+/* ── スマホ ────────────────────────────────────────────
+   ⚠ 帯の本数は減らさず、3本のまま文字を小さくして密度を保つ。
+     以前は狭い画面で1本に落としていたが、それだと背景が
+     「題字を横切る1本の線」に見えてしまい、汚れと区別がつかない。
+     3本あって初めて「面としての手ざわり」になる。
+   ⚠ 代わりに文字を大きく縮める。縮めないと1本あたり2〜3語しか
+     入らず、複製をまたいで同じ名前が同時に2つ見える。 */
+@media(max-width:760px){
+  .hero{
+    /* ⚠ min-height:auto にしない。
+         ヒーローが題字＋Missionの高さまで縮むと、背景3本が
+         題字に貼り付いて潰れる。背景が呼吸する縦幅を必ず残す。 */
+    min-height:min(64svh,460px);
+    padding-block:var(--sp-8) var(--sp-6);
+  }
+  .hero__bg{gap:var(--sp-2)}
+  .hero__bg .tag__n{font-size:clamp(20px,6.4vw,32px)}
+  .hero__bg .tag{padding:0 var(--sp-2)}
+
+  /* ⚠ 題字はスマホでは横幅いっぱいになる。
+       キルゴUは 5.5:1 の横長なので、幅320pxなら高さ約58px。
+       32px の安全圏は確保できるが、これ以上 padding を増やさないこと。 */
+  .hero__fg{padding-inline:var(--sp-3)}
+
+  /* ⚠ 帯のタイルは画面幅より小さく保つ。
+       clamp の下限240pxは、iPhone SE（375px）でも余白が残る値。 */
+  .belt .tile{width:min(240px,72vw)}
+  .beltcap{padding-inline:var(--sp-3)}
+  .beltcap b{font-size:26px}
+}
+
+/* ════════════════════════════════════════════════════════
+   動きの停止
+   ⚠ 背景の帯は「静止させても意味を成さない装飾」なので、消す。
+     折り返して残すと、読めない灰色の文字が21件ぶん画面に居座り、
+     題字と Mission の邪魔にしかならない。
+     ⚠ 同じ21件は下の写真の帯に必ず出るので、情報は失われない。
+   ════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  .hero__bg{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ⚠ モック閲覧用の見出し。本番には入らない。 -->
+<div class="mockbar">
+  <p class="mockbar__no">CASE 02 × 04</p>
+  <p class="mockbar__name">題字の背景を名前が流れる ＋ 写真の帯（合体案）</p>
+  <p class="mockbar__note">
+    <b>題字「北大心理ゼミ」は現行どおり大きいまま残し、その背後を21件の活動名が流れる（案04）。</b>
+    すぐ下に写真の帯（案02）が続くので、1画面目で「団体名」「何をしているか」「Mission」が同時に入る。
+    ⚠ 背景の名前は<b>装飾で、読ませる対象ではない</b>（コントラストを意図的に落とし、aria-hidden にしてある）。
+    同じ21件は必ず下の写真の帯にも出している。
+    ⚠ 動く要素は背景3本＋写真の帯1本＝4本で、大本資料 8-4 の上限（3つ）を1つ超えている。
+    上限超過を承知のうえで3列を選択したもの。うるさく感じたら、まず背景を2本に戻すこと。
+    色つきの絵は CSS で描いた仮のもので、実写ではない。
+  </p>
+</div>
+
+<main class="frame">
+  <div data-slot="nav"></div>
+
+  <!-- ══ ヒーロー：題字の背後を名前が流れる（案04）══ -->
+  <section class="hero">
+
+    <!-- 背景。⚠ 装飾なので aria-hidden。リンクにもしない。 -->
+    <div class="hero__bg" aria-hidden="true">
+      <div class="flow flow--l flow--fade" style="--speed:88s"><div class="flow__track" id="bg-a"></div></div>
+      <div class="flow flow--r flow--fade" style="--speed:104s"><div class="flow__track" id="bg-b"></div></div>
+      <div class="flow flow--l flow--fade" style="--speed:96s"><div class="flow__track" id="bg-c"></div></div>
+      <!-- ⚠ 4本目を足さないこと。
+           ⚠ 現時点で既に 8-4 の上限を超えている（背景3本＋写真の帯1本＝4本）。
+             これ以上増やすと、上限超過の度合いがさらに広がる。 -->
+    </div>
+
+    <!-- 前面 -->
+    <div class="hero__fg">
+      <svg class="logomark hero__logo" aria-hidden="true"><use href="#logomark"/></svg>
+      <span class="vh">北大心理ゼミ</span>
+
+      <p class="hero__hwrap" style="margin-top:var(--sp-6)">
+        <span class="label hero__label">Mission</span>
+      </p>
+      <!-- ⚠ 原文どおり。<span> は文字を1字も増減させていない（囲んでいるだけ）。 -->
+      <h1 class="hero__hwrap has-kenten" style="font-weight:400">
+        <span class="hero__h">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- ══ 写真の帯（案02）══ -->
+  <section class="belt">
+    <p class="beltcap" id="beltcap"></p>
+    <div class="flow flow--l flow--fade" style="--speed:96s">
+      <div class="flow__track" id="belt"></div>
+    </div>
+  </section>
+
+  <div data-slot="below"></div>
+</main>
+
+<script src="_shared.js"></script>
+<script>
+/* ⚠ 本番では lib/content.ts の集計を map するだけになる。
+   ここで JS を使っているのは、21件を手書きして写し間違えるのを避けるため。 */
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ── 背景の帯（案04）──────────────────────────────
+     ⚠ 装飾なので <a> にしない。リンクにすると
+       ・タブ移動で読めない文字にフォーカスが飛ぶ
+       ・pointer-events:none と矛盾する
+     ⚠ 21件を3本に交互に振り分ける。前から7件ずつ割ると
+       3本目が終了だらけになって、流れの密度が偏る。
+     ⚠ 21件 ÷ 3本 = 7件。1本あたりが短いと、画面幅によっては
+       複製をまたいで同じ名前が同時に2つ見える。文字を小さくしたのは
+       1本に収まる件数を増やして、これを起きにくくする狙いもある。 */
+  const bgItem = (a) => `<span class="tag"><span class="tag__n">${a.name}</span></span>`;
+  const bgOf = (n) => twoSets(ACTIVITIES.filter((_, i) => i % 3 === n).map(bgItem).join(''));
+  document.getElementById('bg-a').innerHTML = bgOf(0);
+  document.getElementById('bg-b').innerHTML = bgOf(1);
+  document.getElementById('bg-c').innerHTML = bgOf(2);
+
+  /* ── 写真の帯（案02）────────────────────────────── */
+  const tile = (a) => `
+    <a class="tile ${a.status === 'done' ? 'tile--done' : ''}" href="#${a.slug}">
+      ${photoOf(a)}
+      <p class="tile__n">${a.name}</p>
+      <p class="tile__t">${metaOf(a)}</p>
+    </a>`;
+  document.getElementById('belt').innerHTML = twoSets(ACTIVITIES.map(tile).join(''));
+
+  /* ⚠ 件数は数える。手で書くと content/ が増えたとき必ず矛盾する
+       （本番では lib/content.ts の getCounts() が同じ役割を果たす）。 */
+  const withPhoto = ACTIVITIES.filter(a => a.photo).length;
+  document.getElementById('beltcap').innerHTML =
+    `<span class="label">これまでに生まれた企画</span>` +
+    `<b class="num">${ACTIVITIES.length}</b>` +
+    `<small style="letter-spacing:.06em">件（うち写真あり ${withPhoto} 件）</small>`;
+});
+</script>
+</body>
+</html>

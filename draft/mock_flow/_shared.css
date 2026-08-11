@@ -1,0 +1,276 @@
+/* ══════════════════════════════════════════════════════════════════
+   トップページ「流れる」案 02/03/05/08  共通スタイル
+   根拠：output/website/styles/tokens.css ／ base.css（現行の実装と同一）
+        draft/デザイン大本資料_v1.md
+
+   ⚠ このファイルは4案で共有する。案ごとの差分は各HTMLの <style> に書く。
+     共通部分をここに集めているのは、4案を比べたときに
+     「違いだけが違って見える」状態を保つため。
+     ここを触ると4案すべてが動く。案固有の調整をここに書かないこと。
+
+   ⚠ 書体・ウェイトは現行サイトから一切変更していない。
+     Zen Kaku Gothic New 400/700 ／ Space Mono 400 ／ Shippori Mincho（42字）
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════
+   1. トークン（tokens.css と同一）
+   ════════════════════════════════════════════════════════ */
+:root{
+  /* ── 色。カッコ内は WCAG 2.1 相対輝度式による実測 ── */
+  --ink:#0E0E0E;          /* 墨      paper上 17.11 AAA */
+  --paper:#F4F1EA;        /* 生成り  基本の地 */
+  --paper-card:#E8E5DE;   /* 紙灰    ⚠ paperとの差は1.115。面を分ける装飾であって、
+                                       境界そのものに意味を持たせてはならない */
+  --white:#FFFFFF;
+  --shu:#E8402A;          /* 朱：面に使い、上には墨を載せる 4.78 AA */
+  --shu-on-light:#C4321F; /* 生成り地の小文字・リンク      4.87 AA */
+  --shu-on-dark:#FF6B54;  /* 墨地の小文字                  6.88 AA */
+  --sub-on-light:#6B6862; /* 生成り地の副文字              4.92 AA */
+  --sub-on-dark:#B8B3A8;  /* 墨地の副文字                  9.24 AAA */
+  /* ⚠ 使用禁止（実測）：#FFF on --shu 4.04 ／ --shu on --paper 3.58 */
+
+  /* ── 書体。順序は「欧文 → 和文 → OS標準」── */
+  --font-sans:"Switzer","Zen Kaku Gothic New","Yu Gothic",YuGothic,
+              "Hiragino Kaku Gothic ProN",sans-serif;
+  --font-serif:"Shippori Mincho","Yu Mincho",YuMincho,serif; /* ⚠ MVV専用・42字サブセット */
+  --font-mono:"Space Mono",monospace;                        /* ⚠ 英数字のみ */
+
+  /* ── 余白（8px 基本単位）── */
+  --sp-1:.5rem; --sp-2:1rem; --sp-3:1.5rem; --sp-4:2rem;
+  --sp-6:3rem;  --sp-8:4rem; --sp-12:6rem;  --sp-16:8rem; --sp-24:12rem;
+
+  /* ── 寸法 ── */
+  --radius:24px; --radius-pill:999px; --frame:8px; --measure:34em;
+
+  /* ── イージング ── */
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --dur-hover:160ms; --dur-reveal:500ms;
+
+  color-scheme:light;   /* ⚠ ダークモードは実装しない（04資料 5章）*/
+}
+
+/* ════════════════════════════════════════════════════════
+   2. 基本（base.css と同一）
+   ════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ink);            /* ══ 額装 第1層：墨の額 ══ */
+  padding:var(--frame);
+  font:400 17px/1.9 var(--font-sans);
+  letter-spacing:.08em;
+  color:var(--ink);
+  line-break:strict; overflow-wrap:anywhere; overflow-x:clip;
+  /* ⚠ lh 1.9 / ls .08em は実測に基づく。欧文の lh 1.0 を持ち込むと日本語は窒息する。 */
+}
+h1,h2,h3{margin:0} p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+img{max-width:100%;height:auto;display:block}
+h1,h2,h3,.display{font-feature-settings:'palt' 1;word-break:auto-phrase}
+.num,time,.meta{font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid var(--shu-on-light);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* ══ 額装：body[墨] → .frame[生成り] → .sheet[紙灰] ══ */
+.frame{background:var(--paper);border-radius:var(--radius);
+       min-height:calc(100svh - var(--frame)*2);overflow:clip}
+.sheet{background:var(--paper-card);border-radius:var(--radius);
+       margin-inline:var(--sp-6);padding:var(--sp-12) var(--sp-6)}
+.wrap{max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.section{padding-block:var(--sp-24)}
+
+/* ── タイポグラフィ ── */
+.label{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;
+       color:var(--sub-on-light);text-transform:uppercase}
+.h1{font-size:clamp(26px,3.6vw,40px);font-weight:700;line-height:1.2;letter-spacing:-.02em}
+.h2{font-size:clamp(24px,3.2vw,32px);font-weight:700;line-height:1.3;letter-spacing:-.02em}
+.h3{font-size:clamp(18px,1.6vw,20px);font-weight:700;line-height:1.6;letter-spacing:.02em}
+.body{max-width:var(--measure)}
+.cap{font-size:14px;line-height:1.7;letter-spacing:.06em;color:var(--sub-on-light)}
+.mvv{font-family:var(--font-serif);font-weight:400;line-height:2.0;letter-spacing:.06em}
+.mvv--md{font-size:clamp(19px,2.4vw,24px)}
+
+/* 圏点（ゴマ点）。⚠ 1つの見出しに1種類まで。囲みと併用しない。 */
+.kenten{text-emphasis:filled sesame;-webkit-text-emphasis:filled sesame;
+        text-emphasis-color:var(--shu-on-light);-webkit-text-emphasis-color:var(--shu-on-light)}
+.has-kenten{line-height:1.55}
+
+/* 題字。⚠ fill:currentColor。表示高さ 32px 相当以上を確保する。 */
+.logomark{display:block;width:100%;height:auto;color:inherit}
+.logomark path,.logomark use{fill:currentColor}
+
+/* ── ナビ。⚠ ブランド名にキルゴUを使わない（16pxで潰れる）── */
+.nav{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:flex-end;
+     justify-content:space-between;padding:var(--sp-4) var(--sp-6) var(--sp-2)}
+.nav__brand{text-decoration:none}
+.nav__brand b{display:block;font-size:16px;font-weight:700;letter-spacing:.04em;line-height:1.3}
+.nav__brand span{display:block;font:400 11px/1.5 var(--font-mono);
+                 letter-spacing:.12em;color:var(--sub-on-light)}
+.nav__list{display:flex;flex-wrap:wrap;gap:var(--sp-4)}
+.nav__link{text-decoration:none}
+.nav__ja{display:block;font-size:15px}
+.nav__en{display:block;font:400 11px/1.5 var(--font-mono);
+         letter-spacing:.12em;color:var(--sub-on-light)}
+
+/* ── 数字（メタバー）── */
+.figures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+         gap:var(--sp-4);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
+         padding-block:var(--sp-4)}
+.fig dt{font:400 11px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.fig dd{margin:.25em 0 0;font-size:28px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.fig dd small{font-size:15px;font-weight:400;letter-spacing:.06em}
+/* ⚠ 未確定は 0 で埋めず「––」を出す（CLAUDE.md 3-4）*/
+.fig dd.is-unknown{color:var(--sub-on-light);font-weight:400}
+
+/* ── 告知帯。⚠ サイト上で唯一「期限のある情報」。朱は1画面に1箇所まで。 ── */
+.notice{display:block;text-decoration:none;background:var(--shu);color:var(--ink);
+        border-radius:var(--radius);padding:var(--sp-6);
+        transition:background var(--dur-hover) ease-out,color var(--dur-hover) ease-out}
+.notice:hover{background:var(--ink);color:var(--shu-on-dark)}   /* 6.88 AA */
+.notice__label{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.notice__name{font-size:clamp(28px,4vw,44px);font-weight:700;line-height:1.25;
+              letter-spacing:-.02em;margin-top:.2em}
+.notice__date{font-size:clamp(16px,1.8vw,20px);letter-spacing:.06em;margin-top:.3em}
+
+/* ── フッター ── */
+.foot{background:var(--ink);color:var(--paper);border-radius:var(--radius);
+      margin:var(--sp-6);padding:var(--sp-12) var(--sp-6)}
+.foot .label{color:var(--sub-on-dark)}
+.foot a{color:var(--shu-on-dark)}
+.foot__logo{max-width:340px;margin-bottom:var(--sp-6)}
+.foot__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--sp-6)}
+.foot__note{margin-top:var(--sp-8);padding-top:var(--sp-4);
+            border-top:1px solid var(--sub-on-dark);
+            font-size:14px;line-height:1.9;color:var(--sub-on-dark)}
+
+@media(max-width:760px){
+  body{font-size:16px}
+  .sheet{margin-inline:var(--sp-2);padding:var(--sp-8) var(--sp-3)}
+  .section{padding-block:var(--sp-12)}
+  .foot{margin-inline:var(--sp-2)}
+}
+
+/* ════════════════════════════════════════════════════════
+   3. 仮の写真
+   ⚠ 実写ではない。public/photos/ が現在0枚のため、CSS で描いた代替。
+     「朱の乗算 → ホバーで原色に戻る」挙動だけを正しく再現している。
+     本番では <img> に差し替わり、filter / mix-blend-mode はそのまま効く。
+   ⚠ 写真の質はここでは判断できない。実写が入るまで最終形は確定しない。
+   ════════════════════════════════════════════════════════ */
+.ph{position:relative;background:var(--paper-card);border-radius:var(--radius);
+    overflow:clip;aspect-ratio:16/10}
+.ph::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 20% 15%,#9aa3ad 0%,transparent 60%),
+             radial-gradient(100% 80% at 85% 80%,#6f7b6a 0%,transparent 55%),
+             linear-gradient(160deg,#c8c3b8,#7d7a72);
+  filter:grayscale(1) contrast(1.1);
+  transition:filter var(--dur-hover) ease-out;
+}
+.ph::after{content:"";position:absolute;inset:0;background:var(--shu);
+           mix-blend-mode:multiply;opacity:.72;
+           transition:opacity var(--dur-hover) ease-out}
+.ph--b::before{background:radial-gradient(110% 90% at 70% 20%,#b0a68f 0%,transparent 60%),
+                          linear-gradient(200deg,#8d8f96,#5c5a55)}
+.ph--c::before{background:radial-gradient(130% 100% at 30% 80%,#8fa2ad 0%,transparent 60%),
+                          linear-gradient(120deg,#b9b2a4,#6a6f63)}
+.ph--d::before{background:radial-gradient(100% 90% at 50% 30%,#a8968c 0%,transparent 65%),
+                          linear-gradient(30deg,#9c9587,#57544f)}
+.ph--e::before{background:radial-gradient(115% 95% at 15% 60%,#a3ad9a 0%,transparent 60%),
+                          linear-gradient(75deg,#aaa396,#63615c)}
+.ph--f::before{background:radial-gradient(125% 85% at 80% 35%,#9c8fa3 0%,transparent 60%),
+                          linear-gradient(215deg,#b5aea0,#5f5d58)}
+/* ホバーした1枚だけが原色に戻る */
+.ph:hover::before,a:hover .ph::before{filter:grayscale(0) contrast(1)}
+.ph:hover::after, a:hover .ph::after {opacity:0}
+/* ⚠ 写真が無い項目。隠さず、無いことを正直に出す。 */
+.ph--none{background:var(--paper);border:1.5px solid var(--ink)}
+.ph--none::before,.ph--none::after{content:none}
+.ph__cap{position:absolute;left:var(--sp-2);bottom:var(--sp-2);
+         font:400 10px/1.4 var(--font-mono);letter-spacing:.1em;color:var(--ink);
+         background:var(--paper);border-radius:var(--radius-pill);padding:.2em .8em}
+
+/* ── 写真＋名前のひとかたまり ── */
+.tile{display:block;text-decoration:none}
+.tile__n{margin-top:var(--sp-2);font-size:17px;font-weight:700;
+         letter-spacing:.02em;line-height:1.5;
+         display:inline-block;border-bottom:2px solid transparent;
+         transition:border-color var(--dur-hover) ease-out}
+.tile:hover .tile__n{border-bottom-color:var(--shu-on-light)}
+.tile__t{font:400 11px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+/* ⚠ 終了したものは色を薄くするだけでなく、必ず「終了」の文字でも示す。 */
+.tile--done .tile__n{color:var(--sub-on-light)}
+
+/* ════════════════════════════════════════════════════════
+   4. 流れる帯（マーキー）の土台
+
+   ⚠ 大本資料 8-4「同時に動く要素は3つまで」との関係
+     帯は多数の子を持つが、全要素が単一トラックを同一速度で動くため、
+     知覚されるのは「1つの動き」である。既存 Chip.module.css が
+     20枚の札に対して行っているのと同じ読み替えを適用している。
+     ⚠ この読み替えを根拠に、1画面に帯を3本以上入れてはならない。
+
+   ⚠ ホバー・フォーカスで停止する。
+     読みたい人が読めない動きは、動きではなく妨害である。
+   ════════════════════════════════════════════════════════ */
+.flow{position:relative;overflow:clip;width:100%}
+.flow__track{display:flex;width:max-content;will-change:transform}
+.flow__track>*{flex:none}
+.flow__set{display:flex;align-items:flex-start}
+/* 同じ列を2つ並べ -50% 動かすと継ぎ目が出ない。
+   ⚠ 2つ目の複製は必ず aria-hidden にする。読み上げが2周する。 */
+@keyframes flow-left { from{transform:translateX(0)}    to{transform:translateX(-50%)} }
+@keyframes flow-right{ from{transform:translateX(-50%)} to{transform:translateX(0)} }
+.flow--l .flow__track{animation:flow-left  var(--speed,60s) linear infinite}
+.flow--r .flow__track{animation:flow-right var(--speed,60s) linear infinite}
+.flow:hover .flow__track,.flow:focus-within .flow__track{animation-play-state:paused}
+/* ⚠ 帯が画面端で断ち切られると「切れた」に見え、「流れ」に見えない。地の色で溶かす。 */
+.flow--fade{-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+                    mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+
+/* 帯に載せる大きな名前 */
+.tag{display:inline-flex;align-items:baseline;gap:.6em;padding:0 var(--sp-3);
+     text-decoration:none;white-space:nowrap}
+.tag__n{font-size:clamp(28px,4.4vw,56px);font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.tag__t{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.tag--done .tag__n{color:var(--sub-on-light)}
+.tag:hover .tag__n{border-bottom:3px solid var(--shu-on-light)}
+.sep{font-size:clamp(20px,3vw,36px);color:var(--shu-on-light);padding:0 .1em;align-self:center}
+
+/* ════════════════════════════════════════════════════════
+   5. モック閲覧用の見出し（⚠ 本番には入らない）
+   ════════════════════════════════════════════════════════ */
+.mockbar{background:var(--ink);color:var(--paper);border-radius:var(--radius);
+         margin-bottom:var(--frame);padding:var(--sp-3) var(--sp-6)}
+.mockbar__no{font:700 13px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--shu-on-dark)}
+.mockbar__name{font-size:19px;font-weight:700;letter-spacing:.04em;margin-top:.2em}
+.mockbar__note{font-size:13px;line-height:1.8;color:var(--sub-on-dark);max-width:66em;margin-top:.4em}
+.mockbar__nav{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);margin-top:var(--sp-2);
+              font:400 12px/1.6 var(--font-mono);letter-spacing:.08em}
+.mockbar__nav a{color:var(--sub-on-dark);text-decoration:none;border-bottom:1px solid transparent}
+.mockbar__nav a:hover{color:var(--shu-on-dark);border-bottom-color:var(--shu-on-dark)}
+.mockbar__nav a[aria-current]{color:var(--shu-on-dark);border-bottom-color:var(--shu-on-dark)}
+
+/* ════════════════════════════════════════════════════════
+   6. 動きの停止（大本資料 8-4／必須）
+   ⚠ 前庭障害・偏頭痛のある人にとって大きな動きは実害がある。
+     マーキーは特に負担が大きい。
+   ⚠ 単に止めるだけでは、帯の半分が画面外に残って情報が消える。
+     折り返して「全件が読める」状態まで落とすこと。
+   ════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important;
+  }
+  /* スクロール連動（animation-timeline）は上記だけでは止まらない。個別に殺す。 */
+  .flow__track{animation:none!important}
+  .flow{overflow:visible;mask-image:none;-webkit-mask-image:none}
+  .flow__track{width:auto;flex-wrap:wrap}
+  .flow__set{flex-wrap:wrap}
+  /* 複製を隠す。⚠ これを忘れると静止時に全件が2回出る。 */
+  .flow__set[aria-hidden="true"]{display:none}
+}

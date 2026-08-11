@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案03｜写真と名前が交互｜北大心理ゼミ トップページ モック</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     案03｜写真と名前が交互に流れる（混成帯）
+
+     考え方
+       案01（名前だけの帯）と案02（写真の帯）の合成。
+       写真がある活動は写真タイルとして、
+       写真が無い活動は大きな名前として、同じ帯に混ぜて流す。
+
+     ⚠ この案の要点は「素材の量に依存しない」こと。
+       写真0枚なら名前だけの帯として成立し、
+       写真が1枚増えるごとに帯が勝手に豊かになる。
+       写真が21枚そろうのを待たずに公開できる。
+
+     ⚠ 帯を2段にして、上段＝進行中・下段＝終了 に分けている。
+       終了したものを消さないのは Value「過去から学ぶことを忘れない」による。
+       ⚠ 状態は色の濃さだけでなく、必ず「終了」の文字でも示す。
+
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 書体・ウェイトは現行サイトから一切変更していない
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   案03 固有
+   ════════════════════════════════════════════════════════ */
+.hero{padding:var(--sp-8) 0 var(--sp-4)}
+.hero__logo{max-width:360px;margin-bottom:var(--sp-6)}
+.hero__h{font-size:clamp(30px,5.4vw,60px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+
+/* 2段の帯。⚠ 上下を罫線で挟んで「記録」の面であることを示す。 */
+.belts{margin-top:var(--sp-8);border-block:1px solid var(--ink);
+       padding-block:var(--sp-4);display:grid;gap:var(--sp-4)}
+.belts .tile{width:clamp(200px,22vw,280px);margin-inline:var(--sp-2)}
+.belts .tag{align-self:center}
+
+/* 下段は終了したもの。⚠ 一段静かにするが、消さない。 */
+.belt--past .tag__n{font-size:clamp(20px,2.4vw,30px)}
+.belt--past .tile{width:clamp(150px,16vw,200px)}
+
+.beltcap{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);align-items:baseline;
+         padding-inline:var(--sp-4);max-width:1140px;margin-inline:auto}
+.beltcap b{font-size:28px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<!-- ⚠ モック閲覧用の見出し。本番には入らない。 -->
+<div class="mockbar">
+  <p class="mockbar__no">CASE 03</p>
+  <p class="mockbar__name">写真と名前が交互に流れる（混成帯）</p>
+  <p class="mockbar__note">
+    写真がある活動は写真タイルで、写真が無い活動は大きな名前で、同じ帯に混ぜて流す。
+    <b>写真0枚でも名前だけの帯として成立し、写真が1枚増えるごとに勝手に豊かになる。</b>
+    上段が進行中、下段が終了したもの。終了を消さないのは Value「過去から学ぶことを忘れない」による。
+    色つきの絵は CSS で描いた仮のもので、実写ではない。
+  </p>
+</div>
+
+<main class="frame">
+  <div data-slot="nav"></div>
+
+  <!-- ══ ヒーロー ══ -->
+  <section class="hero">
+    <div class="wrap">
+      <svg class="logomark hero__logo" aria-hidden="true"><use href="#logomark"/></svg>
+      <span class="vh">北大心理ゼミ</span>
+      <p class="label">Mission</p>
+      <!-- ⚠ 原文どおり。<span> は文字を1字も増減させていない。 -->
+      <h1 class="hero__h has-kenten" style="margin-top:var(--sp-2)">
+        大学生の溢れ出す<span class="kenten">妄想</span>を形にする
+      </h1>
+    </div>
+
+    <div class="belts">
+      <!-- 上段：進行中。左へ流れる -->
+      <div class="flow flow--l flow--fade" style="--speed:78s">
+        <div class="flow__track" id="belt-now"></div>
+      </div>
+      <!-- 下段：終了。右へ流れる。
+           ⚠ 上下が逆方向に動くことで「量」が視覚的に増える。
+             ただし帯は2本まで。3本目を足さないこと。 -->
+      <div class="flow flow--r flow--fade belt--past" style="--speed:88s">
+        <div class="flow__track" id="belt-past"></div>
+      </div>
+    </div>
+
+    <!-- ⚠ 件数は JS で数える。手で書くと content/ が増えたとき必ず矛盾する
+           （本番では lib/content.ts の getCounts() が同じ役割を果たす）。 -->
+    <p class="beltcap" style="margin-top:var(--sp-4)" id="beltcap"></p>
+  </section>
+
+  <div data-slot="below"></div>
+</main>
+
+<script src="_shared.js"></script>
+<script>
+/* ⚠ 本番では lib/content.ts の集計を map するだけになる。 */
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* 写真があれば写真タイル、無ければ大きな名前。これが案03の核。 */
+  const item = (a) => a.photo
+    ? `<a class="tile ${a.status === 'done' ? 'tile--done' : ''}" href="#${a.slug}">
+         ${photoOf(a)}
+         <p class="tile__n">${a.name}</p>
+         <p class="tile__t">${metaOf(a)}</p>
+       </a>`
+    : `<a class="tag ${a.status === 'done' ? 'tag--done' : ''}" href="#${a.slug}">
+         <span class="tag__n">${a.name}</span>
+         <span class="tag__t">${metaOf(a)}</span>
+       </a>`;
+
+  const now  = ACTIVITIES.filter(a => a.status !== 'done');
+  const past = ACTIVITIES.filter(a => a.status === 'done');
+
+  document.getElementById('belt-now').innerHTML  = twoSets(now.map(item).join(''));
+  document.getElementById('belt-past').innerHTML = twoSets(past.map(item).join(''));
+
+  document.getElementById('beltcap').innerHTML =
+    `<span class="label">これまでに生まれた企画</span>` +
+    `<b class="num">${ACTIVITIES.length}</b>` +
+    `<small style="letter-spacing:.06em">件（進行中 ${now.length} ／ 終了 ${past.length}）</small>`;
+});
+</script>
+</body>
+</html>

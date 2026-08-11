@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>北大心理ゼミ｜ファーストビュー「流れる」案 9種</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ファーストビュー改善モック ── 「流れる」9案
+     目的：最初の1画面で「実際に何を作り・何をしているか」が一目で分かること
+
+     前提（2026-08-11 時点の実測）
+       ・活動は21件（部活10／PJ10／イベント1）。名前は全て確定している。
+       ・紹介文は21件中2件のみ。写真は0枚。
+       → よって全案とも「写真0枚でも成立し、写真が入ると自動で強くなる」
+         構造にしてある。写真枠は CSS で描いた仮のもので、実写ではない。
+
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 未確認の数値は ―― のまま。推測で埋めない（CLAUDE.md 3-4）
+     ⚠ 書体・ウェイトは現行サイトから一切変更していない
+       （Zen Kaku Gothic New 400/700 ／ Space Mono ／ Shippori Mincho 42字）
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- MVV専用の明朝。42字サブセット。⚠ この42字以外を流すと別書体になる。活動名には使わない。 -->
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   トークン（styles/tokens.css と同一。変更していない）
+   ════════════════════════════════════════════════════════ */
+:root{
+  --ink:#0E0E0E; --paper:#F4F1EA; --paper-card:#E8E5DE; --white:#FFF;
+  --shu:#E8402A; --shu-on-light:#C4321F; --shu-on-dark:#FF6B54;
+  --sub-on-light:#6B6862; --sub-on-dark:#B8B3A8;
+  --font-sans:"Switzer","Zen Kaku Gothic New","Yu Gothic",YuGothic,"Hiragino Kaku Gothic ProN",sans-serif;
+  --font-serif:"Shippori Mincho","Yu Mincho",YuMincho,serif;
+  --font-mono:"Space Mono",monospace;
+  --sp-1:.5rem; --sp-2:1rem; --sp-3:1.5rem; --sp-4:2rem; --sp-6:3rem;
+  --sp-8:4rem; --sp-12:6rem; --sp-16:8rem;
+  --radius:24px; --radius-pill:999px; --frame:8px; --measure:34em;
+  --ease-out:cubic-bezier(.16,1,.3,1); --dur-hover:160ms;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--ink); padding:var(--frame);
+  font:400 17px/1.9 var(--font-sans); letter-spacing:.08em; color:var(--ink);
+  line-break:strict; overflow-wrap:anywhere; overflow-x:clip;
+}
+h1,h2,h3{margin:0} p{margin:0} ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit} img{max-width:100%;height:auto;display:block}
+h1,h2,h3,.display{font-feature-settings:'palt' 1;word-break:auto-phrase}
+.num,.meta{font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid var(--shu-on-light);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+.frame{background:var(--paper);border-radius:var(--radius);overflow:clip}
+.wrap{max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.label{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light);text-transform:uppercase}
+.mvv{font-family:var(--font-serif);font-weight:400;line-height:2.0;letter-spacing:.06em}
+.logomark{display:block;width:100%;height:auto;color:inherit}
+.logomark path,.logomark use{fill:currentColor}
+.kenten{text-emphasis:filled sesame;-webkit-text-emphasis:filled sesame;
+        text-emphasis-color:var(--shu-on-light);-webkit-text-emphasis-color:var(--shu-on-light)}
+.has-kenten{line-height:1.55}
+
+/* ════════════════════════════════════════════════════════
+   モック閲覧用の枠（本番には入らない）
+   ════════════════════════════════════════════════════════ */
+.doc{background:var(--paper);border-radius:var(--radius);padding:var(--sp-8) 0;margin-bottom:var(--frame)}
+.case{margin-bottom:var(--frame);background:var(--paper);border-radius:var(--radius);overflow:clip}
+.case__head{
+  background:var(--ink);color:var(--paper);padding:var(--sp-3) var(--sp-4);
+  display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:baseline;justify-content:space-between;
+}
+.case__no{font:700 13px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--shu-on-dark)}
+.case__name{font-size:19px;font-weight:700;letter-spacing:.04em}
+.case__note{font-size:13px;line-height:1.8;color:var(--sub-on-dark);flex-basis:100%;max-width:60em}
+.case__body{padding:var(--sp-6) 0}
+.verdict{
+  display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-3);
+  font:400 12px/1.6 var(--font-mono);letter-spacing:.08em;color:var(--sub-on-light);
+  padding:var(--sp-3) var(--sp-4);border-top:1px solid rgba(14,14,14,.14);
+}
+.verdict b{color:var(--ink)}
+
+/* ════════════════════════════════════════════════════════
+   仮の写真（⚠ 実写ではない。写真が0枚のため CSS で描いた代替）
+   本番では <img> に差し替わる。朱の乗算とホバー復帰の挙動だけを再現している。
+   ════════════════════════════════════════════════════════ */
+.ph{
+  position:relative;background:var(--paper-card);border-radius:var(--radius);
+  overflow:clip;aspect-ratio:16/10;
+}
+.ph::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(120% 90% at 20% 15%, #9aa3ad 0%, transparent 60%),
+    radial-gradient(100% 80% at 85% 80%, #6f7b6a 0%, transparent 55%),
+    linear-gradient(160deg,#c8c3b8,#7d7a72);
+  /* ══ 朱の乗算（大本忠実10案 案9）══ */
+  filter:grayscale(1) contrast(1.1);
+  transition:filter var(--dur-hover) ease-out;
+}
+.ph::after{
+  content:"";position:absolute;inset:0;background:var(--shu);
+  mix-blend-mode:multiply;opacity:.72;
+  transition:opacity var(--dur-hover) ease-out;
+}
+.ph--b::before{background:radial-gradient(110% 90% at 70% 20%,#b0a68f 0%,transparent 60%),linear-gradient(200deg,#8d8f96,#5c5a55)}
+.ph--c::before{background:radial-gradient(130% 100% at 30% 80%,#8fa2ad 0%,transparent 60%),linear-gradient(120deg,#b9b2a4,#6a6f63)}
+.ph--d::before{background:radial-gradient(100% 90% at 50% 30%,#a8968c 0%,transparent 65%),linear-gradient(30deg,#9c9587,#57544f)}
+/* ホバーで1枚だけ原色に戻る */
+.ph:hover::before,a:hover .ph::before{filter:grayscale(0) contrast(1)}
+.ph:hover::after,a:hover .ph::after{opacity:0}
+/* 写真が無い項目の枠。⚠ 空欄を隠さない。無いことを正直に出す。 */
+.ph--none{background:var(--paper);border:1.5px solid var(--ink)}
+.ph--none::before,.ph--none::after{content:none}
+.ph__cap{
+  position:absolute;left:var(--sp-2);bottom:var(--sp-2);
+  font:400 10px/1.4 var(--font-mono);letter-spacing:.1em;color:var(--ink);
+  background:var(--paper);border-radius:var(--radius-pill);padding:.2em .8em;
+}
+
+/* ════════════════════════════════════════════════════════
+   共通：流れる帯（マーキー）の土台
+   ⚠ 大本資料 8-4「同時に動く要素は3つまで」との関係
+     帯は多数の子を持つが、全要素が単一のトラックを同一速度で動くため、
+     知覚されるのは「1つの動き」である。既存の Chip.module.css が
+     20枚の札に対して行っているのと同じ読み替えを適用している。
+     ⚠ この読み替えを根拠に、帯を画面内で3本以上に増やしてはならない。
+   ⚠ ホバーで停止する。読みたい人が読めない動きは、動きではなく妨害。
+   ⚠ 末尾の @media (prefers-reduced-motion) で全て静止する。
+   ════════════════════════════════════════════════════════ */
+.flow{position:relative;overflow:clip;width:100%}
+.flow__track{display:flex;width:max-content;will-change:transform}
+.flow__track > *{flex:none}
+/* 同じ列を2つ並べ、-50% 動かすと継ぎ目が出ない */
+.flow__set{display:flex;align-items:center}
+@keyframes flow-left { from{transform:translateX(0)}    to{transform:translateX(-50%)} }
+@keyframes flow-right{ from{transform:translateX(-50%)} to{transform:translateX(0)} }
+.flow--l .flow__track{animation:flow-left  var(--speed,60s) linear infinite}
+.flow--r .flow__track{animation:flow-right var(--speed,60s) linear infinite}
+.flow:hover .flow__track,.flow:focus-within .flow__track{animation-play-state:paused}
+/* 両端を地の色で溶かす。⚠ 帯が画面端で切れると「切れた」に見え、「流れ」に見えない。 */
+.flow--fade{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+}
+
+/* 帯に載せる「名前」 */
+.tag{
+  display:inline-flex;align-items:baseline;gap:.6em;
+  padding:0 var(--sp-3);text-decoration:none;white-space:nowrap;
+}
+.tag__n{font-size:clamp(28px,4.4vw,56px);font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.tag__t{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.tag--done .tag__n{color:var(--sub-on-light)}          /* 生成り地 4.92 AA */
+.tag:hover .tag__n{border-bottom:3px solid var(--shu-on-light)}
+/* 区切りの中黒。⚠ 名前どうしが繋がって読めるのを防ぐ。 */
+.sep{font-size:clamp(20px,3vw,36px);color:var(--shu-on-light);padding:0 .1em}
+
+/* 小さい版の名前（帯を2段にするとき） */
+.tag--sm .tag__n{font-size:clamp(19px,2.2vw,26px)}
+
+/* 枠つきの札（帯に載せる版） */
+.pill{
+  display:inline-flex;flex-direction:column;gap:.3em;
+  padding:var(--sp-2) var(--sp-3);margin-inline:var(--sp-1);
+  border:1.5px solid var(--ink);border-radius:var(--radius-pill);
+  text-decoration:none;white-space:nowrap;background:var(--paper);
+  transition:background var(--dur-hover) ease-out,color var(--dur-hover) ease-out;
+}
+.pill__n{font-size:19px;font-weight:700;letter-spacing:.02em;line-height:1.4}
+.pill__t{font:400 11px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.pill:hover{background:var(--ink);color:var(--paper)}
+.pill:hover .pill__t{color:var(--sub-on-dark)}
+.pill--done{border-color:var(--sub-on-light)}
+.pill--done .pill__n{color:var(--sub-on-light)}
+/* 唯一の朱。⚠ 1画面に1枚まで。 */
+.pill--live{background:var(--shu);border-color:var(--shu);color:var(--ink)}
+.pill--live .pill__t{color:var(--ink)}
+
+/* 帯に載せる写真タイル */
+.tile{display:block;width:clamp(220px,26vw,320px);margin-inline:var(--sp-2);text-decoration:none}
+.tile__n{margin-top:var(--sp-2);font-size:17px;font-weight:700;letter-spacing:.02em;line-height:1.5}
+.tile__t{font:400 11px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+
+/* ════════════════════════════════════════════════════════
+   案ごとの固有スタイル
+   ════════════════════════════════════════════════════════ */
+
+/* ── 案1：名前だけの帯・2段 ───────────────────────── */
+.a1__mv{padding:0 var(--sp-4);max-width:1140px;margin:0 auto var(--sp-6)}
+.a1__h{font-size:clamp(30px,5.2vw,58px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+.a1__rows{display:grid;gap:var(--sp-2);border-block:1px solid var(--ink);padding-block:var(--sp-4)}
+.a1__count{padding:var(--sp-3) var(--sp-4) 0;max-width:1140px;margin-inline:auto}
+
+/* ── 案2：写真の帯 ─────────────────────────────── */
+.a2__head{padding:0 var(--sp-4);max-width:1140px;margin:0 auto var(--sp-4)}
+.a2__h{font-size:clamp(28px,4.6vw,52px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+
+/* ── 案3：写真と名前が交互 ───────────────────────── */
+.a3__h{font-size:clamp(28px,4.6vw,52px);font-weight:700;line-height:1.25;letter-spacing:-.02em;
+       padding:0 var(--sp-4);max-width:1140px;margin:0 auto var(--sp-6)}
+
+/* ── 案4：Mission の背後を名前が流れる ───────────────
+   ⚠ 背面の文字は装飾。読ませる対象ではないので aria-hidden にし、
+     コントラストを 3.0 未満に落として前面の Mission を邪魔させない。
+     ⚠ 逆に言えば、ここに「読ませたい情報」を置いてはならない。 */
+.a4{position:relative;padding-block:var(--sp-16);overflow:clip;isolation:isolate}
+.a4__bg{position:absolute;inset:0;z-index:0;display:grid;align-content:center;gap:var(--sp-2);pointer-events:none}
+.a4__bg .tag__n{color:#CFC9BC;font-size:clamp(34px,6vw,72px)}  /* 生成り地 1.7＝装飾専用 */
+.a4__fg{position:relative;z-index:1;max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.a4__h{
+  font-size:clamp(30px,5.4vw,60px);font-weight:700;line-height:1.3;letter-spacing:-.02em;
+  /* 背面が動くため、前面の文字には必ず地を敷く。敷かないと可読性が落ちる。 */
+  background:var(--paper);box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  padding:.1em .3em;display:inline;
+}
+
+/* ── 案5：縦2列が上下逆に流れる ───────────────────── */
+.a5{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);
+    max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.a5__col{height:min(78svh,640px);overflow:clip;position:relative;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 10%,#000 90%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 10%,#000 90%,transparent)}
+.a5__track{display:grid;gap:var(--sp-3);will-change:transform}
+@keyframes flow-up  { from{transform:translateY(0)}    to{transform:translateY(-50%)} }
+@keyframes flow-down{ from{transform:translateY(-50%)} to{transform:translateY(0)} }
+.a5__col--u .a5__track{animation:flow-up   var(--speed,50s) linear infinite}
+.a5__col--d .a5__track{animation:flow-down var(--speed,50s) linear infinite}
+.a5:hover .a5__track,.a5:focus-within .a5__track{animation-play-state:paused}
+.a5__lead{grid-column:1/-1;margin-bottom:var(--sp-4)}
+.a5__h{font-size:clamp(28px,4.4vw,50px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+.a5 .tile{width:auto;margin:0}
+@media(max-width:760px){.a5{grid-template-columns:1fr}.a5__col--d{display:none}}
+
+/* ── 案6：スクロールで動く帯（自動再生しない）─────────
+   ⚠ 自動で動かず、指の動きに1対1で紐づくため、動きに酔う人への負担が最も軽い。
+     animation-timeline 未対応ブラウザでは静止した帯になる（＝正しく劣化する）。 */
+.a6__flow .flow__track{animation:flow-left linear both;animation-timeline:view();animation-range:entry 0% exit 100%}
+.a6__flow:hover .flow__track{animation-play-state:running}  /* 停止させない（スクロール連動のため） */
+.a6__h{font-size:clamp(28px,4.6vw,52px);font-weight:700;line-height:1.25;letter-spacing:-.02em;
+       padding:0 var(--sp-4);max-width:1140px;margin:0 auto var(--sp-6)}
+
+/* ── 案7：縦書きの名前が流れる ─────────────────────
+   ⚠ 日本語だけが持てる形。欧文サイトの模倣では絶対に出ない。
+   ⚠ 縦書き内の英数字（PJ）は自動で横倒しになるため text-orientation を指定する。 */
+.a7{background:var(--ink);color:var(--paper);border-radius:var(--radius);
+    margin-inline:var(--sp-6);padding:var(--sp-8) 0;overflow:clip}
+.a7__h{font-size:clamp(26px,4vw,44px);font-weight:700;line-height:1.3;letter-spacing:-.02em;
+       padding:0 var(--sp-6);margin-bottom:var(--sp-6)}
+.a7 .label{color:var(--sub-on-dark);padding:0 var(--sp-6)}
+.a7__strip{height:min(56svh,460px)}
+.a7__track{display:flex;flex-direction:row-reverse;width:max-content;height:100%;
+           animation:flow-right var(--speed,70s) linear infinite}
+.a7__strip:hover .a7__track{animation-play-state:paused}
+.a7__set{display:flex;flex-direction:row-reverse;height:100%}
+.a7__n{
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-size:clamp(22px,2.6vw,30px);font-weight:700;letter-spacing:.14em;line-height:1;
+  padding:0 var(--sp-3);text-decoration:none;height:100%;
+  border-right:1px solid rgba(244,241,234,.22);
+}
+.a7__n:hover{color:var(--shu-on-dark)}                 /* 墨地 6.88 AA */
+.a7__n--done{color:var(--sub-on-dark)}                 /* 墨地 9.24 AAA */
+@media(max-width:760px){.a7{margin-inline:var(--sp-2)}}
+
+/* ── 案8：大判が1枚ずつ入れ替わる ───────────────────
+   ⚠ 「流れ」ではなく「切り替わり」。動きの総量が最も少ない。
+     写真が集まった後にいちばん効く案だが、いま0枚なので効果は未知数。 */
+.a8{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6);align-items:center;
+    max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.a8__stage{position:relative;aspect-ratio:4/3;border-radius:var(--radius);overflow:clip}
+.a8__stage .ph{position:absolute;inset:0;aspect-ratio:auto;opacity:0;animation:a8fade 20s linear infinite}
+.a8__stage .ph:nth-child(1){animation-delay:0s}
+.a8__stage .ph:nth-child(2){animation-delay:4s}
+.a8__stage .ph:nth-child(3){animation-delay:8s}
+.a8__stage .ph:nth-child(4){animation-delay:12s}
+.a8__stage .ph:nth-child(5){animation-delay:16s}
+@keyframes a8fade{0%{opacity:0}3%{opacity:1}20%{opacity:1}23%{opacity:0}100%{opacity:0}}
+.a8__h{font-size:clamp(28px,4.4vw,50px);font-weight:700;line-height:1.25;letter-spacing:-.02em}
+.a8__list{margin-top:var(--sp-4);display:grid;gap:.2em}
+.a8__list a{text-decoration:none;font-size:17px;font-weight:700;letter-spacing:.02em}
+.a8__list a:hover{border-bottom:2px solid var(--shu-on-light)}
+@media(max-width:760px){.a8{grid-template-columns:1fr}}
+
+/* ── 案9：散らばって流れ込み、格子に整列 ─────────────
+   ⚠ 既存 Chip.module.css の「整列」をヒーローに引き上げたもの。
+     Mission「妄想（散乱）→形にする（整列）」を画面で演じる意図はそのまま。 */
+.a9{max-width:1140px;margin-inline:auto;padding-inline:var(--sp-4)}
+.a9__h{font-size:clamp(28px,4.6vw,52px);font-weight:700;line-height:1.25;letter-spacing:-.02em;margin-bottom:var(--sp-6)}
+.a9__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-2)}
+.a9__grid a{
+  --rot:0deg;--tx:0px;--ty:0px;
+  display:flex;flex-direction:column;gap:.3em;padding:var(--sp-2);
+  border:1.5px solid var(--ink);border-radius:var(--radius);background:var(--paper);
+  text-decoration:none;
+  animation:a9in .9s var(--ease-out) both;
+}
+@keyframes a9in{from{rotate:var(--rot);translate:var(--tx) var(--ty);opacity:0}
+                to  {rotate:0deg;translate:0 0;opacity:1}}
+.a9__grid a:nth-child(6n+1){--rot:-4deg;--tx:-90px;--ty: 70px;animation-delay:.00s}
+.a9__grid a:nth-child(6n+2){--rot: 3deg;--tx: 80px;--ty:-64px;animation-delay:.05s}
+.a9__grid a:nth-child(6n+3){--rot:-2deg;--tx: 96px;--ty: 52px;animation-delay:.10s}
+.a9__grid a:nth-child(6n+4){--rot: 4deg;--tx:-76px;--ty:-70px;animation-delay:.15s}
+.a9__grid a:nth-child(6n+5){--rot:-3deg;--tx: 44px;--ty: 92px;animation-delay:.20s}
+.a9__grid a:nth-child(6n+6){--rot: 2deg;--tx:-60px;--ty:-88px;animation-delay:.25s}
+.a9__grid a:hover{background:var(--ink);color:var(--paper)}
+.a9__grid a:hover .pill__t{color:var(--sub-on-dark)}
+
+/* ── 全案共通：見出し下の「件数」 ───────────────────
+   ⚠ 21 は content/ の実ファイル数（部活10＋PJ10＋イベント1）。
+     本番では lib/content.ts の集計から取り、ページに直接書かない。 */
+.count{display:flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-4);align-items:baseline}
+.count b{font-size:34px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+
+/* ════════════════════════════════════════════════════════
+   動きの停止（大本資料 8-4／必須）
+   ⚠ 前庭障害・偏頭痛のある人にとって大きな動きは実害がある。
+     マーキーは特に負担が大きいため、静止時に「全件が読める」状態に
+     落ちることを全案で確認すること。切れて読めなくなる案は不採用。
+   ════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important;
+  }
+  /* スクロール連動は上記だけでは止まらない。個別に殺す。 */
+  .flow__track,.a5__track,.a7__track,.a6__flow .flow__track{animation:none!important}
+  /* 静止すると帯は「横に長い1行」になり、半分が画面外に出る。
+     折り返して全件見えるようにする。これが無いと情報が消える。 */
+  .flow,.a5__col,.a7__strip{overflow:visible;height:auto;mask-image:none;-webkit-mask-image:none}
+  .flow__track,.a7__track{width:auto;flex-wrap:wrap}
+  .flow__set:nth-child(2),.a7__set:nth-child(2),.a5__set:nth-child(2){display:none} /* 複製を隠す */
+  .flow__set,.a7__set{flex-wrap:wrap}
+  .a8__stage .ph{opacity:1;position:relative}
+  .a8__stage{aspect-ratio:auto;display:grid;gap:var(--sp-2)}
+  .a4__bg{display:none}                 /* 背面の流れは静止させても意味を成さない */
+}
+</style>
+</head>
+<body>
+
+<!-- 題字SVGの定義（本番 components/Logomark.tsx と同一） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logomark" viewBox="6 -878 5652 1028">
+    <path d="M780 -82 789 -328 1019 -307 991 135 505 127V-876H760L757 -688L973 -753L1023 -477L755 -428V-84ZM225 -876H482L483 134H224L228 -18L72 41L6 -219L228 -298V-444L13 -440V-695L228 -691Z M1027 -462V-718L1392 -714L1388 -878H1664L1660 -714L2025 -718V-462L1714 -466L2038 -24L1817 150L1526 -284L1235 150L1014 -24L1338 -466Z M2279 -654 2325 -876 2830 -796 2777 -549ZM2033 -11 2088 -507 2271 -494V-593L2517 -585V-93H2660L2669 -257L2799 -241L2784 -492L3004 -512L3047 -11L2875 16L2856 128H2268L2269 -203L2246 45Z M3583 -642H3602V-662H3584ZM3365 -582H3330V-515L3365 -516ZM3603 -482V-503H3583L3584 -482ZM3802 -482H3821V-503H3802ZM3406 -86V-67L3581 -66V-89ZM3092 -191V-284L3049 -281V-519L3093 -516V-583H3045V-818H3366V-861H4045V-298H3826V-275L4047 -279V-85L3826 -89V-66H4061V131L3316 130L3315 18L3055 67L3041 -186ZM3330 -214 3365 -218V-280L3581 -276V-299H3365V-280L3330 -284ZM3803 -641H3822V-661H3803Z M4222 72 4208 -391 4100 -386 4079 -658 4187 -660 4177 -808 4486 -801 4481 -681 4680 -685Q4683 -636 4723 -608Q4755 -586 4807 -588Q4855 -595 4883 -632Q4918 -612 4947 -620L4885 -248L4591 -319L4613 -420L4492 -416L4506 -198L4793 -213L4906 28ZM4773 -618Q4745 -625 4724 -650Q4703 -682 4711 -726Q4718 -753 4745 -772Q4778 -794 4824 -777Q4797 -708 4860 -652Q4819 -605 4773 -618ZM4848 -731Q4843 -765 4864 -793Q4884 -821 4918 -827Q4953 -832 4981 -812Q5009 -791 5014 -757Q5020 -722 5000 -694Q4979 -666 4944 -661Q4910 -655 4882 -676Q4854 -696 4848 -731Z M5059 12 5055 -240 5659 -208 5643 44ZM5531 -271 5167 -283 5161 -492 5531 -483ZM5083 -564 5075 -788 5607 -756 5595 -529Z"/>
+  </symbol>
+</svg>
+
+<!-- ══════════════════════════════════════════════════════
+     案内
+     ══════════════════════════════════════════════════════ -->
+<div class="doc">
+  <div class="wrap">
+    <p class="label">Mock / First view</p>
+    <h1 style="font-size:clamp(26px,3.6vw,40px);font-weight:700;line-height:1.3;letter-spacing:-.02em;margin-top:var(--sp-2)">
+      ファーストビュー「流れる」案 9種
+    </h1>
+    <p style="max-width:var(--measure);margin-top:var(--sp-3)">
+      最初の1画面で「実際に何を作り、何をしているか」が一目で分かることだけを狙った案です。
+      書体とウェイトは現行サイトから一切変えていません。変えたのは大きさ・順番・動きだけです。
+    </p>
+    <p class="label" style="margin-top:var(--sp-4)">前提</p>
+    <ul style="max-width:var(--measure);margin-top:var(--sp-1)">
+      <li>・活動は21件（部活10／PJ10／イベント1）。名前はすべて確定済み。</li>
+      <li>・紹介文は21件中2件のみ。<b>写真は0枚。</b></li>
+      <li>・よって全案とも「写真0枚で成立し、写真が入ると自動で強くなる」形にしています。</li>
+      <li>・下の写真枠は CSS で描いた<b>仮のもの</b>で、実写ではありません。</li>
+    </ul>
+    <p class="label" style="margin-top:var(--sp-4)">見るときのポイント</p>
+    <ul style="max-width:var(--measure);margin-top:var(--sp-1)">
+      <li>・帯は<b>マウスを乗せると止まります</b>（読みたい人が読めるように）。</li>
+      <li>・OSの「視差効果を減らす」を入れると、全案が静止して全件読める形に落ちます。</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案1｜名前の帯・2段（写真ゼロで最も強い）
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 01</span>
+    <span class="case__name">名前の帯・2段（逆方向）</span>
+    <p class="case__note">Mission を言い切った直後に、21件の名前を巨大な文字で左右逆向きに流す。
+      「溢れ出す」という言葉を、文字の量と速度そのもので証明する。写真が1枚も無い今、いちばん強い案。</p>
+  </header>
+  <div class="case__body">
+    <div class="a1__mv">
+      <p class="label">Mission</p>
+      <h2 class="a1__h has-kenten" style="margin-top:var(--sp-2)">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</h2>
+    </div>
+
+    <div class="a1__rows">
+      <!-- 1段目：左へ -->
+      <div class="flow flow--l flow--fade" style="--speed:64s">
+        <div class="flow__track">
+          <div class="flow__set">
+            <a class="tag" href="#"><span class="tag__n">豆腐ゲームPJ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">言葉もてあそ部</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">詩タイピングPJ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">落書き本PJ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">哲学カフェPJ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">水産学ゼミ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">ノンアルカクテル部</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">研究室訪問部</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">カードゲームPJ</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">すこやか部</span></a><span class="sep">／</span>
+            <a class="tag" href="#"><span class="tag__n">ふらっと部</span></a><span class="sep">／</span>
+          </div>
+          <!-- ⚠ 複製。継ぎ目を消すための実装であり、内容の重複ではない -->
+          <div class="flow__set" aria-hidden="true">
+            <a class="tag" tabindex="-1"><span class="tag__n">豆腐ゲームPJ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">言葉もてあそ部</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">詩タイピングPJ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">落書き本PJ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">哲学カフェPJ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">水産学ゼミ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">ノンアルカクテル部</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">研究室訪問部</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">カードゲームPJ</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">すこやか部</span></a><span class="sep">／</span>
+            <a class="tag" tabindex="-1"><span class="tag__n">ふらっと部</span></a><span class="sep">／</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2段目：右へ。⚠ 終了したものは薄くするだけでなく「終了」の文字も出す -->
+      <div class="flow flow--r flow--fade" style="--speed:72s">
+        <div class="flow__track">
+          <div class="flow__set">
+            <a class="tag tag--sm" href="#"><span class="tag__n">読書部</span><span class="tag__t">CLUB</span></a><span class="sep">／</span>
+            <a class="tag tag--sm" href="#"><span class="tag__n">料理部</span><span class="tag__t">CLUB</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">ラジオ部</span><span class="tag__t">CLUB / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">心理シェア部</span><span class="tag__t">CLUB / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">実験再現PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">快眠お届けPJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">瞑想習慣化PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">トーク力向上PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" href="#"><span class="tag__n">運動PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm" href="#"><span class="tag__n">道東合宿</span><span class="tag__t">EVENT / 2026.09.04</span></a><span class="sep">／</span>
+          </div>
+          <div class="flow__set" aria-hidden="true">
+            <a class="tag tag--sm" tabindex="-1"><span class="tag__n">読書部</span><span class="tag__t">CLUB</span></a><span class="sep">／</span>
+            <a class="tag tag--sm" tabindex="-1"><span class="tag__n">料理部</span><span class="tag__t">CLUB</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">ラジオ部</span><span class="tag__t">CLUB / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">心理シェア部</span><span class="tag__t">CLUB / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">実験再現PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">快眠お届けPJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">瞑想習慣化PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">トーク力向上PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm tag--done" tabindex="-1"><span class="tag__n">運動PJ</span><span class="tag__t">PJ / 終了</span></a><span class="sep">／</span>
+            <a class="tag tag--sm" tabindex="-1"><span class="tag__n">道東合宿</span><span class="tag__t">EVENT / 2026.09.04</span></a><span class="sep">／</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="a1__count">
+      <dl class="count" style="margin:0">
+        <dt class="label">これまでに生まれた企画</dt>
+        <dd style="margin:0"><b class="num">21</b><small style="letter-spacing:.06em"> 件</small></dd>
+      </dl>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★★★</span>
+    <span><b>写真が入ると</b> 変わらない（写真を使わない案）</span>
+    <span><b>実装量</b> 小</span>
+    <span><b>動きの負担</b> 中（ホバーで停止・reduced-motionで全件折り返し）</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案2｜写真の帯（朱の乗算・ホバーで原色）
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 02</span>
+    <span class="case__name">写真の帯（朱の乗算・ホバーで原色に戻る）</span>
+    <p class="case__note">活動写真を白黒＋朱の乗算で統一して横に流し、マウスを乗せた1枚だけが元の色に戻る。
+      写真の明るさや色がバラバラでも見た目が揃うため、学生が撮ったままの写真を無加工で投入できる。
+      <b>⚠ 写真0枚の現在は、右側のように「名前だけの枠」に自動で落ちる。</b></p>
+  </header>
+  <div class="case__body">
+    <div class="a2__head">
+      <p class="label">Works</p>
+      <h2 class="a2__h" style="margin-top:var(--sp-2)">つくったもの、やっていること</h2>
+    </div>
+    <div class="flow flow--l flow--fade" style="--speed:70s">
+      <div class="flow__track">
+        <div class="flow__set">
+          <a class="tile" href="#"><div class="ph"><span class="ph__cap">仮</span></div><p class="tile__n">豆腐ゲームPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">落書き本PJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">言葉もてあそ部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" href="#"><div class="ph ph--c"><span class="ph__cap">仮</span></div><p class="tile__n">哲学カフェPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">水産学ゼミ</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" href="#"><div class="ph ph--d"><span class="ph__cap">仮</span></div><p class="tile__n">詩タイピングPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">ノンアルカクテル部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" href="#"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">料理部</p><p class="tile__t">CLUB / 活動中</p></a>
+        </div>
+        <div class="flow__set" aria-hidden="true">
+          <a class="tile" tabindex="-1"><div class="ph"><span class="ph__cap">仮</span></div><p class="tile__n">豆腐ゲームPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">落書き本PJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">言葉もてあそ部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--c"><span class="ph__cap">仮</span></div><p class="tile__n">哲学カフェPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">水産学ゼミ</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--d"><span class="ph__cap">仮</span></div><p class="tile__n">詩タイピングPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">ノンアルカクテル部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">料理部</p><p class="tile__t">CLUB / 活動中</p></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★☆☆☆（空枠が並ぶ）</span>
+    <span><b>写真が入ると</b> ★★★★★</span>
+    <span><b>実装量</b> 中</span>
+    <span><b>必要な素材</b> 各活動1枚・横長（16:9）・無加工でよい</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案3｜写真と名前が交互に流れる
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 03</span>
+    <span class="case__name">写真と名前が交互に流れる（混成帯）</span>
+    <p class="case__note">写真タイルと大きな名前を交互に並べる。写真が0枚でも「名前だけの帯」として成立し、
+      写真が1枚増えるごとに帯が勝手に豊かになる。<b>案1と案2のいいとこ取りで、いまの素材状況に最も適合する。</b></p>
+  </header>
+  <div class="case__body">
+    <h2 class="a3__h has-kenten">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</h2>
+    <div class="flow flow--l flow--fade" style="--speed:66s">
+      <div class="flow__track">
+        <div class="flow__set">
+          <a class="tag" href="#"><span class="tag__n">豆腐ゲームPJ</span></a>
+          <a class="tile" href="#"><div class="ph"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" href="#"><span class="tag__n">言葉もてあそ部</span></a>
+          <a class="tag" href="#"><span class="tag__n">水産学ゼミ</span></a>
+          <a class="tile" href="#"><div class="ph ph--b"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" href="#"><span class="tag__n">落書き本PJ</span></a>
+          <a class="tag" href="#"><span class="tag__n">哲学カフェPJ</span></a>
+          <a class="tile" href="#"><div class="ph ph--c"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" href="#"><span class="tag__n">ノンアルカクテル部</span></a>
+          <a class="tag" href="#"><span class="tag__n">詩タイピングPJ</span></a>
+          <a class="tile" href="#"><div class="ph ph--d"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" href="#"><span class="tag__n">研究室訪問部</span></a>
+        </div>
+        <div class="flow__set" aria-hidden="true">
+          <a class="tag" tabindex="-1"><span class="tag__n">豆腐ゲームPJ</span></a>
+          <a class="tile" tabindex="-1"><div class="ph"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">言葉もてあそ部</span></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">水産学ゼミ</span></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--b"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">落書き本PJ</span></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">哲学カフェPJ</span></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--c"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">ノンアルカクテル部</span></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">詩タイピングPJ</span></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--d"><span class="ph__cap">仮</span></div></a>
+          <a class="tag" tabindex="-1"><span class="tag__n">研究室訪問部</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★★☆</span>
+    <span><b>写真が入ると</b> ★★★★★</span>
+    <span><b>実装量</b> 中</span>
+    <span><b>特徴</b> 素材が増えるほど自動で良くなる</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案4｜Mission の背後を名前が流れる
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 04</span>
+    <span class="case__name">Mission の背後を名前が流れる（重ね）</span>
+    <p class="case__note">1画面のなかで「宣言」と「その証拠」を同時に見せる。スクロール前に両方が目に入るのが利点。
+      <b>⚠ 背面の文字は装飾であり、読ませる対象ではない</b>（コントラストを意図的に落としている）。
+      ここに読ませたい情報を置いてはならない。</p>
+  </header>
+  <div class="case__body" style="padding:0">
+    <div class="a4">
+      <div class="a4__bg" aria-hidden="true">
+        <div class="flow flow--l" style="--speed:80s"><div class="flow__track">
+          <div class="flow__set"><span class="tag"><span class="tag__n">豆腐ゲームPJ</span></span><span class="tag"><span class="tag__n">言葉もてあそ部</span></span><span class="tag"><span class="tag__n">水産学ゼミ</span></span><span class="tag"><span class="tag__n">落書き本PJ</span></span></div>
+          <div class="flow__set"><span class="tag"><span class="tag__n">豆腐ゲームPJ</span></span><span class="tag"><span class="tag__n">言葉もてあそ部</span></span><span class="tag"><span class="tag__n">水産学ゼミ</span></span><span class="tag"><span class="tag__n">落書き本PJ</span></span></div>
+        </div></div>
+        <div class="flow flow--r" style="--speed:92s"><div class="flow__track">
+          <div class="flow__set"><span class="tag"><span class="tag__n">哲学カフェPJ</span></span><span class="tag"><span class="tag__n">ノンアルカクテル部</span></span><span class="tag"><span class="tag__n">詩タイピングPJ</span></span><span class="tag"><span class="tag__n">研究室訪問部</span></span></div>
+          <div class="flow__set"><span class="tag"><span class="tag__n">哲学カフェPJ</span></span><span class="tag"><span class="tag__n">ノンアルカクテル部</span></span><span class="tag"><span class="tag__n">詩タイピングPJ</span></span><span class="tag"><span class="tag__n">研究室訪問部</span></span></div>
+        </div></div>
+        <div class="flow flow--l" style="--speed:74s"><div class="flow__track">
+          <div class="flow__set"><span class="tag"><span class="tag__n">すこやか部</span></span><span class="tag"><span class="tag__n">カードゲームPJ</span></span><span class="tag"><span class="tag__n">読書部</span></span><span class="tag"><span class="tag__n">ふらっと部</span></span></div>
+          <div class="flow__set"><span class="tag"><span class="tag__n">すこやか部</span></span><span class="tag"><span class="tag__n">カードゲームPJ</span></span><span class="tag"><span class="tag__n">読書部</span></span><span class="tag"><span class="tag__n">ふらっと部</span></span></div>
+        </div></div>
+      </div>
+      <div class="a4__fg">
+        <p class="label" style="background:var(--paper);display:inline-block;padding:.2em .6em">Mission</p>
+        <h2 style="margin-top:var(--sp-2)"><span class="a4__h has-kenten">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</span></h2>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★★☆</span>
+    <span><b>写真が入ると</b> 変わらない</span>
+    <span><b>実装量</b> 中</span>
+    <span><b>注意</b> 背面は読めない前提。同時に3本動くため 8-4 の上限ちょうど</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案5｜縦2列が上下逆に流れる
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 05</span>
+    <span class="case__name">縦2列が上下逆に流れる</span>
+    <p class="case__note">写真が主役になる形。左右の列が逆方向に動くため、静止画より情報量が多く見える。
+      スマホでは1列に落とす。<b>⚠ 写真が主役なので、0枚の現在は空枠が縦に並ぶだけになる。</b></p>
+  </header>
+  <div class="case__body">
+    <div class="a5">
+      <div class="a5__lead">
+        <p class="label">Works</p>
+        <h2 class="a5__h" style="margin-top:var(--sp-2)">つくったもの、やっていること</h2>
+      </div>
+      <div class="a5__col a5__col--u" style="--speed:44s"><div class="a5__track">
+        <div class="a5__set" style="display:grid;gap:var(--sp-3)">
+          <a class="tile" href="#"><div class="ph"><span class="ph__cap">仮</span></div><p class="tile__n">豆腐ゲームPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">言葉もてあそ部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" href="#"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">落書き本PJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+        </div>
+        <div class="a5__set" aria-hidden="true" style="display:grid;gap:var(--sp-3)">
+          <a class="tile" tabindex="-1"><div class="ph"><span class="ph__cap">仮</span></div><p class="tile__n">豆腐ゲームPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">言葉もてあそ部</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--b"><span class="ph__cap">仮</span></div><p class="tile__n">落書き本PJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+        </div>
+      </div></div>
+      <div class="a5__col a5__col--d" style="--speed:52s"><div class="a5__track">
+        <div class="a5__set" style="display:grid;gap:var(--sp-3)">
+          <a class="tile" href="#"><div class="ph ph--c"><span class="ph__cap">仮</span></div><p class="tile__n">哲学カフェPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" href="#"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">水産学ゼミ</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" href="#"><div class="ph ph--d"><span class="ph__cap">仮</span></div><p class="tile__n">料理部</p><p class="tile__t">CLUB / 活動中</p></a>
+        </div>
+        <div class="a5__set" aria-hidden="true" style="display:grid;gap:var(--sp-3)">
+          <a class="tile" tabindex="-1"><div class="ph ph--c"><span class="ph__cap">仮</span></div><p class="tile__n">哲学カフェPJ</p><p class="tile__t">PROJECT / 進行中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--none"><span class="ph__cap">写真なし</span></div><p class="tile__n">水産学ゼミ</p><p class="tile__t">CLUB / 活動中</p></a>
+          <a class="tile" tabindex="-1"><div class="ph ph--d"><span class="ph__cap">仮</span></div><p class="tile__n">料理部</p><p class="tile__t">CLUB / 活動中</p></a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★☆☆☆☆</span>
+    <span><b>写真が入ると</b> ★★★★★</span>
+    <span><b>実装量</b> 中</span>
+    <span><b>注意</b> 縦の動きは横より酔いやすい。速度は最も遅くする</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案6｜スクロールで動く帯（自動再生しない）
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 06</span>
+    <span class="case__name">スクロールで動く帯（自動再生なし）</span>
+    <p class="case__note">勝手には動かず、指を動かした分だけ帯が横に動く。動きが自分の操作と1対1で結びつくため、
+      <b>動きに酔う人への負担が全案で最も軽い。</b>既存の札の「整列」と同じ scroll-driven animation を使う。
+      ⚠ このセクションを画面内で上下にスクロールして確認してください。</p>
+  </header>
+  <div class="case__body">
+    <h2 class="a6__h">スクロールすると、つくったものが横に流れる</h2>
+    <div class="flow flow--fade a6__flow">
+      <div class="flow__track">
+        <div class="flow__set">
+          <a class="tag" href="#"><span class="tag__n">豆腐ゲームPJ</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">言葉もてあそ部</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">水産学ゼミ</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">落書き本PJ</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">哲学カフェPJ</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">詩タイピングPJ</span></a><span class="sep">／</span>
+          <a class="tag" href="#"><span class="tag__n">ノンアルカクテル部</span></a><span class="sep">／</span>
+        </div>
+        <div class="flow__set" aria-hidden="true">
+          <a class="tag" tabindex="-1"><span class="tag__n">豆腐ゲームPJ</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">言葉もてあそ部</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">水産学ゼミ</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">落書き本PJ</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">哲学カフェPJ</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">詩タイピングPJ</span></a><span class="sep">／</span>
+          <a class="tag" tabindex="-1"><span class="tag__n">ノンアルカクテル部</span></a><span class="sep">／</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★★☆</span>
+    <span><b>動きの負担</b> ★最小</span>
+    <span><b>実装量</b> 小</span>
+    <span><b>注意</b> Safari 等の未対応環境では静止（＝正しく劣化する）</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案7｜縦書きの名前が流れる（墨地）
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 07</span>
+    <span class="case__name">縦書きの名前が流れる（墨地）</span>
+    <p class="case__note">日本語だけが持てる形。欧文サイトの模倣からは絶対に出てこない画になる。
+      墨地に反転させることで、ページ内で最も強い1画面をつくれる。
+      <b>⚠ 縦書きは「PJ」等の英数字の扱いが崩れやすい</b>ため text-orientation で立てている。</p>
+  </header>
+  <div class="case__body" style="padding-block:var(--sp-4)">
+    <div class="a7">
+      <p class="label">Works</p>
+      <h2 class="a7__h" style="margin-top:var(--sp-2)">つくったもの、やっていること</h2>
+      <div class="a7__strip" style="--speed:72s">
+        <div class="a7__track">
+          <div class="a7__set">
+            <a class="a7__n" href="#">豆腐ゲームPJ</a>
+            <a class="a7__n" href="#">言葉もてあそ部</a>
+            <a class="a7__n" href="#">水産学ゼミ</a>
+            <a class="a7__n" href="#">落書き本PJ</a>
+            <a class="a7__n" href="#">哲学カフェPJ</a>
+            <a class="a7__n" href="#">詩タイピングPJ</a>
+            <a class="a7__n" href="#">ノンアルカクテル部</a>
+            <a class="a7__n" href="#">研究室訪問部</a>
+            <a class="a7__n" href="#">すこやか部</a>
+            <a class="a7__n" href="#">ふらっと部</a>
+            <a class="a7__n" href="#">読書部</a>
+            <a class="a7__n" href="#">料理部</a>
+            <a class="a7__n a7__n--done" href="#">ラジオ部</a>
+            <a class="a7__n a7__n--done" href="#">実験再現PJ</a>
+          </div>
+          <div class="a7__set" aria-hidden="true">
+            <a class="a7__n" tabindex="-1">豆腐ゲームPJ</a>
+            <a class="a7__n" tabindex="-1">言葉もてあそ部</a>
+            <a class="a7__n" tabindex="-1">水産学ゼミ</a>
+            <a class="a7__n" tabindex="-1">落書き本PJ</a>
+            <a class="a7__n" tabindex="-1">哲学カフェPJ</a>
+            <a class="a7__n" tabindex="-1">詩タイピングPJ</a>
+            <a class="a7__n" tabindex="-1">ノンアルカクテル部</a>
+            <a class="a7__n" tabindex="-1">研究室訪問部</a>
+            <a class="a7__n" tabindex="-1">すこやか部</a>
+            <a class="a7__n" tabindex="-1">ふらっと部</a>
+            <a class="a7__n" tabindex="-1">読書部</a>
+            <a class="a7__n" tabindex="-1">料理部</a>
+            <a class="a7__n a7__n--done" tabindex="-1">ラジオ部</a>
+            <a class="a7__n a7__n--done" tabindex="-1">実験再現PJ</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★★★</span>
+    <span><b>独自性</b> ★最大</span>
+    <span><b>実装量</b> 中</span>
+    <span><b>注意</b> 縦書きは環境差が出やすい。実機確認が必須</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案8｜大判が1枚ずつ入れ替わる
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 08</span>
+    <span class="case__name">大判が1枚ずつ入れ替わる（切り替え）</span>
+    <p class="case__note">「流れ」ではなく「切り替わり」。動きの総量が最も少なく、上品に見える。
+      <b>⚠ 写真の質がそのまま出るため、良い写真が数枚そろってから初めて効く案。</b>いま0枚なので効果は未知数。</p>
+  </header>
+  <div class="case__body">
+    <div class="a8">
+      <div class="a8__stage">
+        <div class="ph"><span class="ph__cap">仮</span></div>
+        <div class="ph ph--b"><span class="ph__cap">仮</span></div>
+        <div class="ph ph--c"><span class="ph__cap">仮</span></div>
+        <div class="ph ph--d"><span class="ph__cap">仮</span></div>
+        <div class="ph"><span class="ph__cap">仮</span></div>
+      </div>
+      <div>
+        <p class="label">Works</p>
+        <h2 class="a8__h" style="margin-top:var(--sp-2)">つくったもの、やっていること</h2>
+        <div class="a8__list">
+          <a href="#">豆腐ゲームPJ</a>
+          <a href="#">言葉もてあそ部</a>
+          <a href="#">落書き本PJ</a>
+          <a href="#">哲学カフェPJ</a>
+          <a href="#">水産学ゼミ</a>
+        </div>
+        <p class="label" style="margin-top:var(--sp-3)">ほか 16 件</p>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★☆☆☆☆</span>
+    <span><b>写真が入ると</b> ★★★★☆</span>
+    <span><b>実装量</b> 小</span>
+    <span><b>動きの負担</b> 最小</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     案9｜散らばって流れ込み、格子に整列
+     ══════════════════════════════════════════════════════ -->
+<section class="case">
+  <header class="case__head">
+    <span class="case__no">CASE 09</span>
+    <span class="case__name">散らばって流れ込み、格子に整列（既存の動きをヒーローへ）</span>
+    <p class="case__note">いま下のほうにある「札が整列する」動きを、そのまま1画面目に引き上げる。
+      Mission の「妄想（散乱）→ 形にする（整列）」を画面で演じる意図を保ったまま、
+      <b>ページを開いた瞬間に21件が飛び込んでくる。</b>いちばん改修が小さい案。
+      ⚠ 再生を見るにはページを再読み込みしてください。</p>
+  </header>
+  <div class="case__body">
+    <div class="a9">
+      <p class="label">Mission</p>
+      <h2 class="a9__h has-kenten" style="margin-top:var(--sp-2)">大学生の溢れ出す<span class="kenten">妄想</span>を形にする</h2>
+      <div class="a9__grid">
+        <a href="#"><span class="pill__n">豆腐ゲームPJ</span><span class="pill__t">PJ / 進行中</span></a>
+        <a href="#"><span class="pill__n">言葉もてあそ部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">水産学ゼミ</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">落書き本PJ</span><span class="pill__t">PJ / 進行中</span></a>
+        <a href="#"><span class="pill__n">哲学カフェPJ</span><span class="pill__t">PJ / 進行中</span></a>
+        <a href="#"><span class="pill__n">詩タイピングPJ</span><span class="pill__t">PJ / 進行中</span></a>
+        <a href="#"><span class="pill__n">ノンアルカクテル部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">研究室訪問部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">カードゲームPJ</span><span class="pill__t">PJ / 進行中</span></a>
+        <a href="#"><span class="pill__n">すこやか部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">ふらっと部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">読書部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">料理部</span><span class="pill__t">CLUB / 活動中</span></a>
+        <a href="#"><span class="pill__n">ラジオ部</span><span class="pill__t">CLUB / 終了</span></a>
+        <a href="#"><span class="pill__n">心理シェア部</span><span class="pill__t">CLUB / 終了</span></a>
+        <a href="#"><span class="pill__n">実験再現PJ</span><span class="pill__t">PJ / 終了</span></a>
+        <a href="#"><span class="pill__n">快眠お届けPJ</span><span class="pill__t">PJ / 終了</span></a>
+        <a href="#"><span class="pill__n">瞑想習慣化PJ</span><span class="pill__t">PJ / 終了</span></a>
+        <a href="#"><span class="pill__n">トーク力向上PJ</span><span class="pill__t">PJ / 終了</span></a>
+        <a href="#"><span class="pill__n">運動PJ</span><span class="pill__t">PJ / 終了</span></a>
+        <a href="#"><span class="pill__n">道東合宿</span><span class="pill__t">EVENT / 2026.09.04</span></a>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">
+    <span><b>写真0枚での強さ</b> ★★★☆☆</span>
+    <span><b>実装量</b> ★最小（既存コードの移動でほぼ済む）</span>
+    <span><b>動きの負担</b> 小（1回だけ・繰り返さない）</span>
+  </p>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     まとめ
+     ══════════════════════════════════════════════════════ -->
+<div class="doc">
+  <div class="wrap">
+    <p class="label">Summary</p>
+    <h2 style="font-size:clamp(24px,3.2vw,32px);font-weight:700;line-height:1.3;letter-spacing:-.02em;margin-top:var(--sp-2)">
+      いまの素材（写真0枚）を前提にした推奨
+    </h2>
+    <ul style="max-width:var(--measure);margin-top:var(--sp-3);display:grid;gap:var(--sp-2)">
+      <li><b>いますぐ効く：案3（写真と名前が交互）</b><br>
+        写真0枚でも名前だけの帯として成立し、写真が1枚入るごとに勝手に良くなる。
+        素材待ちにならない。</li>
+      <li><b>いちばん強い画：案7（縦書き・墨地）</b><br>
+        他大学のどのサイトにも似ない。ただし縦書きは環境差が出るので実機確認が要る。</li>
+      <li><b>いちばん安全：案6（スクロール連動）</b><br>
+        自動で動かないので、動きが苦手な人にも配慮できる。</li>
+      <li><b>いちばん安く済む：案9（既存の整列をヒーローへ）</b><br>
+        いまあるコードの移動でほぼ完了する。</li>
+    </ul>
+    <p class="label" style="margin-top:var(--sp-6)">組み合わせについて</p>
+    <p style="max-width:var(--measure);margin-top:var(--sp-1)">
+      案は排他ではありません。たとえば「1画面目＝案3の帯」「2画面目＝案7の縦書き」のように重ねられます。
+      ⚠ ただし帯を画面内に3本以上入れないこと（大本資料 8-4）。
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

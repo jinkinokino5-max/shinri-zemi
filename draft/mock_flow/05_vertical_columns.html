@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案05｜縦2列が上下逆に流れる｜北大心理ゼミ トップページ モック</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     案05｜縦2列が上下逆に流れる
+
+     考え方
+       左に Mission、右に写真の2列を置き、2列を上下逆方向に流す。
+       1画面のなかで「宣言」と「実際にやっていること」が同時に目に入る。
+       横流れと違い、写真を大きいまま見せられるのが利点。
+
+     ⚠ この案は写真が主役である。
+       現在 public/photos/ は0枚なので、実際には「写真なし」の枠が
+       縦に並ぶだけになる。4案のなかで、素材が無い状態にいちばん弱い。
+
+     ⚠ 縦の動きは横より酔いやすい（前庭系への負担が大きい）。
+       速度は4案のなかで最も遅くしてある（--speed を短くしないこと）。
+
+     ⚠ スマホでは2列目を隠して1列に落とす。
+       狭い画面で2列を逆方向に動かすと、視線の置き場が無くなる。
+
+     ⚠ Mission / Vision / Value は一字一句、原文どおり（大本資料 0-1）
+     ⚠ 書体・ウェイトは現行サイトから一切変更していない
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho&text=%E3%81%84%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%91%E3%81%93%E3%81%99%E3%81%9B%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%B6%E3%81%BE%E3%82%82%E3%82%89%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%92%E5%87%BA%E5%8C%97%E5%8E%BB%E5%95%8F%E5%A0%B4%E5%A4%A7%E5%A6%84%E5%AD%A6%E5%B9%B8%E5%BD%A2%E5%BF%98%E6%83%B3%E6%89%80%E6%9C%80%E6%BA%A2%E7%94%9F%E7%B6%9A%E8%AA%B0%E9%81%8E%E9%87%8F&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+
+<style>
+/* ════════════════════════════════════════════════════════
+   案05 固有
+   ════════════════════════════════════════════════════════ */
+.hero{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-4);
+  align-items:start;
+  max-width:1140px;margin-inline:auto;padding:var(--sp-8) var(--sp-4) var(--sp-12);
+}
+.hero__text{padding-top:var(--sp-4)}
+.hero__logo{max-width:100%;margin-bottom:var(--sp-6)}
+.hero__h{font-size:clamp(26px,3.2vw,38px);font-weight:700;line-height:1.3;letter-spacing:-.02em}
+.hero__count{margin-top:var(--sp-6)}
+.hero__count b{font-size:34px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+
+/* ── 縦に流れる列 ────────────────────────────────────
+   ⚠ 上下を地の色で溶かす。溶かさないと列が「切れて」見える。 */
+.col{
+  height:min(82svh,700px);overflow:clip;position:relative;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+}
+.col__track{display:grid;gap:var(--sp-3);will-change:transform}
+@keyframes col-up  { from{transform:translateY(0)}    to{transform:translateY(-50%)} }
+@keyframes col-down{ from{transform:translateY(-50%)} to{transform:translateY(0)} }
+/* ⚠ 速度は最も遅く。縦の動きは横より負担が大きい。 */
+.col--u .col__track{animation:col-up   var(--speed,72s) linear infinite}
+.col--d .col__track{animation:col-down var(--speed,84s) linear infinite}
+/* ⚠ ホバー・フォーカスで両列とも止める。片方だけ止まると視線が振られる。 */
+.hero:hover .col__track,.hero:focus-within .col__track{animation-play-state:paused}
+
+.col__set{display:grid;gap:var(--sp-3)}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr 1fr}
+  /* ⚠ 2列目は隠す。狭い画面で逆方向2列は視線の置き場が無くなる。 */
+  .col--d{display:none}
+}
+@media(max-width:640px){
+  .hero{grid-template-columns:1fr;padding-bottom:var(--sp-8)}
+  .col{height:min(60svh,460px)}
+}
+
+/* ════════════════════════════════════════════════════════
+   動きの停止
+   ⚠ 縦列は clip されているため、単に止めると下の項目が永久に見えない。
+     高さ制限とマスクを外し、全件が縦に並ぶ形まで落とす。
+   ════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  .col__track{animation:none!important}
+  .col{height:auto;overflow:visible;mask-image:none;-webkit-mask-image:none}
+  .col__set[aria-hidden="true"]{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ⚠ モック閲覧用の見出し。本番には入らない。 -->
+<div class="mockbar">
+  <p class="mockbar__no">CASE 05</p>
+  <p class="mockbar__name">縦2列が上下逆に流れる</p>
+  <p class="mockbar__note">
+    左に Mission、右に写真の2列。2列が上下逆方向に流れ、1画面で「宣言」と「実際にやっていること」が同時に目に入る。
+    写真を大きいまま見せられるのが利点。
+    <b>⚠ 4案のなかで最も写真に依存する。いま public/photos/ は0枚なので、実際には「写真なし」の枠が縦に並ぶ。</b>
+    縦の動きは横より酔いやすいため、速度は4案で最も遅くしてある。
+  </p>
+</div>
+
+<main class="frame">
+  <div data-slot="nav"></div>
+
+  <!-- ══ ヒーロー：左に宣言、右に流れる2列 ══ -->
+  <section class="hero">
+    <div class="hero__text">
+      <svg class="logomark hero__logo" aria-hidden="true"><use href="#logomark"/></svg>
+      <span class="vh">北大心理ゼミ</span>
+      <p class="label">Mission</p>
+      <!-- ⚠ 原文どおり。<span> は文字を1字も増減させていない。 -->
+      <h1 class="hero__h has-kenten" style="margin-top:var(--sp-2)">
+        大学生の溢れ出す<span class="kenten">妄想</span>を形にする
+      </h1>
+      <dl class="hero__count" style="margin:var(--sp-6) 0 0">
+        <dt class="label">これまでに生まれた企画</dt>
+        <dd style="margin:.2em 0 0"><b class="num">21</b><small style="letter-spacing:.06em"> 件</small></dd>
+      </dl>
+    </div>
+
+    <div class="col col--u"><div class="col__track" id="col-a"></div></div>
+    <div class="col col--d"><div class="col__track" id="col-b"></div></div>
+  </section>
+
+  <div data-slot="below"></div>
+</main>
+
+<script src="_shared.js"></script>
+<script>
+/* ⚠ 本番では lib/content.ts の集計を map するだけになる。 */
+document.addEventListener('DOMContentLoaded', () => {
+
+  const item = (a) => `
+    <a class="tile ${a.status === 'done' ? 'tile--done' : ''}" href="#${a.slug}">
+      ${photoOf(a)}
+      <p class="tile__n">${a.name}</p>
+      <p class="tile__t">${metaOf(a)}</p>
+    </a>`;
+
+  /* 縦列は「本体＋複製」を上下に積む。⚠ 複製は必ず aria-hidden。 */
+  const twoColSets = (html) =>
+    `<div class="col__set">${html}</div>` +
+    `<div class="col__set" aria-hidden="true">${html.replace(/href="[^"]*"/g,'tabindex="-1"')}</div>`;
+
+  /* 2列に交互に振り分ける。⚠ 前半／後半で割ると片方が終了だらけになる。 */
+  const a = ACTIVITIES.filter((_, i) => i % 2 === 0);
+  const b = ACTIVITIES.filter((_, i) => i % 2 === 1);
+
+  document.getElementById('col-a').innerHTML = twoColSets(a.map(item).join(''));
+  document.getElementById('col-b').innerHTML = twoColSets(b.map(item).join(''));
+});
+</script>
+</body>
+</html>

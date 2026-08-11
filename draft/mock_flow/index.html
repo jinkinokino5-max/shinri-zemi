@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>トップページ「流れる」案 02/03/05/08｜北大心理ゼミ モック一覧</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     案02/03/05/08 のモック一覧
+
+     4案とも「トップページ1枚として通しで見られる」形にしてある。
+     ナビ・告知帯・Vision・数字・Value・フッターは4案で共通で、
+     違うのはヒーロー（1画面目）だけ。
+     ⚠ 共通部分は _shared.css と _shared.js にある。そこを触ると4案すべてが動く。
+     ══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+
+<style>
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+       gap:var(--sp-3);margin-top:var(--sp-6)}
+.caselink{
+  display:grid;gap:.4em;align-content:start;
+  padding:var(--sp-4);border:1.5px solid var(--ink);border-radius:var(--radius);
+  text-decoration:none;background:var(--paper);
+  transition:background var(--dur-hover) ease-out,color var(--dur-hover) ease-out;
+}
+.caselink:hover{background:var(--ink);color:var(--paper)}
+.caselink:hover .caselink__t,.caselink:hover .caselink__v{color:var(--sub-on-dark)}
+.caselink__no{font:700 12px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--shu-on-light)}
+.caselink:hover .caselink__no{color:var(--shu-on-dark)}
+.caselink__n{font-size:20px;font-weight:700;letter-spacing:.02em;line-height:1.5}
+.caselink__t{font-size:14px;line-height:1.8;color:var(--sub-on-light)}
+.caselink__v{font:400 11px/1.7 var(--font-mono);letter-spacing:.08em;color:var(--sub-on-light);margin-top:.4em}
+.note{max-width:var(--measure);display:grid;gap:var(--sp-2);margin-top:var(--sp-3)}
+</style>
+</head>
+<body>
+
+<main class="frame" style="padding-block:var(--sp-8)">
+  <div class="wrap">
+    <p class="label">Mock / First view</p>
+    <h1 class="h1" style="margin-top:var(--sp-2)">トップページ「流れる」案　02 / 03 / 05 / 08</h1>
+
+    <div class="note">
+      <p>4案とも<b>トップページ1枚として通しで</b>見られます。
+        ナビ・告知帯・Vision・数字・Value・フッターは4案で共通で、
+        <b>違うのは1画面目（ヒーロー）だけ</b>です。</p>
+      <p>書体とウェイトは現行サイトから一切変えていません。
+        変えたのは大きさ・順番・動きだけです。</p>
+    </div>
+
+    <div class="cases">
+      <!-- ⚠ 合体案。他の4案とは位置づけが違うので先頭に置く。 -->
+      <a class="caselink" href="02x04_title_flow.html" style="grid-column:1/-1">
+        <span class="caselink__no">CASE 02 × 04　合体案</span>
+        <span class="caselink__n">題字の背景を名前が流れる ＋ 写真の帯</span>
+        <span class="caselink__t">
+          題字「北大心理ゼミ」を現行どおり大きく残したまま、その背後を21件の活動名が流れる（案04）。
+          すぐ下に写真の帯（案02）が続く。1画面目で「団体名」「何をしているか」「Mission」が同時に入る。
+        </span>
+        <span class="caselink__v">写真0枚 ★★★★☆ ／ 写真あり ★★★★★ ／ 動く要素 4本（8-4 の上限を1つ超過）</span>
+      </a>
+
+      <a class="caselink" href="02_photo_belt.html">
+        <span class="caselink__no">CASE 02</span>
+        <span class="caselink__n">写真の帯</span>
+        <span class="caselink__t">白黒＋朱の乗算で横に流し、ホバーした1枚だけ原色に戻る。</span>
+        <span class="caselink__v">写真0枚 ★★☆☆☆ ／ 写真あり ★★★★★</span>
+      </a>
+      <a class="caselink" href="03_mixed_belt.html">
+        <span class="caselink__no">CASE 03</span>
+        <span class="caselink__n">写真と名前が交互</span>
+        <span class="caselink__t">写真がある活動は写真で、無い活動は大きな名前で、同じ帯に混ぜて流す。</span>
+        <span class="caselink__v">写真0枚 ★★★★☆ ／ 写真あり ★★★★★</span>
+      </a>
+      <a class="caselink" href="05_vertical_columns.html">
+        <span class="caselink__no">CASE 05</span>
+        <span class="caselink__n">縦2列が上下逆に流れる</span>
+        <span class="caselink__t">左に宣言、右に写真の2列。写真を大きいまま見せられる。</span>
+        <span class="caselink__v">写真0枚 ★☆☆☆☆ ／ 写真あり ★★★★★</span>
+      </a>
+      <a class="caselink" href="08_crossfade.html">
+        <span class="caselink__no">CASE 08</span>
+        <span class="caselink__n">大判が1枚ずつ入れ替わる</span>
+        <span class="caselink__t">写真と名前が連動する。動きの総量が4案で最も少ない。</span>
+        <span class="caselink__v">写真0枚 ★☆☆☆☆ ／ 写真あり ★★★★☆</span>
+      </a>
+    </div>
+
+    <p class="label" style="margin-top:var(--sp-8)">見るときの注意</p>
+    <ul class="note">
+      <li>・<b>写真は0枚です。</b>色つきの絵は CSS で描いた仮のもので、実写ではありません。
+        実写が入るまで最終的な見え方は確定しません。</li>
+      <li>・写真が入った状態と入っていない状態を同時に見られるよう、
+        21件のうち一部だけ写真枠を出しています。実際にはいま全件が「写真なし」です。</li>
+      <li>・帯は<b>マウスを乗せると止まります</b>（読みたい人が読めるように）。</li>
+      <li>・OSの「視差効果を減らす」を入れると、全案が静止して全21件が読める形に落ちます。
+        単に止めるだけだと帯の半分が画面外に残って情報が消えるため、
+        折り返しまで指定しています。</li>
+      <li>・案08だけ<b>「一時停止」ボタン</b>があります。5秒以上自動で動くものは
+        利用者が止められなければならないため（WCAG 2.2.2）、装飾ではなく要件です。</li>
+      <li>・合体案（02×04）の<b>背景に流れる名前は装飾</b>で、読ませる対象ではありません。
+        コントラストを意図的に落とし、リンクにもしていません。
+        同じ21件は必ず下の写真の帯にも出しているので、情報は失われません。</li>
+    </ul>
+
+    <p class="label" style="margin-top:var(--sp-8)">合体案について（02 × 04）</p>
+    <ul class="note">
+      <li>・<b>題字を小さくせずに解決しています。</b>現行トップの欠点は1画面目が題字だけで
+        「何をしている団体か」が分からないことでしたが、
+        題字を縮めるのではなく、その背後と直下に活動そのものを置く形にしました。</li>
+      <li>・題字は文字が抜けている形なので、<b>「心」「理」の内側を背景の名前が通り抜けて見えます。</b>
+        これは意図した効果です。ただし字が潰れては本末転倒なので、
+        背景色は生成りとの差が小さい値に固定しています。ここを濃くしないでください。</li>
+      <li>・⚠ <b>動く要素は背景3本＋写真の帯1本＝4本</b>で、
+        大本資料 8-4「1画面に同時に動く要素は3つまで」を<b>1つ超えています。</b>
+        上限超過を承知のうえで3列を選択したものです。
+        実機でうるさく感じたら、最初に戻すのはここ（背景を2本にすれば上限内）。</li>
+      <li>・背景の文字は3列にしたぶん一段小さくしてあります（最大 88px → 64px）。
+        88px のまま3列にすると縦が溢れ、題字に文字が貼り付いて汚れに見えます。
+        <b>大きくするなら、ヒーローの高さも一緒に上げる必要があります。</b></li>
+      <li>・画面幅 1000px 以下で3本目、760px 以下で2本目を落とします。
+        幅が狭まると1本あたりの文字数が減り、そのままでは密度が高くなりすぎるためです。</li>
+    </ul>
+
+    <p class="label" style="margin-top:var(--sp-8)">この4案に共通して入れたもの</p>
+    <ul class="note">
+      <li>・<b>Mission を1画面目の主役にした。</b>現行サイトは1画面目が題字だけで、
+        Mission はスクロールしないと出てきません。</li>
+      <li>・<b>道東合宿（2026.09.04）の告知帯を入れた。</b>
+        サイト上で唯一の「期限のある情報」なのに、現行トップでは使われていません。</li>
+      <li>・終了した企画を消していません（Value「過去から学ぶことを忘れない」）。
+        状態は色の濃さだけでなく、必ず「終了」の文字でも示しています。</li>
+    </ul>
+  </div>
+</main>
+
+</body>
+</html>
