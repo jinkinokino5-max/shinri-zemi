@@ -1,0 +1,110 @@
+/* ヒーロー：題字の背後を活動名が流れる。詳細は TitleHero.tsx のコメントを参照。 */
+
+.hero {
+  position: relative;
+  /* ⚠ 重ね順をここで閉じる。閉じないと後続セクションに干渉しうる。 */
+  isolation: isolate;
+  overflow: clip;
+  padding-block: var(--sp-12) var(--sp-8);
+  /* ⚠ 題字と背景3本が呼吸できる最低限の高さ。
+       これより低いと帯が題字に貼り付いて、ただの汚れに見える。 */
+  min-height: min(78svh, 700px);
+  display: grid;
+  align-content: center;
+}
+
+/* ══ 背景 ══ ⚠ 装飾。読ませない。 */
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  align-content: center;
+  /* ⚠ 3本ぶん。2本のときの --sp-6 のままだと縦にはみ出す。 */
+  gap: var(--sp-3);
+  pointer-events: none;   /* ⚠ 題字の上のクリックを奪わせない */
+  user-select: none;
+}
+
+.bgName {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0 var(--sp-4);
+  /* ⚠ 生成り(#F4F1EA)地でコントラスト約1.7。これは「読めない」値だが、
+       背景装飾としては意図どおり。⚠ ここに読ませたい情報を置かないこと。
+       ⚠ これ以上濃くすると題字の抜き（「心」「理」の内側）が濁って字が潰れる。 */
+  color: #D6D1C4;
+  font-size: clamp(30px, 5.2vw, 64px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+}
+
+/* ══ 前面 ══ */
+.fg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1140px;
+  margin-inline: auto;
+  padding-inline: var(--sp-4);
+}
+
+/* ⚠ 題字は主役の大きさで出す。表示高さ32pxの安全圏を大きく上回る。 */
+.logo { max-width: min(100%, 900px); }
+
+.line { margin-top: var(--sp-4); line-height: 2.0; }
+
+/* ⚠ 背面が動くため、前面の文字には必ず地を敷く。敷かないと可読性が落ちる。 */
+.label {
+  background: var(--paper);
+  display: inline-block;
+  padding: .25em .7em;
+  border-radius: var(--radius-pill);
+}
+
+.mission {
+  font-size: clamp(26px, 3.8vw, 44px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: -.02em;
+  background: var(--paper);
+  /* ⚠ 折り返した2行目にも地を付ける。無いと1行目にしか地が乗らない。 */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  /* ⚠ 上だけ余白を厚くしている（.45em）。
+       圏点（ゴマ点）は文字の上に出るため、上下同じ余白だと地の外へはみ出し、
+       背後の流れる文字と重なって濁る。
+       ⚠ この値を下げないこと。下げると「妄想」の圏点が地から出る。 */
+  padding: .45em .4em .15em;
+  display: inline;
+}
+
+/* ══ スマホ ══════════════════════════════════════════
+   ⚠ 帯の本数は減らさず、3本のまま文字を小さくして密度を保つ。
+     1本に落とすと背景が「題字を横切る1本の線」に見えて、汚れと区別がつかない。
+     3本あって初めて「面としての手ざわり」になる。
+   ⚠ 代わりに文字を大きく縮める。縮めないと1本あたり2〜3語しか入らず、
+     複製をまたいで同じ名前が同時に2つ見える。 */
+@media (max-width: 760px) {
+  .hero {
+    /* ⚠ auto にしない。題字＋Missionの高さまで縮むと背景3本が題字に貼り付く。 */
+    min-height: min(64svh, 460px);
+    padding-block: var(--sp-8) var(--sp-6);
+  }
+  .bg { gap: var(--sp-2); }
+  .bgName { font-size: clamp(20px, 6.4vw, 32px); padding: 0 var(--sp-2); }
+  /* ⚠ キルゴUは 5.5:1 の横長。幅320pxなら高さ約58pxで、32pxの安全圏は保てる。
+       ⚠ これ以上 padding を増やすと 32px を割り込む。 */
+  .fg { padding-inline: var(--sp-3); }
+}
+
+/* ══ 動きの停止 ══════════════════════════════════════
+   ⚠ 背景は「静止させても意味を成さない装飾」なので消す。
+     折り返して残すと、読めない灰色の文字が21件ぶん居座り、
+     題字と Mission の邪魔にしかならない。
+   ⚠ 同じ活動は直下の WorkBelt に必ず出るので、情報は失われない。 */
+@media (prefers-reduced-motion: reduce) {
+  .bg { display: none; }
+  .hero { min-height: 0; }
+}

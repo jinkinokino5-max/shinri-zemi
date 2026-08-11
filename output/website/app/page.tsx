@@ -1,91 +1,76 @@
-import { Logomark } from '@/components/Logomark';
+import Link from 'next/link';
 import { SiteNav } from '@/components/SiteNav';
-import { Chip, ChipField } from '@/components/Chip';
-import { getClubs, getProjects, getEvents, getCounts } from '@/lib/content';
+import { TitleHero } from '@/components/TitleHero';
+import { WorkBelt } from '@/components/WorkBelt';
+import { getActivities, getCounts, getUpcomingEvent } from '@/lib/content';
 import { ORG, figure } from '@/lib/org';
 
 /* ══════════════════════════════════════════════════════════════════
    トップページ
-   根拠：draft/mock_top_v2.html（確定した視覚言語）
-        ① 整列 ALIGNMENT       ② 額装の入れ子  ③ 朱の乗算
+   根拠：draft/mock_flow/02x04_title_flow.html（2026-08-11 に団体が採用）
+        draft/mock_top_v2.html（確定した視覚言語）
+
+   2026-08-11 の変更点と、その理由
+     以前は1画面目が題字だけで、Mission すらスクロールしないと出てこなかった。
+     「最初の引きが弱い／何をしている団体か伝わらない」という指摘を受け、
+     ① 題字の背後を活動名が流れる（TitleHero）
+     ② その直下に写真の帯（WorkBelt）
+     を置いて、1画面目で「団体名」「何をしているか」「Mission」が
+     同時に目に入る構成に変えた。
+     ⚠ 題字を小さくして解決したのではない。題字は主役の大きさのまま残してある。
+
+     あわせて、それまで未使用だった朱の告知帯を有効にした。
+     道東合宿はサイト上で唯一「期限のある情報」であるにもかかわらず、
+     トップに出ていなかった。
 
    ⚠ 数字はすべて lib/content.ts の集計と lib/org.ts から取る。
      ページに直接書かない。書くと更新漏れで矛盾が生まれる。
    ══════════════════════════════════════════════════════════════════ */
 
-const STATUS_LABEL = { active: '活動中', done: '終了' } as const;
-const PJ_STATUS_LABEL = { active: '進行中', done: '終了' } as const;
-
 export default function HomePage() {
-  const clubs = getClubs();
-  const projects = getProjects();
-  const events = getEvents();
+  const activities = getActivities();
   const counts = getCounts();
-
-  // 画面で朱にするのは1枚だけ。⚠ 朱を2箇所に使うと効果が半減する。
-  const highlightSlug = events[0]?.slug;
+  // ⚠ 開催済みのイベントを「近日開催」として出さない。
+  //   静的書き出しなので「今日」はビルド時点（content.ts の注記を参照）。
+  const upcoming = getUpcomingEvent();
 
   return (
     <>
       <SiteNav />
 
-      {/* ══ ヒーロー：額装 第3層 ══ */}
-      <section className="sheet" style={{ paddingBlock: 'var(--sp-12) var(--sp-16)' }}>
-        <div className="wrap">
-          <p className="label">2026 — VOL.01</p>
+      {/* ══ 1画面目：題字＋背後を流れる活動名 ══ */}
+      <TitleHero activities={activities} />
 
-          <p style={{ maxWidth: 1040, marginBlock: 'var(--sp-4) var(--sp-8)' }}>
-            <Logomark />
-          </p>
+      {/* ══ 直下：写真の帯 ══ */}
+      <WorkBelt activities={activities} />
 
-          {/* ⚠ Mission：原文どおり。句読点の追加・語尾の変更・要約はしない。
-                <span> は文字を1字も増減させていない（囲んでいるだけ）。 */}
-          <h1 className="h1 has-kenten">
-            大学生の溢れ出す<span className="kenten">妄想</span>を形にする
-          </h1>
-        </div>
-      </section>
+      {/* ══ 告知帯 ══
+          ⚠ サイト上で唯一、期限のある情報。朱の面で最も強く出す。
+          ⚠ 朱を使う場所は1画面に1箇所まで。増やすと効果が半減する。
+          ⚠ 近日開催が無ければ、帯ごと出さない。空の帯は嘘になる。 */}
+      {upcoming ? (
+        <section className="section" style={{ paddingBlock: 'var(--sp-12)' }}>
+          <div className="wrap">
+            <Link className="notice" href={`/events/${upcoming.slug}/`}>
+              <span className="notice__label">Next event</span>
+              <span className="notice__name">{upcoming.name}</span>
+              <span className="notice__date">
+                {upcoming.date.replace(/-/g, '.')}
+                {upcoming.endDate ? ` – ${upcoming.endDate.slice(5).replace('-', '.')}` : ''}
+              </span>
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
-      {/* ══ 整列 ALIGNMENT ══ */}
-      <section className="section">
+      {/* ══ Vision ══ */}
+      <section className="section" style={{ paddingBlock: 'var(--sp-8)' }}>
         <div className="wrap">
           <p className="label">Vision</p>
           {/* ⚠ Vision：原文どおり */}
           <h2 className="mvv mvv--md" style={{ marginTop: 'var(--sp-2)' }}>
             {ORG.vision}
           </h2>
-
-          <ChipField>
-            {clubs.map((c) => (
-              <Chip
-                key={c.slug}
-                href={`/clubs/${c.slug}/`}
-                name={c.name}
-                meta={`Club / ${STATUS_LABEL[c.status]}`}
-                done={c.status === 'done'}
-              />
-            ))}
-
-            {events.map((e) => (
-              <Chip
-                key={e.slug}
-                href={`/events/${e.slug}/`}
-                name={e.name}
-                meta={`Event / ${e.date.replace(/-/g, '.')}`}
-                highlight={e.slug === highlightSlug}
-              />
-            ))}
-
-            {projects.map((p) => (
-              <Chip
-                key={p.slug}
-                href={`/projects/${p.slug}/`}
-                name={p.name}
-                meta={`Project / ${PJ_STATUS_LABEL[p.status]}`}
-                done={p.status === 'done'}
-              />
-            ))}
-          </ChipField>
         </div>
       </section>
 
@@ -112,7 +97,7 @@ export default function HomePage() {
       </section>
 
       {/* ══ Value：額装 第3層 ══ */}
-      <section className="sheet">
+      <section className="sheet" style={{ marginTop: 'var(--sp-8)' }}>
         <div className="wrap">
           <p className="label">Value</p>
           {/* ⚠ Value：2つとも原文どおり */}

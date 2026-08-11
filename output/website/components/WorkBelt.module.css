@@ -1,0 +1,49 @@
+/* 写真の帯。詳細は WorkBelt.tsx のコメントを参照。 */
+
+.belt { padding-block: var(--sp-6) var(--sp-8); }
+
+.cap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+  max-width: 1140px;
+  margin: 0 auto var(--sp-3);
+  padding-inline: var(--sp-4);
+}
+.n { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+.unit { font-size: 15px; letter-spacing: .06em; }
+
+.tile {
+  display: block;
+  width: clamp(240px, 28vw, 360px);
+  margin-inline: var(--sp-2);
+  text-decoration: none;
+}
+
+.name {
+  margin-top: var(--sp-2);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1.5;
+  display: inline-block;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--dur-hover) ease-out;
+}
+.tile:hover .name { border-bottom-color: var(--shu-on-light); }   /* 4.87 AA */
+
+.meta {
+  font: 400 11px/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);            /* 生成り地 4.92 AA */
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  /* ⚠ タイルは画面幅より確実に小さく保つ。
+       240px は iPhone SE（375px）でも左右に余白が残る値。 */
+  .tile { width: min(240px, 72vw); }
+  .cap { padding-inline: var(--sp-3); }
+  .n { font-size: 26px; }
+}

@@ -127,6 +127,64 @@ export function getWorks() {
   return readCollection('works').sort((a, b) => b.year - a.year);
 }
 
+/* ── 活動の横断リスト ───────────────────────────────── */
+
+/** 部活・PJ・イベントを1本にまとめた1件。トップページの帯が使う。 */
+export type Activity = {
+  slug: string;
+  name: string;
+  href: string;
+  /** 画面に出す種別と状態。⚠ 状態は色ではなく必ず文字でも示す。 */
+  meta: string;
+  done: boolean;
+  cover?: { src: string; alt: string };
+};
+
+/**
+ * 部活・PJ・イベントを1本の配列にする。
+ *
+ * ⚠ 並び順は「活動中を先、終了を後」。各 getter の並びをそのまま連結している。
+ *   終了を後ろに置くのは隠すためではない。積み重ねとして最後にまとめて見せる
+ *   （Value「過去から学ぶことを忘れない」）。
+ * ⚠ イベントは終了扱いにしない。日付そのものが状態を語るため。
+ */
+export function getActivities(): Activity[] {
+  const clubs = getClubs().map(
+    (c): Activity => ({
+      slug: c.slug,
+      name: c.name,
+      href: `/clubs/${c.slug}/`,
+      meta: `CLUB / ${c.status === 'done' ? '終了' : '活動中'}`,
+      done: c.status === 'done',
+      cover: c.cover,
+    }),
+  );
+
+  const projects = getProjects().map(
+    (p): Activity => ({
+      slug: p.slug,
+      name: p.name,
+      href: `/projects/${p.slug}/`,
+      meta: `PROJECT / ${p.status === 'done' ? '終了' : '進行中'}`,
+      done: p.status === 'done',
+      cover: p.cover,
+    }),
+  );
+
+  const events = getEvents().map(
+    (e): Activity => ({
+      slug: e.slug,
+      name: e.name,
+      href: `/events/${e.slug}/`,
+      meta: `EVENT / ${e.date.replace(/-/g, '.')}`,
+      done: false,
+      cover: e.cover,
+    }),
+  );
+
+  return [...clubs, ...projects, ...events];
+}
+
 /* ── 集計 ───────────────────────────────────────────── */
 
 /** トップと団体紹介で使う件数。⚠ 数字は必ずここ経由で出す。手で書かない。 */
