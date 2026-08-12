@@ -1,0 +1,281 @@
+/* ══════════════════════════════════════════════════════════════════
+   投稿画面・承認画面の見た目
+   根拠：draft/デザイン大本資料_v1.md 原理2・原理3 ／ 04資料（コントラスト）
+
+   ⚠ ここは「静謐」の側に寄せる。投稿画面は道具であって作品ではない。
+     入力中に画面が動くと、書いている内容から注意が逸れる。
+     よってアニメーションは置かない（トップの整列とは目的が違う）。
+
+   ⚠ box-shadow を使わない（原理3）。面は地の色の差と余白で分ける。
+     scripts/check-content.mjs が実際に検出して警告を出す。
+   ⚠ 色は tokens.css の変数だけを使う。ここで新しい色を作らない。
+   ══════════════════════════════════════════════════════════════════ */
+
+.form { margin-top: var(--sp-6); }
+
+/* ── 面 ───────────────────────────────────────────── */
+.panel {
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  max-width: var(--measure);
+}
+.panelTitle {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: var(--sp-2);
+}
+
+.card {
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+  margin-bottom: var(--sp-6);
+}
+
+.h2 {
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -.01em;
+  margin-bottom: var(--sp-3);
+}
+
+/* 目立たせるが、警告ではない。朱の面に墨を載せる（04資料の最重要ルール）。 */
+.notice {
+  background: var(--shu);
+  color: var(--ink);            /* 朱地に墨：4.78 AA */
+  border-radius: var(--radius-pill);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-4);
+  font-size: 15px;
+  line-height: 1.6;
+  display: inline-block;
+}
+
+.note {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--sub-on-light);   /* 4.92 AA */
+  max-width: var(--measure);
+}
+.note a { color: var(--shu-on-light); }  /* 4.87 AA */
+
+.message {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper-card);
+  border-left: 3px solid var(--shu-on-light);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 16px;
+  line-height: 1.8;
+  max-width: var(--measure);
+}
+
+/* ── ログイン中の表示 ─────────────────────────────── */
+.who {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: 15px;
+  margin-bottom: var(--sp-4);
+}
+.role {
+  font: 400 12px/1 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);
+  margin-inline-start: var(--sp-1);
+}
+
+/* ── 入力欄 ───────────────────────────────────────── */
+.field {
+  margin-bottom: var(--sp-6);
+  max-width: var(--measure);
+}
+
+.label {
+  display: block;
+  font-size: 17px;             /* ⚠ 本文17px（blanca の 14px という失敗を潰す） */
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: var(--sp-1);
+}
+
+/* ⚠ 必須・任意は色ではなく文字で示す。色だけの区別は見えない人がいる。 */
+.required,
+.optional {
+  font: 400 11px/1 var(--font-mono);
+  letter-spacing: .1em;
+  margin-inline-start: var(--sp-1);
+  padding: 3px 6px;
+  border-radius: var(--radius-pill);
+  vertical-align: middle;
+}
+.required { background: var(--shu); color: var(--ink); }
+.optional { background: var(--paper); color: var(--sub-on-light); }
+
+.hint {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--sub-on-light);
+  margin-bottom: var(--sp-1);
+}
+
+.input {
+  width: 100%;
+  font: 400 17px/1.6 var(--font-sans);
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--sub-on-light);   /* ⚠ 1px。薄すぎる枠は境界に見えない */
+  border-radius: 12px;
+  padding: var(--sp-1) var(--sp-2);
+}
+.input:focus-visible {
+  /* base.css の :focus-visible と同じ朱。ここで消さない（06資料 2章） */
+  outline: 3px solid var(--shu-on-light);
+  outline-offset: 2px;
+}
+/* ⚠ 誤りを枠の色だけで示さない。必ず .error の文章と併せて出す。 */
+.inputInvalid { border-color: var(--shu-on-light); border-width: 2px; }
+
+.short { max-width: 18em; }
+.textarea { line-height: 1.9; resize: vertical; }
+.file { font-size: 15px; }
+
+.error {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--shu-on-light);   /* 4.87 AA */
+  margin-top: var(--sp-1);
+}
+
+/* ── 複数入力 ─────────────────────────────────────── */
+.list { display: grid; gap: var(--sp-1); }
+.listRow { display: flex; gap: var(--sp-2); align-items: center; }
+
+/* ── ラジオ・チェック ─────────────────────────────── */
+.radioSet { display: flex; gap: var(--sp-3); border: 0; padding: 0; }
+.radio,
+.check {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-size: 16px;
+  line-height: 1.8;
+  cursor: pointer;
+}
+.consent {
+  border: 0;
+  padding: var(--sp-3);
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  margin-bottom: var(--sp-6);
+  max-width: var(--measure);
+  display: grid;
+  gap: var(--sp-2);
+}
+
+/* ── 種類の切り替え ───────────────────────────────── */
+.tabs { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.tab {
+  font: 400 15px/1 var(--font-sans);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--sub-on-light);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+/* ⚠ 選択中は色だけでなく太字でも示す。aria-selected も付けている。 */
+.tabOn { background: var(--shu); border-color: var(--shu); font-weight: 700; }
+
+/* ── ボタン ───────────────────────────────────────── */
+.row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+
+.primary,
+.secondary {
+  font: 700 17px/1 var(--font-sans);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: opacity var(--dur-hover) var(--ease-out);
+}
+.primary { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
+.secondary { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.primary:hover:not(:disabled),
+.secondary:hover:not(:disabled) { opacity: .8; }
+.primary:disabled,
+.secondary:disabled { opacity: .45; cursor: not-allowed; }
+
+.linkBtn {
+  font: 400 15px/1.6 var(--font-sans);
+  color: var(--shu-on-light);   /* 4.87 AA */
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── 写真 ─────────────────────────────────────────── */
+.photos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-4);
+  margin-top: var(--sp-3);
+}
+.photo { background: var(--paper-card); border-radius: var(--radius); padding: var(--sp-2); }
+.photoImg {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--paper);
+  display: block;
+}
+.photoBody { margin-top: var(--sp-2); display: grid; gap: var(--sp-1); }
+.altLabel { display: grid; gap: 4px; font-size: 14px; color: var(--sub-on-light); }
+
+/* ── 確認画面の内容表示 ───────────────────────────── */
+.dl { margin-bottom: var(--sp-4); }
+.dlRow {
+  display: grid;
+  grid-template-columns: 12em 1fr;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  border-top: 1px solid var(--paper);
+}
+.dlRow dt { font-size: 14px; color: var(--sub-on-light); }
+.dlRow dd { font-size: 16px; line-height: 1.9; white-space: pre-wrap; }
+
+@media (max-width: 640px) {
+  .dlRow { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* ── 自分の投稿一覧 ───────────────────────────────── */
+.mine { margin-top: var(--sp-12); }
+.mineList { list-style: none; }
+.mineItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--paper-card);
+}
+.meta {
+  font: 400 12px/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);
+  margin-inline-start: var(--sp-2);
+}
+.returned {
+  margin-top: var(--sp-1);
+  font-size: 15px;
+  line-height: 1.8;
+  border-left: 3px solid var(--shu-on-light);
+  padding-inline-start: var(--sp-2);
+  max-width: var(--measure);
+}

@@ -60,6 +60,11 @@ jobs:
       - name: ビルド（明朝サブセットの自動生成を含む）
         run: npm run build
 
+      - name: 投稿→Markdown の検査（フェーズ6）
+        # ⚠ 代表が承認したのにビルドが落ちる、という壊れ方を先に潰す。
+        #   to-markdown.ts と lib/schema.ts の食い違いをここで検出する。
+        run: npm run check:publish
+
       - name: 独自ページの検査（部活・PJ・イベント・作品）
         # ⚠ JS混入・外部参照・容量超過があればここで落とす。
         #   代表の確認を「人にしか判断できないこと」だけに絞るための仕組み。

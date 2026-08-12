@@ -40,6 +40,12 @@
     "out",
     "archive",
     "draft",
-    "reference"
+    "reference",
+
+    // ⚠ supabase/functions/ は Deno で動く（Node ではない）。
+    //   Deno.serve や jsr: の import は Next.js の型検査では解決できないため、
+    //   ここで除外する。除外しても検証されないわけではない：
+    //   `supabase functions deploy` の時点で Deno 自身が型検査する。
+    "supabase"
   ]
 }
