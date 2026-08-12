@@ -97,8 +97,10 @@ create index submissions_state_idx  on public.submissions (state, updated_at des
 create index submissions_author_idx on public.submissions (author, updated_at desc);
 
 -- updated_at の自動更新
+-- ⚠ set search_path を明示する。省くと Supabase のセキュリティ検査が
+--   「search_path が可変の関数」として警告する（実際に検出される）。
 create function public.touch_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = public as $$
 begin
   new.updated_at := now();
   return new;
@@ -134,10 +136,18 @@ language sql stable security definer set search_path = public as $$
     when public.my_role() = 'rep' then true
     when k = 'work'    then true                                   -- メンバー全員
     when k = 'event'   then public.my_role() = 'staff'              -- 運営部・企画部
+    -- ⚠ club_slugs は配列なので、`slug = any (select club_slugs …)` とは書けない。
+    --   副問い合わせが返すのは「配列という1つの値」であって、値の集合ではないため
+    --   text = text[] の比較になり、関数の作成時点で落ちる（実際に落ちた）。
+    --   exists で1行を取り出し、その行の配列に対して any を使う。
     when k = 'club'    then public.my_role() = 'leader'
-                           and slug = any (select club_slugs    from public.members where user_id = auth.uid())
+                           and exists (select 1 from public.members m
+                                        where m.user_id = auth.uid()
+                                          and slug = any (m.club_slugs))
     when k = 'project' then public.my_role() = 'leader'
-                           and slug = any (select project_slugs from public.members where user_id = auth.uid())
+                           and exists (select 1 from public.members m
+                                        where m.user_id = auth.uid()
+                                          and slug = any (m.project_slugs))
     else false
   end;
 $$;
