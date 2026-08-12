@@ -126,6 +126,55 @@ for (const file of files) {
   }
 }
 
+/* ── sitemap.xml が実在するページだけを指しているか ──
+   ⚠ 2026-08-12 追加。投稿機能の通し確認で、実際に事故が起きたため。
+
+     投稿された作品が sitemap に載った → だが /works/<slug>/ の route が
+     まだ無い（ロードマップ 2-F で9月に先送り）→ 404 のURLを検索エンジンに
+     申告する状態で、デプロイが通ってしまった。
+
+   ⚠ 見逃した理由：上のループは .html しか見ていない。sitemap.xml は
+     拡張子が違うので、リンク切れ検査の網に一度も掛かっていなかった。
+     「検査があるから大丈夫」が最も危ないのは、こういう穴があるとき。
+
+   最優先読者はスポンサーで、検索から来る可能性が高い（06資料 4章）。
+   存在しないページを申告するのは実害がある。 */
+const sitemapPath = join(OUT, 'sitemap.xml');
+if (existsSync(sitemapPath)) {
+  const xml = readFileSync(sitemapPath, 'utf8');
+  const locs = (xml.match(/<loc>([^<]+)<\/loc>/g) ?? []).map((s) => s.slice(5, -6));
+
+  if (locs.length === 0) errors.push('sitemap.xml に1件もURLが無い');
+
+  // ⚠ sitemap の中身は絶対URLで、その接頭辞は BASE_PATH ではなく SITE_URL 由来。
+  //   この2つは別物で、混同すると全ページを誤検出する（実際にやった）。
+  //     BASE_PATH  ビルド時に配信元のサブディレクトリを付けるためのもの
+  //     SITE_URL   OGPやsitemapで絶対URLを作るためのもの。lib/org.ts が持つ
+  //   独自ドメインに移ると SITE_URL の接頭辞は空になるので、決め打ちにしない。
+  const siteUrl =
+    process.env.SITE_URL ??
+    readFileSync(join(root, 'lib/org.ts'), 'utf8').match(/SITE_URL\s*=[\s\S]*?'(https?:\/\/[^']+)'/)?.[1] ??
+    '';
+  const sitePrefix = siteUrl ? new URL(siteUrl).pathname.replace(/\/$/, '') : '';
+
+  for (const loc of locs) {
+    let path;
+    try {
+      path = new URL(loc).pathname;
+    } catch {
+      errors.push(`sitemap.xml：URLとして読めない ${loc}`);
+      continue;
+    }
+    const u = (sitePrefix && path.startsWith(sitePrefix) ? path.slice(sitePrefix.length) : path) || '/';
+    const withSlash = u.endsWith('/') ? u : `${u}/`;
+    if (!urls.has(withSlash) && !existsSync(join(OUT, u))) {
+      errors.push(`sitemap.xml：存在しないページを指している ${loc}`);
+    }
+  }
+} else {
+  errors.push('sitemap.xml が生成されていない');
+}
+
 /* ── MVV がサイト上で原文どおりに出ているか ────────── */
 const top = readFileSync(join(OUT, 'index.html'), 'utf8').replace(/<[^>]+>/g, '');
 for (const m of MVV) {
