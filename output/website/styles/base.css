@@ -250,6 +250,32 @@ h1, h2, h3, .display { font-feature-settings: 'palt' 1; word-break: auto-phrase;
    ⚠ 層の切り替えは「地の色の反転」だけで表現する。別の装飾を足さない。
    ⚠ 墨地では朱・副色を専用の値に差し替える。生成り地用のままだと
      コントラスト不足になる（--shu は墨地で 4.78、--shu-on-light は不足）。 */
+/* ══ 白地の面（作品の個別ページ専用）══
+   根拠：styles/tokens.css の --white「作品集のみ。作品の色を正しく見せるため」
+        draft/デザイン大本資料_v1.md 原理2
+
+   ⚠ ここだけ生成りではなく白にする理由。
+     生成り（#F4F1EA）は黄みを持つため、その上に作品の写真を置くと、
+     見る人は作品の色を生成り込みで受け取る。作品集は作品の色が主役なので、
+     地の色が作品に混ざってはいけない。
+
+   ⚠ この面には装飾を足さないこと（原理2）。
+       「学生の作品は色も雰囲気もバラバラだから、サイト側が主張すると全部が濁る」
+     余白と文字組みだけで持たせる。朱もここでは使わない。 */
+.plate {
+  background: var(--white);
+  border-radius: var(--radius);
+  margin: var(--sp-6);
+  padding: var(--sp-12) var(--sp-6);
+}
+@media (max-width: 760px) { .plate { margin: var(--sp-2); padding: var(--sp-8) var(--sp-3); } }
+
+/* ⚠ 白地では文字のコントラストが変わる。実測（WCAG 2.1 相対輝度式）：
+     --ink          白地 19.30 AAA ／ 生成り 17.11 AAA
+     --sub-on-light 白地  5.55 AA  ／ 生成り  4.92 AA
+     --shu-on-light 白地  5.49 AA  ／ 生成り  4.87 AA
+   いずれも白地のほうが高い。墨地（.paper）と違い、色の差し替えは要らない。 */
+
 .paper {
   background: var(--ink);
   color: var(--paper);                       /* 17.11 AAA */

@@ -8,6 +8,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/build-font-subset.mjs",
     "build": "next build",
+    "postbuild": "node scripts/clean-works-placeholder.mjs",
     "start": "npx serve out",
     "check": "npm run check:publish && node scripts/check-custom-pages.mjs && node scripts/check-content.mjs",
     "check:publish": "node --experimental-strip-types --no-warnings scripts/check-publish-markdown.mjs",

@@ -127,6 +127,33 @@ export function getWorks() {
   return readCollection('works').sort((a, b) => b.year - a.year);
 }
 
+/**
+ * 作品の所属先（部活／PJ／イベント）を、表示名とリンク先に解決する。
+ *
+ * ⚠ 見つからないときは null を返し、リンクを出さない。
+ *   投稿画面は既存の一覧から選ばせるので普通は起きないが、
+ *   .md を手で書いたときに存在しない slug を指す事故はありうる。
+ *   そのとき**リンク切れを作るより、リンクを出さないほうがよい**
+ *   （scripts/check-content.mjs がリンク切れでデプロイを止めるため、
+ *     ここで黙って壊れたリンクを吐くと、無関係な場所で公開が止まる）。
+ *
+ * ⚠ 終了した部活・PJでもリンクは残す。status で消さないのが本サイトの前提
+ *   （schema.ts：終了しても削除しない。作品の所属先が消えるため）。
+ */
+export function resolveBelongsTo(belongsTo: { kind: 'club' | 'project' | 'event'; slug: string }) {
+  const table = {
+    club: { items: getClubs(), base: '/clubs/', label: 'Club' },
+    project: { items: getProjects(), base: '/projects/', label: 'Project' },
+    event: { items: getEvents(), base: '/events/', label: 'Event' },
+  }[belongsTo.kind];
+
+  if (!table) return null;
+  const hit = table.items.find((x) => x.slug === belongsTo.slug);
+  if (!hit) return null;
+
+  return { name: hit.name, href: `${table.base}${hit.slug}/`, label: table.label };
+}
+
 /* ── 活動の横断リスト ───────────────────────────────── */
 
 /** 部活・PJ・イベントを1本にまとめた1件。トップページの帯が使う。 */

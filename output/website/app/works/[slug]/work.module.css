@@ -1,0 +1,95 @@
+/* ══════════════════════════════════════════════════════════════════
+   作品の個別ページ
+   根拠：draft/デザイン大本資料_v1.md 原理2（作品集は極限まで引く）
+
+   ⚠ ここに朱を使わない。動きも付けない。装飾も足さない。
+     学生の作品は色も雰囲気もバラバラなので、サイト側が主張すると全部が濁る。
+     効かせるのは「余白」と「文字組み」だけ。
+
+   ⚠ 迷ったら、要素を足すのではなく余白を増やすこと。
+   ══════════════════════════════════════════════════════════════════ */
+
+.title {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  max-width: 20em;
+}
+
+/* 制作者と制作年。⚠ 作品を特定するための情報であって、飾りではない。 */
+.by {
+  margin-top: var(--sp-3);
+  font-size: 17px;                     /* ⚠ 本文17px。blanca の 14px という失敗を潰す */
+  line-height: 1.8;
+  color: var(--sub-on-light);          /* 白地 5.55 AA */
+}
+.year {
+  margin-inline-start: var(--sp-3);
+  font: 400 14px/1 var(--font-mono);
+  letter-spacing: .12em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ⚠ 余白を大きく取る。作品と本文の間に「間」を作るのが、このページの主な仕事。 */
+.hero { margin-block: var(--sp-12); }
+
+.text {
+  margin-block: var(--sp-8);
+  font-size: 17px;
+  line-height: 2;                      /* ⚠ 日本語の長文。行間は広めに取る */
+  white-space: pre-wrap;               /* 投稿された改行をそのまま活かす */
+}
+
+/* 2枚目以降の写真。
+   ⚠ 1列に詰め込まない。作品同士が隣り合うと互いの色が干渉する。 */
+.gallery {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--sp-8);
+  margin-block: var(--sp-12);
+}
+.galleryImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+  /* ⚠ 寸法が未知のまま読み込むと画面が飛ぶ（CLS）。
+     1-E（sharp によるビルド時の最適化）で width/height を自動付与するまでの
+     暫定措置として、最小の高さだけ確保しておく。 */
+  min-height: 1px;
+  background: var(--paper-card);
+}
+
+/* 所属先・タグ・外部リンク。⚠ 作品より目立たせない。 */
+.meta {
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--paper-card);
+  display: grid;
+  gap: var(--sp-2);
+}
+.meta div {
+  display: grid;
+  grid-template-columns: 8em 1fr;
+  gap: var(--sp-2);
+  align-items: baseline;
+}
+.meta dt {
+  font: 400 11px/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  color: var(--sub-on-light);
+}
+.meta dd { font-size: 16px; line-height: 1.8; word-break: break-word; }
+.meta a { color: var(--shu-on-light); }   /* 白地 5.49 AA */
+
+@media (max-width: 640px) {
+  .meta div { grid-template-columns: 1fr; gap: 0; }
+}
+
+.back {
+  margin-top: var(--sp-12);
+  font-size: 16px;
+}
+.back a { color: var(--shu-on-light); }

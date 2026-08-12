@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { SiteNav } from '@/components/SiteNav';
 import { getWorks } from '@/lib/content';
 
@@ -32,12 +33,17 @@ export default function WorksPage() {
             </p>
           ) : (
             <ul className="rows" style={{ marginTop: 'var(--sp-8)' }}>
+              {/* ⚠ 一覧は静かに保つ（大本資料 原理2）。写真を並べない。
+                    サムネイルを敷き詰めると、作品同士の色が干渉して全部が濁る。
+                    賑やかさは個別ページ側に置く（ロードマップ 5-C-0 の線引き）。 */}
               {works.map((w) => (
                 <li key={w.slug} className="row">
-                  <span className="row__name">{w.title}</span>
-                  <span className="row__meta">
-                    {w.year} ／ {w.displayNames.join('・')}
-                  </span>
+                  <Link href={`/works/${w.slug}/`} className="row__link">
+                    <span className="row__name">{w.title}</span>
+                    <span className="row__meta">
+                      {w.year} ／ {w.displayNames.join('・')}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
