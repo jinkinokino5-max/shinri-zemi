@@ -54,8 +54,8 @@ export function Thumb({
   return (
     <div className={cls} style={style}>
       {/* ⚠ next/image は output:'export' では最適化が効かないため使わない。
-            sharp によるビルド前処理へ切り替える（ロードマップ 1-E）。
-            それまでは素の <img> を使い、loading="lazy" だけ効かせる。
+            素の <img> を使い、loading="lazy" だけ効かせる。
+            軽くする処理は scripts/optimize-images.mjs が担当する。
             ⚠ alt はスキーマで必須にしてある（06資料 2章）。 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -66,7 +66,6 @@ export function Thumb({
         loading="lazy"
         decoding="async"
       />
-      <span className={styles.overlay} />
     </div>
   );
 }
