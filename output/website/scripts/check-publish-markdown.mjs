@@ -213,6 +213,91 @@ if (noPhoto && /^cover:/m.test(noPhoto.md)) {
   failed++;
 }
 
+/* ── 直す提案（op='update'）───────────────────────
+   ⚠ 直す提案には keepImages が入ってくる。これはコンテンツの項目ではなく、
+     「いま載っている写真をそのまま残す」という指示である。
+     フロントマターに漏れると、lib/schema.ts が知らない項目が .md に残り続ける。 */
+
+const kept = check(
+  '直す提案（いまの写真をそのまま残す）',
+  {
+    id: 'aaaaaaaa-0000-0000-0000-000000000010',
+    kind: 'work',
+    target_slug: 'tofu-game',
+    data: {
+      title: 'とうふゲーム（改訂）',
+      displayNames: ['あお'],
+      belongsTo: { kind: 'project', slug: 'tofu-game' },
+      year: 2026,
+      body: '説明文だけ直しました。',
+      publishedAt: '2026-05-01',
+      keepImages: [
+        { src: '/photos/works/tofu-game/aaaa1111.jpg', alt: '完成した盤面' },
+        { src: '/photos/works/tofu-game/bbbb2222.jpg', alt: '制作中のようす' },
+      ],
+    },
+  },
+  { photos: [] },
+);
+
+if (kept) {
+  if (/keepImages/.test(kept.md)) {
+    console.error('❌ keepImages がフロントマターに漏れています（内部の指示であって項目ではない）');
+    failed++;
+  }
+  if (kept.value.cover?.src !== '/photos/works/tofu-game/aaaa1111.jpg') {
+    console.error('❌ 残した写真の1枚目が cover になっていません');
+    failed++;
+  }
+  // ⚠ 直すたびに公開日が今日へ動くと、去年の作品が毎回新着になる。
+  if (kept.value.publishedAt !== '2026-05-01') {
+    console.error(`❌ 公開日が書き換わっています（${kept.value.publishedAt}）`);
+    failed++;
+  }
+}
+
+const mixed = check(
+  '直す提案（残す写真＋足す写真。並びは 残す→足す）',
+  {
+    id: 'aaaaaaaa-0000-0000-0000-000000000011',
+    kind: 'work',
+    target_slug: 'tofu-game',
+    data: {
+      title: 'とうふゲーム',
+      displayNames: ['あお'],
+      belongsTo: { kind: 'project', slug: 'tofu-game' },
+      year: 2026,
+      body: '写真を1枚足しました。',
+      keepImages: [{ src: '/photos/works/tofu-game/aaaa1111.jpg', alt: '完成した盤面' }],
+    },
+  },
+  { photos: [{ path: 'uid/sub/dddd4444.jpg', alt: '追加した写真' }] },
+);
+
+if (mixed) {
+  // ⚠ 一覧に出る写真（cover）が、文章を直しただけで入れ替わってはいけない。
+  if (mixed.value.cover?.src !== '/photos/works/tofu-game/aaaa1111.jpg') {
+    console.error('❌ 写真を足しただけで cover が入れ替わっています');
+    failed++;
+  }
+  if (mixed.value.images?.[0]?.src !== '/photos/works/tofu-game/dddd4444.jpg') {
+    console.error('❌ 足した写真が images に入っていません');
+    failed++;
+  }
+}
+
+check('直す提案（写真を全部外した＝写真の無いページにする指示）', {
+  id: 'aaaaaaaa-0000-0000-0000-000000000012',
+  kind: 'club',
+  target_slug: 'dokusho',
+  data: {
+    name: '読書部',
+    status: 'active',
+    body: '写真を外しました。',
+    keepImages: [],
+  },
+});
+
 /* ── 結果 ─────────────────────────────────────────── */
 
 if (failed > 0) {

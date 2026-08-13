@@ -1,7 +1,14 @@
 // ══════════════════════════════════════════════════════════════════
 //  Edge Function `publish`
-//  承認された投稿を content/*.md として GitHub に書き込む。
+//  承認された投稿を content/*.md として GitHub に書き込む（または消す）。
 //  根拠：draft/ロードマップ.md フェーズ6 6-D
+//        ／ supabase/migrations/0003_edit_delete.sql（直す・消すの承認）
+//
+//  ⚠ op が3つある。どれも入口（この関数）は同じで、代表の承認が要る。
+//      create … 新しい .md を書く
+//      update … 同じ .md を上書きする（URL は変わらない）
+//      delete … .md と、その写真フォルダを消す
+//    「提案は誰でも出せる／実行は代表だけ」の境界が、この関数である。
 //
 //  ⚠ この関数が、案A（Markdown書き戻し）の心臓部である。
 //
@@ -85,14 +92,44 @@ async function gh(path: string, init?: RequestInit) {
 type FileToCommit = { path: string; content: string; encoding: 'utf-8' | 'base64' };
 
 /**
- * 複数ファイルを1コミットで書く。
+ * ブランチにある全ファイルのパスを取る。
+ *
+ * ⚠ 消すときに要る。GitHub には「このフォルダごと消す」API が無いので、
+ *   フォルダの中に何があるかを、こちらが知っていなければならない。
+ *   知らないまま .md だけ消すと、写真が誰からも参照されないまま残り続ける。
+ *
+ * ⚠ 木は1回だけ取る。prefix ごとに取り直すと、リポジトリが育つほど
+ *   同じ数万行を何度も受け取ることになる（Edge Function には実行時間の上限がある）。
+ */
+async function listAllPaths(): Promise<string[]> {
+  const tree = await gh(`/repos/${REPO}/git/trees/${BRANCH}?recursive=1`);
+  if (tree.truncated) {
+    // ⚠ 黙って続けない。truncated のまま消す判断をすると、
+    //   「一覧に出てこなかった写真」が消し残る。
+    throw new Error('リポジトリが大きすぎて一覧を取り切れませんでした（tree truncated）。');
+  }
+  return (tree.tree as { path: string; type: string }[])
+    .filter((t) => t.type === 'blob')
+    .map((t) => t.path);
+}
+
+/**
+ * 複数ファイルを1コミットで書く／消す。
  *
  * ⚠ 1ファイルずつ Contents API で書かない。途中で失敗すると
  *   「Markdown はあるが写真が無い」中途半端な状態がコミットされ、
  *   ビルドが落ちる（lib/content.ts が、指定された写真の不在で止める）。
  *   Git Data API なら、木ごと1回で差し替わる。
+ *
+ * @param remove 消すパス。⚠ tree に sha: null を渡すのが「消す」の意味。
+ *   空文字のブロブを置くのではない。空ファイルが残ると、
+ *   gray-matter が中身の無い .md を読んで Zod で落ちる。
  */
-async function commitFiles(files: FileToCommit[], message: string): Promise<string> {
+async function commitFiles(
+  files: FileToCommit[],
+  message: string,
+  remove: string[] = [],
+): Promise<string> {
   const ref = await gh(`/repos/${REPO}/git/ref/heads/${BRANCH}`);
   const baseSha: string = ref.object.sha;
   const baseCommit = await gh(`/repos/${REPO}/git/commits/${baseSha}`);
@@ -107,9 +144,16 @@ async function commitFiles(files: FileToCommit[], message: string): Promise<stri
     }),
   );
 
+  const deletions = remove.map((path) => ({
+    path,
+    mode: '100644',
+    type: 'blob',
+    sha: null,
+  }));
+
   const tree = await gh(`/repos/${REPO}/git/trees`, {
     method: 'POST',
-    body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: blobs }),
+    body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: [...blobs, ...deletions] }),
   });
 
   const commit = await gh(`/repos/${REPO}/git/commits`, {
@@ -172,39 +216,84 @@ Deno.serve(async (req) => {
     if (row.state !== 'pending') return json({ error: 'この投稿は提出中ではありません' }, 409);
     if (!row.target_slug) return json({ error: 'URLになる名前（slug）が未設定です' }, 400);
 
+    const op: 'create' | 'update' | 'delete' = row.op ?? 'create';
     const collection = COLLECTION[row.kind];
     const photoDir = `/photos/${collection}/${row.target_slug}`;
+    const mdPath = `${SUBDIR}/content/${collection}/${row.target_slug}.md`;
+    const photoPrefix = `${SUBDIR}/public${photoDir}/`;
+    const label = row.data?.title ?? row.data?.name ?? row.target_slug;
+
     const files: FileToCommit[] = [];
+    let remove: string[] = [];
 
-    // 写真を Storage から取り出して、リポジトリに入れる。
-    // ⚠ 加工はしない。ビルド前の scripts/optimize-images.mjs（sharp）が担当する。
-    //   ここで縮めると、元の解像度が永久に失われる。
-    for (const im of (row.images ?? []) as { path: string; alt: string }[]) {
-      const { data: blob, error: dlErr } = await admin.storage.from('submissions').download(im.path);
-      if (dlErr || !blob) throw new Error(`写真を取り出せません：${im.path}`);
-      const bytes = new Uint8Array(await blob.arrayBuffer());
-      let binary = '';
-      for (let i = 0; i < bytes.length; i += 0x8000) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    if (op === 'delete') {
+      // ⚠ .md と写真をまとめて1コミットで消す。
+      //   .md だけ消すと、誰からも参照されない写真がリポジトリに残り続け、
+      //   数年後に「これは何の写真か」が誰にも分からなくなる。
+      //
+      // ⚠ すでに無いものを sha:null で消そうとすると GitHub が 422 を返す。
+      //   実在するものだけを選ぶ。「消したいものが既に無い」は成功と同じ結果。
+      const all = await listAllPaths();
+      remove = all.filter((p) => p === mdPath || p.startsWith(photoPrefix));
+
+      if (remove.length === 0) {
+        return json({ error: `${mdPath} は既にありません。消すものがありません。` }, 409);
       }
-      files.push({
-        path: `${SUBDIR}/public${photoDir}/${fileName(im.path)}`,
-        content: btoa(binary),
-        encoding: 'base64',
-      });
-    }
+    } else {
+      // 写真を Storage から取り出して、リポジトリに入れる。
+      // ⚠ 加工はしない。ビルド後の scripts/optimize-images.mjs（sharp）が
+      //   出力側だけを縮める。ここで縮めると元の解像度が永久に失われる。
+      for (const im of (row.images ?? []) as { path: string; alt: string }[]) {
+        const { data: blob, error: dlErr } = await admin.storage
+          .from('submissions')
+          .download(im.path);
+        if (dlErr || !blob) throw new Error(`写真を取り出せません：${im.path}`);
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+        }
+        files.push({
+          path: `${SUBDIR}/public${photoDir}/${fileName(im.path)}`,
+          content: btoa(binary),
+          encoding: 'base64',
+        });
+      }
 
-    files.push({
-      path: `${SUBDIR}/content/${collection}/${row.target_slug}.md`,
-      content: toMarkdown(row as PublishRow, photoDir),
-      encoding: 'utf-8',
-    });
+      files.push({
+        path: mdPath,
+        content: toMarkdown(row as PublishRow, photoDir),
+        encoding: 'utf-8',
+      });
+
+      // ⚠ 直す提案で外された写真は、リポジトリからも消す。
+      //   残しても表示はされないが、外したはずの写真がURLを知る人には
+      //   見え続けることになる。「消したつもり」を作らない。
+      if (op === 'update') {
+        const keep = new Set([
+          ...((row.data as { keepImages?: { src: string }[] }).keepImages ?? []).map(
+            (im) => `${SUBDIR}/public${im.src}`,
+          ),
+          ...files.map((f) => f.path),
+        ]);
+        // ⚠ 見るのは、この slug の写真フォルダの中だけ。
+        //   .md が別の場所の写真（手で書いた共有画像など）を指していることが
+        //   ありうるので、フォルダの外には絶対に手を出さない。
+        remove = (await listAllPaths()).filter(
+          (p) => p.startsWith(photoPrefix) && !keep.has(p),
+        );
+      }
+    }
 
     // ⚠ コミットメッセージに投稿IDと承認者を残す。
     //   代表が毎年替わるので、「誰がいつ何を通したか」は git log 側にも要る。
+    //   削除は特に、理由が git log にしか残らない場面がある。必ず書く。
+    const verb = op === 'delete' ? 'を削除' : op === 'update' ? 'を更新' : 'を公開';
+    const reason = op === 'delete' ? `\n理由: ${row.delete_reason ?? '（未記入）'}` : '';
     const sha = await commitFiles(
       files,
-      `${KIND_JA[row.kind] ?? row.kind}「${row.data?.title ?? row.data?.name ?? row.target_slug}」を公開\n\n投稿ID: ${row.id}\n承認: ${user.id}`,
+      `${KIND_JA[row.kind] ?? row.kind}「${label}」${verb}\n\n投稿ID: ${row.id}\n承認: ${user.id}${reason}`,
+      remove,
     );
 
     await admin
@@ -218,7 +307,7 @@ Deno.serve(async (req) => {
       })
       .eq('id', row.id);
 
-    return json({ ok: true, commit: sha, path: `/${collection}/${row.target_slug}/` });
+    return json({ ok: true, commit: sha, op, path: `/${collection}/${row.target_slug}/` });
   } catch (e) {
     // ⚠ 失敗しても投稿は pending のまま残る。消えない。もう一度押せばよい。
     return json({ error: String(e instanceof Error ? e.message : e) }, 500);

@@ -26,11 +26,15 @@ export function PhotoInput({
   submissionId,
   images,
   onChange,
+  label = '写真',
 }: {
   userId: string;
   submissionId: string;
   images: UploadedImage[];
   onChange: (v: UploadedImage[]) => void;
+  /** ⚠ すでに載っている写真がある画面では「写真を足す」に変える。
+   *    そのまま「写真」だと、既存が置き換わるように読める。 */
+  label?: string;
 }) {
   const supabase = getSupabase()!;
   const [busy, setBusy] = useState(false);
@@ -98,11 +102,12 @@ export function PhotoInput({
   return (
     <div className={s.field}>
       <span className={s.label}>
-        写真<span className={s.optional}>任意</span>
+        {label}
+        <span className={s.optional}>任意</span>
       </span>
       <p className={s.hint}>
         何枚でも入れられます。<b>加工しないでそのまま入れてください。</b>
-        軽くする処理はサイト側で自動的に行います。1枚 10MB まで。
+        軽くする処理はサイト側で自動的に行います（scripts/optimize-images.mjs）。1枚 10MB まで。
         {images.length > 0 && ' 1枚目が一覧に出る写真になります。'}
       </p>
 

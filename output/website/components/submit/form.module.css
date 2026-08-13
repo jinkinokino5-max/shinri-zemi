@@ -279,3 +279,52 @@
   padding-inline-start: var(--sp-2);
   max-width: var(--measure);
 }
+
+/* ── 直す・消す（0003_edit_delete.sql）─────────────
+   ⚠ 変更・削除は「色だけ」で示さない。必ず文字（変更／削除）も添える。
+     色覚特性のある人と、印刷した紙で確認する人に届かなくなる（06資料 2章）。 */
+
+.dlChanged { background: var(--paper-card); }
+.changedTag {
+  display: inline-block;
+  margin-inline-start: var(--sp-1);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font: 700 11px/1.6 var(--font-mono);
+  letter-spacing: .1em;
+  background: var(--shu);
+  color: var(--ink);
+}
+/* 変更前の値。⚠ 打ち消し線だけにしない。読み上げでは伝わらないため、
+   「変更前：」という文字そのものを ::before で出す。 */
+.beforeText {
+  display: block;
+  color: var(--sub-on-light);
+  text-decoration: line-through;
+  text-decoration-color: var(--shu-on-light);
+}
+.beforeText::before {
+  content: '変更前：';
+  text-decoration: none;
+  display: inline;
+}
+
+/* 消せないときの説明。⚠ ボタンを disabled にするだけで終わらせない。
+   「押せない」と「なぜ押せないか」は別のことである。 */
+.blocked {
+  margin: var(--sp-4) 0;
+  padding: var(--sp-3);
+  border: 2px solid var(--shu-on-light);
+  border-radius: var(--radius);
+  background: var(--paper-card);
+}
+.orphans {
+  margin: var(--sp-2) 0;
+  padding-inline-start: var(--sp-4);
+  font-size: 15px;
+  line-height: 1.9;
+}
+.orphans a { color: var(--shu-on-light); }
+
+/* 外される写真。⚠ 薄くするだけにしない。枠と文字でも示す。 */
+.photoDropped { opacity: .55; outline: 2px dashed var(--shu-on-light); }

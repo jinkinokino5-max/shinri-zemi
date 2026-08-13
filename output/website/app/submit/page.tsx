@@ -3,6 +3,7 @@ import { SiteNav } from '@/components/SiteNav';
 import { SubmitApp } from '@/components/submit/SubmitApp';
 import type { BelongsToOption } from '@/components/submit/FieldInput';
 import { getClubs, getEvents, getProjects } from '@/lib/content';
+import { getPublishedEntries } from '@/lib/submission/published';
 
 /* ══════════════════════════════════════════════════════════════════
    投稿画面
@@ -39,7 +40,10 @@ export default function SubmitPage() {
         <div className="wrap">
           <p className="label">SUBMIT</p>
           <h1 className="h2">投稿する</h1>
-          <SubmitApp options={options} />
+          {/* ⚠ 「直す・消す」の対象は、データベースではなく content/*.md から作る。
+                公開済みの正は Git にあるため（lib/submission/published.ts）。
+                この一覧はビルド時点のもので、画面にもそう書いてある。 */}
+          <SubmitApp options={options} entries={getPublishedEntries()} />
         </div>
       </section>
     </>

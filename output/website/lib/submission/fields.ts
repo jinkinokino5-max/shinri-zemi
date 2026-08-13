@@ -15,6 +15,28 @@
 
 export type Kind = 'work' | 'club' | 'project' | 'event';
 
+/**
+ * その投稿が何をするものか。
+ * 根拠：supabase/migrations/0003_edit_delete.sql の submission_op
+ *
+ * ⚠ update と delete は「提案」である。出せるのはメンバー全員、
+ *   実行できるのは代表だけ。この非対称が、この機能の設計そのものである。
+ */
+export type Op = 'create' | 'update' | 'delete';
+
+export const OP_LABEL: Record<Op, string> = {
+  create: '新しく載せる',
+  update: '内容を直す',
+  delete: '消す',
+};
+
+/** 承認画面のバッジに出す短い名前。 */
+export const OP_BADGE: Record<Op, string> = {
+  create: '新規',
+  update: '変更',
+  delete: '削除',
+};
+
 export type Field = {
   /** data jsonb の中のキー。lib/schema.ts の項目名と一致させる。 */
   key: string;
@@ -165,3 +187,13 @@ export const NEEDS_CONSENT: Record<Kind, boolean> = {
   project: false,
   event: false,
 };
+
+/**
+ * 同意チェックを出すか。
+ *
+ * ⚠ 消す提案には出さない。載せる話ではないため。
+ *   直す提案には出す。直した内容がそのまま公開されるため。
+ *   この判断は 0003_edit_delete.sql の work_requires_consent 制約と同じ。
+ *   片方だけ変えると、画面は通るのにデータベースが弾く（またはその逆になる）。
+ */
+export const needsConsent = (kind: Kind, op: Op) => NEEDS_CONSENT[kind] && op !== 'delete';

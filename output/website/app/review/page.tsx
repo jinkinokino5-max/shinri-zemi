@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SiteNav } from '@/components/SiteNav';
 import { ReviewApp } from '@/components/submit/ReviewApp';
+import { getDependents, getPublishedEntries } from '@/lib/submission/published';
 
 /* ══════════════════════════════════════════════════════════════════
    代表による公開前レビューの画面
@@ -26,7 +27,10 @@ export default function ReviewPage() {
         <div className="wrap">
           <p className="label">REVIEW</p>
           <h1 className="h2">投稿の確認</h1>
-          <ReviewApp />
+          {/* ⚠ 「変更前の内容」と「消すと行き場を失う作品」は、ビルド時に
+                content/*.md から数えて渡す。代表のブラウザに調べさせない。
+                調べさせると、調べない日が必ず来る（5-C-0：確認の形骸化）。 */}
+          <ReviewApp entries={getPublishedEntries()} dependents={getDependents()} />
         </div>
       </section>
     </>

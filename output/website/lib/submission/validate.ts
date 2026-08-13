@@ -1,4 +1,4 @@
-import { FIELDS, NEEDS_CONSENT, type Field, type Kind } from './fields';
+import { FIELDS, needsConsent, type Field, type Kind, type Op } from './fields';
 
 /* ══════════════════════════════════════════════════════════════════
    入力内容の検証
@@ -81,13 +81,26 @@ function checkFormat(f: Field, v: unknown): string | null {
  * 提出できるかを調べる。
  *
  * @param consent 作品のときだけ見る。掲載への同意／写真に写る他人の許可。
+ * @param op      何をする投稿か。⚠ 消す提案は入力欄そのものが違う。
  */
 export function validate(
   kind: Kind,
   data: SubmissionData,
   consent: { publish: boolean; portrait: boolean },
+  op: Op = 'create',
+  deleteReason = '',
 ): Errors {
   const errors: Errors = {};
+
+  // ⚠ 消す提案では、中身の項目を見ない。見る意味がないうえ、
+  //   「消したいだけなのに本文の字数を直せ」と言われるのは理不尽である。
+  //   代わりに理由を必須にする。理由のない削除は、あとから誰も検証できない。
+  if (op === 'delete') {
+    if (deleteReason.trim() === '') {
+      errors.deleteReason = 'なぜ消すのかを書いてください。代表が判断できません。';
+    }
+    return errors;
+  }
 
   for (const f of FIELDS[kind]) {
     const v = data[f.key];
@@ -119,7 +132,7 @@ export function validate(
   // ⚠ 状態が「終了」なのに終了年月が無い場合。止めはしないが、伝える。
   //   （分からない日付を捏造させるほうが有害なため、必須にはしない）
 
-  if (NEEDS_CONSENT[kind]) {
+  if (needsConsent(kind, op)) {
     if (!consent.publish) errors.consent_publish = 'サイトへの掲載に同意が必要です。';
     if (!consent.portrait) {
       errors.consent_portrait = '写真に他の人が写っている場合、その人の許可が必要です。';
