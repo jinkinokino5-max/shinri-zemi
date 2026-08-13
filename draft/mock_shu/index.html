@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>写真の朱を残すか／やめるか　比較</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   写真の加工（グレースケール＋朱の乗算）を残すか、やめるか。
+   根拠：draft/デザイン大本資料_v1.md 6-5
+
+   ⚠ 色・余白・角丸は output/website/styles/tokens.css からそのまま写した。
+     ここで新しい値を作っていない。見た目の差は「写真の加工」だけである。
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#0E0E0E; --paper:#F4F1EA; --paper-card:#E8E5DE; --white:#fff;
+  --shu:#E8402A; --shu-on-light:#C4321F; --sub-on-light:#6B6862;
+  --font-sans:'Zen Kaku Gothic New','Yu Gothic',sans-serif;
+  --font-mono:'Space Mono',monospace;
+  --radius:24px; --radius-pill:999px;
+  --sp-1:.5rem; --sp-2:1rem; --sp-3:1.5rem; --sp-4:2rem; --sp-6:3rem; --sp-8:4rem;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-sans);line-height:1.8;
+     padding:var(--sp-6) var(--sp-4) var(--sp-8);}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:clamp(22px,3vw,30px);line-height:1.4;margin-bottom:var(--sp-2)}
+h2{font-size:20px;margin:var(--sp-8) 0 var(--sp-1)}
+h3{font-size:16px;margin:var(--sp-4) 0 var(--sp-1)}
+p{font-size:15px;max-width:34em}
+.label{font:400 12px/1 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.note{font-size:14px;color:var(--sub-on-light);max-width:38em}
+.warn{border-left:3px solid var(--shu-on-light);padding-inline-start:var(--sp-2);margin:var(--sp-2) 0}
+
+/* ── 切り替え ───────────────────────────────── */
+.switch{position:sticky;top:0;z-index:9;background:var(--paper);
+        padding:var(--sp-2) 0;border-bottom:1px solid var(--paper-card);margin-bottom:var(--sp-4)}
+.tabs{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.tab{font:400 15px/1 var(--font-sans);padding:var(--sp-1) var(--sp-3);
+     border:1px solid var(--sub-on-light);border-radius:var(--radius-pill);
+     background:transparent;color:var(--ink);cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--shu);border-color:var(--shu);font-weight:700}
+
+/* ── 写真枠（output/website/components/Thumb.module.css の写し）── */
+.thumb{position:relative;aspect-ratio:4/3;border-radius:var(--radius);
+       background:var(--paper-card);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;
+           transition:filter .4s var(--ease-out)}
+.overlay{position:absolute;inset:0;background:var(--shu);mix-blend-mode:multiply;
+         opacity:0;transition:opacity .4s var(--ease-out);pointer-events:none}
+
+/* A 現状：グレースケール＋朱28%。ホバーで戻る */
+[data-mode="a"] .thumb img{filter:grayscale(1) contrast(1.12)}
+[data-mode="a"] .overlay{opacity:.28}
+[data-mode="a"] .card:hover img{filter:none}
+[data-mode="a"] .card:hover .overlay{opacity:0}
+
+/* B 朱をやめ、グレースケールだけ残す */
+[data-mode="b"] .thumb img{filter:grayscale(1) contrast(1.12)}
+[data-mode="b"] .card:hover img{filter:none}
+
+/* C 加工をやめる（写真そのまま）*/
+[data-mode="c"] .thumb img{filter:none}
+
+.grid{list-style:none;display:grid;gap:var(--sp-4);
+      grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{display:block;text-decoration:none;color:inherit}
+.card h4{font-size:17px;margin-top:var(--sp-1);font-weight:700}
+.card .meta{font:400 12px/1.5 var(--font-mono);letter-spacing:.12em;color:var(--sub-on-light)}
+.wide .thumb{aspect-ratio:16/9}
+.belt .thumb{aspect-ratio:16/10}
+
+/* ── 並べて見るとき ─────────────────────────── */
+.side{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      margin-top:var(--sp-2)}
+.side figcaption{font-size:14px;margin-top:var(--sp-1);color:var(--sub-on-light)}
+.side b{color:var(--ink)}
+.sA .thumb img{filter:grayscale(1) contrast(1.12)} .sA .overlay{opacity:.28}
+.sB .thumb img{filter:grayscale(1) contrast(1.12)}
+.sC .thumb img{filter:none}
+
+table{border-collapse:collapse;margin-top:var(--sp-2);font-size:14px;width:100%}
+th,td{border-top:1px solid var(--paper-card);padding:var(--sp-1);text-align:start;vertical-align:top}
+th{color:var(--sub-on-light);font-weight:400;white-space:nowrap}
+</style>
+</head>
+<body data-mode="a">
+<div class="wrap">
+
+<p class="label">DECISION</p>
+<h1>写真の朱（グレースケール＋朱の乗算）を、残すか／やめるか</h1>
+<p class="note">
+  上のボタンで、サイト全体の写真の出かたを切り替えて見比べられます。
+  写真以外（色・余白・角丸・書体）は本番と同じ値です。差が出ているのは写真の加工だけです。
+</p>
+
+<div class="switch">
+  <div class="tabs" role="group" aria-label="写真の加工">
+    <button class="tab" data-set="a" aria-pressed="true">A 現状：グレースケール＋朱28%</button>
+    <button class="tab" data-set="b" aria-pressed="false">B 朱だけやめる（白黒は残す）</button>
+    <button class="tab" data-set="c" aria-pressed="false">C 加工をやめる（そのまま）</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     1. いま実際に入っている2枚
+     ⚠ ここが今回の判断のいちばんの材料である。
+     ══════════════════════════════════════════════ -->
+<h2>1. いま実際にサイトに入っている2枚</h2>
+<p class="note">
+  言葉もてあそ部が投稿したものです。<b>どちらも「写真」ではなく、文字の入った画面キャプチャ</b>でした。
+</p>
+<div class="warn">
+  <p>
+    6-5 が想定していたのは「学生がスマホで撮った写真」です。実際に最初に入ってきたのは、
+    <b>ゲーム画面のキャプチャ</b>と<b>スライドのキャプチャ</b>でした。
+    白黒にして朱を重ねると、文字と背景の差が潰れて読めなくなります。
+    A と C を切り替えて、数字「100949」と「大学生の溢れ出す妄想を形にする」の読めかたを見比べてください。
+  </p>
+</div>
+
+<ul class="grid wide">
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/a1.jpg" alt="ゲーム画面のキャプチャ"><span class="overlay"></span></div>
+    <h4>言葉もてあそ部</h4><span class="meta">CLUB / 活動中</span></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/b1.jpg" alt="MVVのスライド"><span class="overlay"></span></div>
+    <h4>北大心理ゼミのMVV</h4><span class="meta">CLUB / 活動中</span></a></li>
+</ul>
+
+<!-- ══════════════════════════════════════════════
+     2. 朱が本来やろうとしていたこと
+     ══════════════════════════════════════════════ -->
+<h2>2. 朱が本来やろうとしていたこと：ばらつきを消す</h2>
+<div class="warn">
+  <p>
+    ⚠ <b>下の6枚のうち4枚は、上の2枚の明るさ・色味だけを機械的に変えた見本です。</b>
+    本物のスマホ写真ではありません。実物が2枚しかないため、
+    6-5 が想定した「明るさも色もバラバラ」の状況を再現しています。
+    ばらつきの度合いは、実際の投稿とは違う可能性があります。
+  </p>
+</div>
+<p class="note">
+  A では6枚が同じトーンに揃います。C では揃いません。これが、朱をやめると失われるものです。
+</p>
+
+<ul class="grid">
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/a1.jpg" alt=""><span class="overlay"></span></div><h4>そのまま</h4></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/a2.jpg" alt=""><span class="overlay"></span></div><h4>明るく・暖色寄り（見本）</h4></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/a3.jpg" alt=""><span class="overlay"></span></div><h4>暗く・寒色寄り（見本）</h4></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/b1.jpg" alt=""><span class="overlay"></span></div><h4>そのまま</h4></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/b2.jpg" alt=""><span class="overlay"></span></div><h4>明るく・派手（見本）</h4></a></li>
+  <li><a class="card" href="#"><div class="thumb"><img src="assets/b3.jpg" alt=""><span class="overlay"></span></div><h4>暗く・くすませた（見本）</h4></a></li>
+</ul>
+
+<!-- ══════════════════════════════════════════════
+     3. 3案を同時に見る
+     ══════════════════════════════════════════════ -->
+<h2>3. 3案を同時に並べる</h2>
+<p class="note">切り替えではなく、同じ画面に3つ並べたものです。</p>
+
+<h3>ゲーム画面のキャプチャ</h3>
+<div class="side">
+  <figure class="sA"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/a1.jpg" alt=""><span class="overlay"></span></div>
+    <figcaption><b>A 現状</b>　白黒＋朱28%</figcaption></figure>
+  <figure class="sB"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/a1.jpg" alt=""></div>
+    <figcaption><b>B</b>　白黒のみ</figcaption></figure>
+  <figure class="sC"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/a1.jpg" alt=""></div>
+    <figcaption><b>C</b>　加工なし</figcaption></figure>
+</div>
+
+<h3>スライドのキャプチャ</h3>
+<div class="side">
+  <figure class="sA"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/b1.jpg" alt=""><span class="overlay"></span></div>
+    <figcaption><b>A 現状</b>　白黒＋朱28%</figcaption></figure>
+  <figure class="sB"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/b1.jpg" alt=""></div>
+    <figcaption><b>B</b>　白黒のみ</figcaption></figure>
+  <figure class="sC"><div class="thumb" style="aspect-ratio:16/9"><img src="assets/b1.jpg" alt=""></div>
+    <figcaption><b>C</b>　加工なし</figcaption></figure>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     4. 判断材料
+     ══════════════════════════════════════════════ -->
+<h2>4. それぞれで何が変わるか</h2>
+<table>
+  <tr><th></th><th>A 現状</th><th>B 白黒のみ</th><th>C 加工なし</th></tr>
+  <tr><th>写真のばらつき</th><td>ほぼ消える</td><td>ほぼ消える</td><td>そのまま出る</td></tr>
+  <tr><th>文字入りキャプチャ</th><td>読めない</td><td>読みにくい</td><td>読める</td></tr>
+  <tr><th>作品の色</th><td>変わる（6-5・work.module.css が禁じている）</td><td>変わる</td><td>正しく出る</td></tr>
+  <tr><th>ホバーで色が戻る仕掛け</th><td>ある</td><td>ある</td><td>無くなる</td></tr>
+  <tr><th>サイト全体の統一感</th><td>強い</td><td>やや強い</td><td>写真しだい</td></tr>
+  <tr><th>朱の使いどころ</th><td>写真・見出し・ボタン</td><td>見出し・ボタン</td><td>見出し・ボタン</td></tr>
+</table>
+
+<h2>5. いま分かっていないこと</h2>
+<p class="note">
+  ⚠ <b>本物のスマホ写真が、まだ1枚も投稿されていません。</b>
+  6-5 が守ろうとした「明るさも色もバラバラなスマホ写真」が実際にどれくらいばらつくのかは、
+  この時点では確かめようがありません。上の2章は、同じ画像を機械的に加工した見本にすぎません。
+  作品が数点そろってから、この画面をもう一度開いて決め直すこともできます。
+</p>
+
+</div>
+<script>
+/* ⚠ 切り替えは data-mode だけを変える。CSS の側で全部の見え方を持たせてある。
+     JSで個別に style を書くと、本番の CSS と対応が取れなくなる。 */
+document.querySelectorAll('.tab').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.body.dataset.mode = b.dataset.set;
+    document.querySelectorAll('.tab').forEach(function (x) {
+      x.setAttribute('aria-pressed', String(x === b));
+    });
+  });
+});
+</script>
+</body>
+</html>
