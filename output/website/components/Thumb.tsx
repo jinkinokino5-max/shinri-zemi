@@ -27,6 +27,19 @@ export function Thumb({
   const cls = [styles.thumb, done && styles.done].filter(Boolean).join(' ');
   const style = ratio ? { aspectRatio: ratio } : undefined;
 
+  /* ⚠ 投稿者が枠の中の位置と拡大率を指定していれば、それに従う。
+       指定が無ければ、これまでどおり「まん中・等倍」。
+       ⚠ transform-origin を焦点に合わせる。まん中を原点に拡大すると、
+         せっかく指定した位置から離れていく。 */
+  const f = cover?.focus;
+  const imgStyle = f
+    ? {
+        objectPosition: `${f.x}% ${f.y}%`,
+        transformOrigin: `${f.x}% ${f.y}%`,
+        transform: f.zoom > 1 ? `scale(${f.zoom})` : undefined,
+      }
+    : undefined;
+
   if (!cover) {
     return (
       <div className={`${cls} ${styles.empty}`} style={style}>
@@ -45,7 +58,14 @@ export function Thumb({
             それまでは素の <img> を使い、loading="lazy" だけ効かせる。
             ⚠ alt はスキーマで必須にしてある（06資料 2章）。 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className={styles.img} src={asset(cover.src)} alt={cover.alt} loading="lazy" decoding="async" />
+      <img
+        className={styles.img}
+        style={imgStyle}
+        src={asset(cover.src)}
+        alt={cover.alt}
+        loading="lazy"
+        decoding="async"
+      />
       <span className={styles.overlay} />
     </div>
   );

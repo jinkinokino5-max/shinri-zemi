@@ -11,13 +11,36 @@
 //  ⚠ この2つを揃えて変えること。片方だけ変えない。
 // ══════════════════════════════════════════════════════════════════
 
+/** 枠の中で写真のどこを見せるか。⚠ lib/schema.ts の Focus と揃えること。 */
+type Focus = { x: number; y: number; zoom: number };
+
 export type PublishRow = {
   id: string;
   kind: 'work' | 'club' | 'project' | 'event';
   target_slug: string;
   data: Record<string, unknown>;
-  images: { path: string; alt: string }[];
+  images: { path: string; alt: string; focus?: Focus }[];
 };
+
+/**
+ * 焦点を書き出すか決める。
+ *
+ * ⚠ まん中・等倍（＝既定）なら書き出さない。
+ *   すべての写真に `focus: {x: 50, y: 50, zoom: 1}` が並ぶと、
+ *   .md を人が読んだときに「何か指定されている」と誤解する。
+ *   指定していないことは、書かないことで表す（CLAUDE.md 3-4 と同じ考え）。
+ */
+function focusOrNothing(f?: Focus): Focus | undefined {
+  if (!f) return undefined;
+  if (f.x === 50 && f.y === 50 && f.zoom === 1) return undefined;
+  return { x: f.x, y: f.y, zoom: f.zoom };
+}
+
+/** 写真1枚を、.md に書く形にする。⚠ focus は既定値なら省く。 */
+function imageEntry(src: string, alt: string, focus?: Focus) {
+  const f = focusOrNothing(focus);
+  return f ? { src, alt: alt || '', focus: f } : { src, alt: alt || '' };
+}
 
 /**
  * data の中で、フロントマターに書き出してはいけないキー。
@@ -30,7 +53,7 @@ export type PublishRow = {
 const INTERNAL_KEYS = new Set(['keepImages']);
 
 /** 「そのまま残す」と指示された、公開済みの写真。src は /photos/… の形。 */
-type KeptImage = { src: string; alt: string };
+type KeptImage = { src: string; alt: string; focus?: Focus };
 
 /* ── YAML の出力 ────────────────────────────────────
    ⚠ 自前で書いている理由：値は学生の自由入力で、コロン・引用符・改行が
@@ -56,10 +79,19 @@ function yamlValue(v: unknown, indent = ''): string {
             ? // 配列の中のオブジェクト（images の各要素）。
               //   - src: "…"
               //     alt: "…"
+              //     focus:
+              //       x: 40
+              //
+              // ⚠ 中の値には indent + '    ' を渡すこと。
+              //   渡さないと、さらに入れ子になったもの（focus）の字下げが
+              //   配列の外まで戻ってしまい、フロントマターが壊れる。
+              //   実際、focus を足した時点でこれが起きた（2026-08-13）。
               `${indent}  - ` +
               Object.entries(x as Record<string, unknown>)
                 .map(([k, y], i) =>
-                  i === 0 ? `${k}: ${yamlValue(y)}` : `\n${indent}    ${k}: ${yamlValue(y)}`,
+                  i === 0
+                    ? `${k}: ${yamlValue(y, indent + '    ')}`
+                    : `\n${indent}    ${k}: ${yamlValue(y, indent + '    ')}`,
                 )
                 .join('')
             : `${indent}  - ${yamlValue(x, indent + '  ')}`,
@@ -113,14 +145,12 @@ export function toMarkdown(row: PublishRow, photoDir: string, today = new Date()
      ⚠ keepImages が空で新しい写真も無い＝写真の無いページになる。
        これは事故ではなく指示である（投稿者が全部外した）。
        cover の行そのものが出ず、6-4 のフォールバック表示に切り替わる。 */
-  const kept = ((row.data as { keepImages?: KeptImage[] }).keepImages ?? []).map((im) => ({
-    src: im.src,
-    alt: im.alt || '',
-  }));
-  const added = (row.images ?? []).map((im) => ({
-    src: `${photoDir}/${fileName(im.path)}`,
-    alt: im.alt || '',
-  }));
+  const kept = ((row.data as { keepImages?: KeptImage[] }).keepImages ?? []).map((im) =>
+    imageEntry(im.src, im.alt, im.focus),
+  );
+  const added = (row.images ?? []).map((im) =>
+    imageEntry(`${photoDir}/${fileName(im.path)}`, im.alt, im.focus),
+  );
   const all = [...kept, ...added];
 
   // ⚠ 1枚目を cover にする。写真が無ければ cover の行そのものが出ない。

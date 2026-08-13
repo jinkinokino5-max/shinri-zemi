@@ -41,3 +41,6 @@ Thumbs.db
 out/
 next-env.d.ts
 *.tsbuildinfo
+
+# Supabase CLI のローカル状態（接続情報を含む。共有しない）
+output/website/supabase/.temp/

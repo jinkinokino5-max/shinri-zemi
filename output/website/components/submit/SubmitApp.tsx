@@ -256,6 +256,8 @@ function Inner({
 
   const fields = FIELDS[kind];
   const picked = targetSlug ? entries.find((e) => e.kind === kind && e.slug === targetSlug) : null;
+  const frameName =
+    String(data.title ?? data.name ?? '').trim() || picked?.label || '（名前がまだ）';
 
   return (
     <>
@@ -374,7 +376,14 @@ function Inner({
                 />
               ))}
 
-              <KeepPhotos images={keepImages} onChange={setKeepImages} />
+              {/* ⚠ frameName は「写真が無いときの枠」に出る名前（6-4）。
+                    入力中の作品名・団体名をそのまま渡し、プレビューを
+                    本物と同じ見え方にする。 */}
+              <KeepPhotos
+                images={keepImages}
+                onChange={setKeepImages}
+                frameName={frameName}
+              />
 
               <PhotoInput
                 userId={member.user_id}
@@ -382,6 +391,7 @@ function Inner({
                 images={images}
                 onChange={setImages}
                 label={keepImages.length > 0 ? '写真を足す' : undefined}
+                frameName={frameName}
               />
 
               {needsConsent(kind, op) && (

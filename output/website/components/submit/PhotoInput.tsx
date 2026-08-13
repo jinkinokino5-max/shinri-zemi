@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
+import type { Focus } from '@/lib/schema';
+import { DEFAULT_FOCUS, PhotoFraming } from './PhotoFraming';
 import s from './form.module.css';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -13,11 +15,19 @@ import s from './form.module.css';
        「人に依存するルールは必ず守られなくなる。仕組みで解決する」
      ここでは元のまま受け取り、公開時に scripts/optimize-images.mjs が縮める。
 
-   ⚠ alt は必ず書いてもらう。空の alt は scripts/check-content.mjs が
-     デプロイを止める（参考サイト blanca の失敗をそのまま検査項目にしている）。
+   ⚠ alt（写真の説明）について、事実は次のとおり。
+     scripts/check-content.mjs が見ているのは「alt 属性があるか」だけで、
+     空文字（alt=""）は通ってしまう。**空のままでも公開は止まらない。**
+     以前ここには「空だと公開が止まります」と書いてあったが、それは誤りだった
+     （2026-08-13、実際に空の alt が公開されて判明）。
+     画面に嘘を書くと、次に本当の警告が出たときに誰も信じなくなる。
+     止まらないという事実を書いたうえで、なぜ書いてほしいのかを添える。
+
+   ⚠ 1枚目だけは、出る場所ごとに違う比率へ切り抜かれる。
+     どう出るかを PhotoFraming が見せ、切れるなら位置を調整できる。
    ══════════════════════════════════════════════════════════════════ */
 
-export type UploadedImage = { path: string; alt: string };
+export type UploadedImage = { path: string; alt: string; focus?: Focus };
 
 const MAX_BYTES = 10 * 1024 * 1024; // R-5：1つあたり 10MB
 
@@ -27,6 +37,7 @@ export function PhotoInput({
   images,
   onChange,
   label = '写真',
+  frameName = 'この作品・団体',
 }: {
   userId: string;
   submissionId: string;
@@ -35,6 +46,8 @@ export function PhotoInput({
   /** ⚠ すでに載っている写真がある画面では「写真を足す」に変える。
    *    そのまま「写真」だと、既存が置き換わるように読める。 */
   label?: string;
+  /** プレビューの枠に出す名前。⚠ 写真があるときは使われない（6-4 用）。 */
+  frameName?: string;
 }) {
   const supabase = getSupabase()!;
   const [busy, setBusy] = useState(false);
@@ -99,6 +112,9 @@ export function PhotoInput({
   const setAlt = (path: string, alt: string) =>
     onChange(images.map((im) => (im.path === path ? { ...im, alt } : im)));
 
+  const setFocus = (path: string, focus: Focus) =>
+    onChange(images.map((im) => (im.path === path ? { ...im, focus } : im)));
+
   return (
     <div className={s.field}>
       <span className={s.label}>
@@ -138,7 +154,6 @@ export function PhotoInput({
               <div className={s.photoBody}>
                 <label className={s.altLabel}>
                   {i === 0 ? '1枚目（一覧に出ます）' : `${i + 1}枚目`}の説明
-                  {/* ⚠ 目が見えない人に写真の内容を伝える文。空だと公開が止まる。 */}
                   <input
                     className={s.input}
                     value={im.alt}
@@ -146,10 +161,29 @@ export function PhotoInput({
                     onChange={(e) => setAlt(im.path, e.target.value)}
                   />
                 </label>
+                {/* ⚠ 空でも公開は止まる「わけではない」。事実を書く。
+                      止まらないからこそ、書く理由のほうを伝える。 */}
+                {im.alt.trim() === '' && (
+                  <p className={s.note}>
+                    空のままでも公開はされますが、目の見えない人にこの写真の内容が伝わりません。
+                  </p>
+                )}
                 <button type="button" className={s.linkBtn} onClick={() => remove(im.path)}>
                   この写真を消す
                 </button>
               </div>
+
+              {/* ⚠ 切り抜かれるのは1枚目だけ。2枚目以降は作品ページに
+                    元の比率のまま出るので、決めることが無い。 */}
+              {i === 0 && previews[im.path] && (
+                <PhotoFraming
+                  src={previews[im.path]}
+                  alt={im.alt}
+                  name={frameName}
+                  focus={im.focus ?? DEFAULT_FOCUS}
+                  onChange={(f) => setFocus(im.path, f)}
+                />
+              )}
             </li>
           ))}
         </ul>

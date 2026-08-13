@@ -24,10 +24,38 @@ import { z } from 'zod';
 export const Status = z.enum(['active', 'done']);
 export type Status = z.infer<typeof Status>;
 
+/**
+ * 枠の中で写真のどこを見せるか。
+ *
+ * ⚠ なぜ要るか
+ *   1枚目（cover）は、出る場所ごとに違う比率へ切り抜かれる。
+ *     一覧カード 4:3 ／ トップの帯 16:10 ／ 部活・PJ 16:9 ／ 作品ページ 3:2
+ *   縦長の写真を 16:9 に切ると、まん中しか残らない。
+ *   人が写っていれば顔が切れるし、作品なら題字が切れる。
+ *   投稿者が「どこを残すか」を決められないと、これは直しようがない。
+ *
+ * ⚠ すべて optional。省略時は「まん中・等倍」で、これまでと同じ表示になる。
+ *   既存の content/*.md を1文字も書き換えずに済むようにしてある。
+ *
+ * ⚠ 切り抜きの結果を .md に焼き込まない（画像そのものは切らない）。
+ *   焼き込むと、あとで比率を変えたときに直せなくなる。
+ *   ここに残すのは「どこを中心に見せたいか」という意図だけである。
+ */
+const Focus = z.object({
+  /** 横の中心。0=左端 50=まん中 100=右端。CSS の object-position に渡す。 */
+  x: z.number().min(0).max(100).default(50),
+  /** 縦の中心。0=上端 50=まん中 100=下端。 */
+  y: z.number().min(0).max(100).default(50),
+  /** 拡大率。1=そのまま。⚠ 3倍を超えると、どんな写真も荒れる。 */
+  zoom: z.number().min(1).max(3).default(1),
+});
+export type Focus = z.infer<typeof Focus>;
+
 /** 画像への参照。⚠ alt は必須（06資料 2章：装飾画像以外は alt を入れる）。 */
 const ImageRef = z.object({
   src: z.string(),
   alt: z.string(),
+  focus: Focus.optional(),
 });
 export type ImageRef = z.infer<typeof ImageRef>;
 

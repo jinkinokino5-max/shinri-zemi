@@ -1,0 +1,158 @@
+/* ══════════════════════════════════════════════════════════════════
+   写真の出かたのプレビューと、切り抜きの調整
+   根拠：draft/デザイン大本資料_v1.md 原理3（box-shadow を使わない）
+        ／ 04資料（コントラスト）／ 06資料 2章（色だけに頼らない）
+
+   ⚠ 色は tokens.css の変数だけを使う。ここで新しい色を作らない。
+   ⚠ プレビューの中身（写真の見え方）には一切スタイルを当てない。
+     あれは components/Thumb.module.css の仕事で、ここが触ると嘘になる。
+   ══════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--paper);
+  border-radius: var(--radius);
+}
+
+.caption {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: var(--sp-2);
+}
+.captionNote {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--sub-on-light);   /* 4.92 AA */
+}
+
+/* ── 出る場所ごとのプレビュー ─────────────────────── */
+.contexts {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-3);
+}
+.context { min-width: 0; }
+
+.contextLabel {
+  margin-top: var(--sp-1);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sub-on-light);
+}
+.contextRatio {
+  font: 400 11px/1 var(--font-mono);
+  letter-spacing: .1em;
+  margin-inline-start: var(--sp-1);
+}
+/* ⚠ 「いちばん大きく切られます」。ここを見落とすと調整の意味が伝わらない。 */
+.contextNote {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--shu-on-light);   /* 4.87 AA */
+}
+
+/* ── 調整を開くボタン ─────────────────────────────── */
+.toggle {
+  margin-top: var(--sp-3);
+  font: 400 15px/1.6 var(--font-sans);
+  color: var(--shu-on-light);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── 調整の中身 ───────────────────────────────────── */
+.editor {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--paper-card);
+}
+.editorNote {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--sub-on-light);
+  margin-bottom: var(--sp-2);
+  max-width: var(--measure);
+}
+
+.area {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper-card);
+  cursor: crosshair;
+  touch-action: none;     /* ⚠ 指でなぞる調整を、画面のスクロールに奪われないため */
+  user-select: none;
+}
+.areaImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;   /* 画像のドラッグ（ゴースト）を出さない */
+}
+
+/* いま中心にしている場所。⚠ 白と墨の二重の輪にして、
+   明るい写真でも暗い写真でも見えるようにする。色だけに頼らない。 */
+.crosshair {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--white);
+  outline: 2px solid var(--ink);
+  pointer-events: none;
+}
+
+/* ── つまみ ───────────────────────────────────────── */
+.sliders {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  max-width: var(--measure);
+}
+.slider { display: grid; gap: 4px; }
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.sliderValue {
+  font: 400 13px/1.6 var(--font-mono);
+  color: var(--sub-on-light);
+}
+.slider input {
+  width: 100%;
+  accent-color: var(--shu-on-light);
+}
+.slider input:focus-visible {
+  outline: 3px solid var(--shu-on-light);
+  outline-offset: 2px;
+}
+
+.reset {
+  margin-top: var(--sp-2);
+  font: 400 15px/1.6 var(--font-sans);
+  color: var(--shu-on-light);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.reset:disabled {
+  color: var(--sub-on-light);
+  cursor: not-allowed;
+  text-decoration: none;
+}

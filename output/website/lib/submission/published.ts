@@ -1,4 +1,5 @@
 import { getClubs, getEvents, getProjects, getWorks } from '@/lib/content';
+import type { ImageRef } from '@/lib/schema';
 import type { Kind } from './fields';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -30,7 +31,7 @@ export type PublishedEntry = {
   /** 投稿フォームの data と同じ形。undefined の項目は入れない。 */
   data: Record<string, unknown>;
   /** すでに公開されている写真。⚠ Storage のパスではなく、公開後の src。 */
-  images: { src: string; alt: string }[];
+  images: ImageRef[];
 };
 
 /** undefined を落として詰める。⚠ 空文字を入れない（CLAUDE.md 3-4）。 */
@@ -44,8 +45,10 @@ function compact(o: Record<string, unknown>): Record<string, unknown> {
   return out;
 }
 
-/** cover と images を1本にする。⚠ 順序を保つ。1枚目が cover に戻るため。 */
-function photos(e: { cover?: { src: string; alt: string }; images?: { src: string; alt: string }[] }) {
+/** cover と images を1本にする。⚠ 順序を保つ。1枚目が cover に戻るため。
+ *  ⚠ focus（枠内の位置と拡大率）もそのまま持ち回る。落とすと、
+ *    文章を直しただけで切り抜きの位置がまん中へ戻る。 */
+function photos(e: { cover?: ImageRef; images?: ImageRef[] }): ImageRef[] {
   return [...(e.cover ? [e.cover] : []), ...(e.images ?? [])];
 }
 

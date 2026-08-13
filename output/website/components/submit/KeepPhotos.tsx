@@ -1,5 +1,8 @@
 'use client';
 
+import { asset } from '@/lib/asset';
+import type { Focus } from '@/lib/schema';
+import { DEFAULT_FOCUS, PhotoFraming } from './PhotoFraming';
 import s from './form.module.css';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -17,19 +20,24 @@ import s from './form.module.css';
      （PhotoInput）とは出所が違う。混ぜないこと。
    ══════════════════════════════════════════════════════════════════ */
 
-export type KeptImage = { src: string; alt: string };
+export type KeptImage = { src: string; alt: string; focus?: Focus };
 
 export function KeepPhotos({
   images,
   onChange,
+  frameName = 'この作品・団体',
 }: {
   images: KeptImage[];
   onChange: (v: KeptImage[]) => void;
+  frameName?: string;
 }) {
   if (images.length === 0) return null;
 
   const setAlt = (src: string, alt: string) =>
     onChange(images.map((im) => (im.src === src ? { ...im, alt } : im)));
+
+  const setFocus = (src: string, focus: Focus) =>
+    onChange(images.map((im) => (im.src === src ? { ...im, focus } : im)));
 
   return (
     <div className={s.field}>
@@ -43,7 +51,8 @@ export function KeepPhotos({
         {images.map((im, i) => (
           <li key={im.src} className={s.photo}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={im.src} alt="" className={s.photoImg} />
+            {/* ⚠ basePath を付ける。付けないと GitHub Pages で表示されない。 */}
+            <img src={asset(im.src)} alt="" className={s.photoImg} />
             <div className={s.photoBody}>
               <label className={s.altLabel}>
                 {i === 0 ? '1枚目（一覧に出ます）' : `${i + 1}枚目`}の説明
@@ -54,6 +63,11 @@ export function KeepPhotos({
                   placeholder="何が写っているか"
                 />
               </label>
+              {im.alt.trim() === '' && (
+                <p className={s.note}>
+                  空のままでも公開はされますが、目の見えない人にこの写真の内容が伝わりません。
+                </p>
+              )}
               {/* ⚠ 「消す」ではなく「この写真を外す提案をする」。
                     押した時点では何も消えない。消えるのは承認された後。 */}
               <button
@@ -64,6 +78,18 @@ export function KeepPhotos({
                 この写真を外す
               </button>
             </div>
+
+            {/* ⚠ 切り抜かれるのは1枚目だけ。すでに公開されている写真でも、
+                  位置を直したいことはある（16:9 で顔が切れている等）。 */}
+            {i === 0 && (
+              <PhotoFraming
+                src={asset(im.src)}
+                alt={im.alt}
+                name={frameName}
+                focus={im.focus ?? DEFAULT_FOCUS}
+                onChange={(f) => setFocus(im.src, f)}
+              />
+            )}
           </li>
         ))}
       </ul>

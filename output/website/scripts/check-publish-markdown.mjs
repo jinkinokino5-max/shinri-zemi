@@ -298,6 +298,66 @@ check('直す提案（写真を全部外した＝写真の無いページにす�
   },
 });
 
+/* ── 切り抜きの位置（focus）───────────────────────
+   ⚠ ここは実際に壊れた場所である（2026-08-13）。
+     images は「配列の中のオブジェクト」で、その中にさらに focus という
+     オブジェクトが入る。字下げを1段間違えるだけでフロントマターが崩れ、
+     承認したのにビルドが落ちる、といういちばん直しにくい壊れ方になる。 */
+
+const framed = check(
+  '焦点つきの写真（cover と images の両方に入れ子が出る）',
+  {
+    id: 'aaaaaaaa-0000-0000-0000-000000000013',
+    kind: 'work',
+    target_slug: 'framed',
+    data: {
+      title: '切り抜きを指定した作品',
+      displayNames: ['みずき'],
+      belongsTo: { kind: 'club', slug: 'dokusho' },
+      year: 2026,
+      body: '縦長の写真なので、上のほうを残しています。',
+    },
+  },
+  {
+    photos: [
+      { path: 'uid/sub/aaaa1111.jpg', alt: '表紙', focus: { x: 40, y: 22, zoom: 1.6 } },
+      { path: 'uid/sub/bbbb2222.jpg', alt: '中身', focus: { x: 70, y: 50, zoom: 1 } },
+      { path: 'uid/sub/cccc3333.jpg', alt: '裏表紙' },
+    ],
+  },
+);
+
+if (framed) {
+  if (framed.value.cover?.focus?.y !== 22 || framed.value.cover?.focus?.zoom !== 1.6) {
+    console.error('❌ cover の focus が読み戻せません');
+    failed++;
+  }
+  if (framed.value.images?.[0]?.focus?.x !== 70) {
+    console.error('❌ images の中の focus が読み戻せません（字下げが崩れている可能性）');
+    failed++;
+  }
+  // ⚠ まん中・等倍は書き出さない。全部の写真に既定値が並ぶと、
+  //   .md を読んだ人が「何か指定されている」と誤解する。
+  if (framed.value.images?.[1]?.focus !== undefined) {
+    console.error('❌ 指定していない写真にまで focus が書き出されています');
+    failed++;
+  }
+}
+
+check('まん中・等倍を明示的に渡しても、focus は書き出されないこと', {
+  id: 'aaaaaaaa-0000-0000-0000-000000000014',
+  kind: 'club',
+  target_slug: 'mannaka',
+  data: {
+    name: 'まん中部',
+    status: 'active',
+    body: '既定値です。',
+    keepImages: [
+      { src: '/photos/clubs/mannaka/1.jpg', alt: '活動のようす', focus: { x: 50, y: 50, zoom: 1 } },
+    ],
+  },
+});
+
 /* ── 結果 ─────────────────────────────────────────── */
 
 if (failed > 0) {

@@ -11,7 +11,10 @@ import {
   type Op,
 } from '@/lib/submission/fields';
 import type { DependentMap, PublishedEntry } from '@/lib/submission/published';
+import { asset } from '@/lib/asset';
+import type { Focus } from '@/lib/schema';
 import { AuthGate } from './AuthGate';
+import { DEFAULT_FOCUS, PhotoFraming } from './PhotoFraming';
 import s from './form.module.css';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -42,7 +45,7 @@ type Row = {
   state: string;
   target_slug: string | null;
   data: Record<string, unknown>;
-  images: { path: string; alt: string }[];
+  images: { path: string; alt: string; focus?: Focus }[];
   delete_reason: string | null;
   consent_publish: boolean;
   consent_portrait: boolean;
@@ -265,6 +268,11 @@ function ReviewCard({
             </p>
           )}
 
+          {/* ⚠ 代表が最初に見るのは「サイトでどう出るか」。
+                項目の羅列より先に置く。ここで顔が切れていれば、
+                公開してから気づくのではなく、いま差し戻せる。 */}
+          <CoverPreview row={row} urls={urls} name={title} />
+
           {/* ── 中身をそのまま並べる。直す提案なら、変わったところを示す ── */}
           <dl className={s.dl}>
             {FIELDS[row.kind].map((f) => {
@@ -306,8 +314,13 @@ function ReviewCard({
                     {urls[im.path] && <img src={urls[im.path]} alt={im.alt} className={s.photoImg} />}
                     <p className={s.note}>
                       説明：
+                      {/* ⚠ 空でも公開は止まらない（check-content.mjs は alt 属性の
+                            有無しか見ていない）。止まると書くのは嘘になる。
+                            差し戻すかどうかは、代表が事実を知ったうえで決める。 */}
                       {im.alt || (
-                        <span className={s.error}>（未記入。このままだと公開が止まります）</span>
+                        <span className={s.error}>
+                          （未記入。公開はされますが、目の見えない人に内容が伝わりません）
+                        </span>
                       )}
                     </p>
                   </li>
@@ -408,6 +421,50 @@ function ReviewCard({
         <p className={s.note}>上の{checks.length}つを確認してからでないと反映できません。</p>
       )}
     </article>
+  );
+}
+
+/* ── 一覧に出る写真（cover）が、実際どう出るか ──────
+   ⚠ 投稿画面と同じ PhotoFraming を使う。代表と投稿者が同じものを見る。
+     別々の見え方を見ていると、「切れている」の話が噛み合わなくなる。 */
+
+function CoverPreview({
+  row,
+  urls,
+  name,
+}: {
+  row: Row;
+  urls: Record<string, string>;
+  name: string;
+}) {
+  // ⚠ 並びは to-markdown.ts と同じ「残す写真 → 足す写真」。
+  //   ここだけ順序が違うと、代表が見た1枚目と公開される1枚目がずれる。
+  const kept = (row.data?.keepImages as { src: string; alt: string; focus?: Focus }[]) ?? [];
+  const first = kept[0];
+
+  if (first) {
+    return (
+      <PhotoFraming
+        src={asset(first.src)}
+        alt={first.alt}
+        name={name}
+        focus={first.focus ?? DEFAULT_FOCUS}
+        readOnly
+      />
+    );
+  }
+
+  const added = row.images?.[0];
+  if (!added || !urls[added.path]) return null;
+
+  return (
+    <PhotoFraming
+      src={urls[added.path]}
+      alt={added.alt}
+      name={name}
+      focus={added.focus ?? DEFAULT_FOCUS}
+      readOnly
+    />
   );
 }
 
