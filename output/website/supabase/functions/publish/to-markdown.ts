@@ -50,9 +50,25 @@ function imageEntry(src: string, alt: string, focus?: Focus) {
  *   Zod が知らない項目として通ってしまい、.md にゴミが残り続ける。
  *   写真そのものは下の toMarkdown が cover / images に組み立て直す。
  */
-const INTERNAL_KEYS = new Set(['keepImages']);
+const INTERNAL_KEYS = new Set(['photos', 'keepImages']);
 
-/** 「そのまま残す」と指示された、公開済みの写真。src は /photos/… の形。 */
+/**
+ * 投稿者が決めた写真の並び。1件目が表紙（cover）、2件目以降が本文中の写真。
+ *
+ * ⚠ 2026-08-13 に追加。それまでは「残す写真（keepImages）」と
+ *   「足す写真（images）」の2本の配列を、この順で連結していた。
+ *   そのため、新しく足した写真を表紙にすることができなかった。
+ *   さらに投稿画面が2本の配列それぞれの先頭を「1枚目」と呼んでいたため、
+ *   どちらが表紙になるのか投稿者に分からなかった（実際に事故になった）。
+ *   並びは1本にして、投稿者が決めたとおりに使う。
+ *
+ * src  … すでに公開されている写真（そのまま残す）
+ * path … 新しく上げた写真（Storage のパス。ここで公開URLに直す）
+ * ⚠ どちらか一方だけが入る。
+ */
+type OrderedPhoto = { src?: string; path?: string; alt: string; focus?: Focus };
+
+/** 「そのまま残す」と指示された、公開済みの写真。⚠ 古い下書き用。下の注記を参照。 */
 type KeptImage = { src: string; alt: string; focus?: Focus };
 
 /* ── YAML の出力 ────────────────────────────────────
@@ -145,18 +161,35 @@ export function toMarkdown(row: PublishRow, photoDir: string, today = new Date()
      ⚠ keepImages が空で新しい写真も無い＝写真の無いページになる。
        これは事故ではなく指示である（投稿者が全部外した）。
        cover の行そのものが出ず、6-4 のフォールバック表示に切り替わる。 */
-  const kept = ((row.data as { keepImages?: KeptImage[] }).keepImages ?? []).map((im) =>
-    imageEntry(im.src, im.alt, im.focus),
-  );
-  const added = (row.images ?? []).map((im) =>
-    imageEntry(`${photoDir}/${fileName(im.path)}`, im.alt, im.focus),
-  );
-  const all = [...kept, ...added];
+  const d = row.data as { photos?: OrderedPhoto[]; keepImages?: KeptImage[] };
+
+  const all = d.photos
+    ? // ⚠ 投稿者が決めた並びをそのまま使う。ここで並べ替えない。
+      d.photos.map((im) =>
+        imageEntry(im.src ?? `${photoDir}/${fileName(im.path!)}`, im.alt, im.focus),
+      )
+    : // ⚠ 古い下書き（photos がまだ無い）への備え。
+      //   投稿画面を新しくした時点で保存済みだった下書きが、開いた瞬間に
+      //   写真を全部失わないようにする。新しい下書きはここを通らない。
+      [
+        ...(d.keepImages ?? []).map((im) => imageEntry(im.src, im.alt, im.focus)),
+        ...(row.images ?? []).map((im) =>
+          imageEntry(`${photoDir}/${fileName(im.path)}`, im.alt, im.focus),
+        ),
+      ];
 
   // ⚠ 1枚目を cover にする。写真が無ければ cover の行そのものが出ない。
   //   optional のまま保たれ、名前だけの落ち着いた枠に切り替わる（大本資料 6-4）。
   const [first, ...others] = all;
   if (first) front.cover = first;
+
+  // ⚠ 2枚目以降は、種類にかかわらず書き出す。
+  //   2026-08-13 まで、ここは `if (row.kind === 'work')` の中にあった。
+  //   そのため部活・PJ・イベントに2枚目を投稿すると、写真ファイルだけが
+  //   リポジトリにコミットされ、どのページからも参照されないまま残っていた
+  //   （実際に 5ed1e67f.png が孤児になった）。
+  //   lib/schema.ts の base に images を足して、置き場を作ってある。
+  if (others.length > 0) front.images = others;
 
   if (row.kind === 'work') {
     // ⚠ 公開日は最初に公開した日のまま動かさない。
@@ -164,7 +197,6 @@ export function toMarkdown(row: PublishRow, photoDir: string, today = new Date()
     //   毎回「新しく公開されたもの」になり、時系列が読めなくなる。
     //   直す提案では、編集画面が元の publishedAt をそのまま持ち回っている。
     front.publishedAt = front.publishedAt ?? today.toISOString().slice(0, 10);
-    if (others.length > 0) front.images = others;
   }
 
   const lines = Object.entries(front).map(([k, v]) => `${k}: ${yamlValue(v)}`);

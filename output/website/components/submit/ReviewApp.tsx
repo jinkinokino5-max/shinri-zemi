@@ -271,7 +271,7 @@ function ReviewCard({
           {/* ⚠ 代表が最初に見るのは「サイトでどう出るか」。
                 項目の羅列より先に置く。ここで顔が切れていれば、
                 公開してから気づくのではなく、いま差し戻せる。 */}
-          <CoverPreview row={row} urls={urls} name={title} />
+          <PhotoReview row={row} urls={urls} name={title} before={before} op={op} />
 
           {/* ── 中身をそのまま並べる。直す提案なら、変わったところを示す ── */}
           <dl className={s.dl}>
@@ -301,33 +301,6 @@ function ReviewCard({
               );
             })}
           </dl>
-
-          <KeptPhotos data={row.data} before={before} op={op} />
-
-          {(row.images ?? []).length > 0 && (
-            <>
-              <p className={s.label}>{op === 'update' ? '新しく足す写真' : '写真'}</p>
-              <ul className={s.photos}>
-                {row.images.map((im) => (
-                  <li key={im.path} className={s.photo}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {urls[im.path] && <img src={urls[im.path]} alt={im.alt} className={s.photoImg} />}
-                    <p className={s.note}>
-                      説明：
-                      {/* ⚠ 空でも公開は止まらない（check-content.mjs は alt 属性の
-                            有無しか見ていない）。止まると書くのは嘘になる。
-                            差し戻すかどうかは、代表が事実を知ったうえで決める。 */}
-                      {im.alt || (
-                        <span className={s.error}>
-                          （未記入。公開はされますが、目の見えない人に内容が伝わりません）
-                        </span>
-                      )}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
 
           {row.kind === 'work' && (
             <p className={s.note}>
@@ -424,50 +397,6 @@ function ReviewCard({
   );
 }
 
-/* ── 一覧に出る写真（cover）が、実際どう出るか ──────
-   ⚠ 投稿画面と同じ PhotoFraming を使う。代表と投稿者が同じものを見る。
-     別々の見え方を見ていると、「切れている」の話が噛み合わなくなる。 */
-
-function CoverPreview({
-  row,
-  urls,
-  name,
-}: {
-  row: Row;
-  urls: Record<string, string>;
-  name: string;
-}) {
-  // ⚠ 並びは to-markdown.ts と同じ「残す写真 → 足す写真」。
-  //   ここだけ順序が違うと、代表が見た1枚目と公開される1枚目がずれる。
-  const kept = (row.data?.keepImages as { src: string; alt: string; focus?: Focus }[]) ?? [];
-  const first = kept[0];
-
-  if (first) {
-    return (
-      <PhotoFraming
-        src={asset(first.src)}
-        alt={first.alt}
-        name={name}
-        focus={first.focus ?? DEFAULT_FOCUS}
-        readOnly
-      />
-    );
-  }
-
-  const added = row.images?.[0];
-  if (!added || !urls[added.path]) return null;
-
-  return (
-    <PhotoFraming
-      src={urls[added.path]}
-      alt={added.alt}
-      name={name}
-      focus={added.focus ?? DEFAULT_FOCUS}
-      readOnly
-    />
-  );
-}
-
 /* ── 消す提案の中身 ─────────────────────────────── */
 
 function DeleteReview({
@@ -540,48 +469,88 @@ function DeleteReview({
 
 /* ── いま載っている写真をどうするか ─────────────── */
 
-function KeptPhotos({
-  data,
+/* ── 写真が実際どう出るか ────────────────────────
+   ⚠ 投稿画面と同じ並び（data.photos）を、同じ順で見せる。
+     代表と投稿者が違うものを見ていると、「切れている」の話が噛み合わない。
+   ⚠ 1枚目＝表紙（切り抜かれる）、2枚目以降＝本文中（切り抜かれない）。
+     この区別を代表の画面にも出す。出さないと、表紙が入れ替わったことに
+     気づかないまま承認できてしまう。 */
+
+type ReviewPhoto = { src?: string; path?: string; alt: string; focus?: Focus };
+
+function PhotoReview({
+  row,
+  urls,
+  name,
   before,
   op,
 }: {
-  data: Record<string, unknown>;
+  row: Row;
+  urls: Record<string, string>;
+  name: string;
   before: PublishedEntry | null;
   op: Op;
 }) {
-  if (op !== 'update' || !before) return null;
+  const d = row.data as { photos?: ReviewPhoto[]; keepImages?: ReviewPhoto[] };
+  // ⚠ 古い下書きの形（keepImages ＋ images）も開ける。
+  const photos: ReviewPhoto[] =
+    d.photos ?? [...(d.keepImages ?? []), ...(row.images ?? [])];
 
-  const kept = (data.keepImages as { src: string; alt: string }[] | undefined) ?? [];
-  const dropped = before.images.filter((b) => !kept.some((k) => k.src === b.src));
+  const urlOf = (p: ReviewPhoto) => (p.src ? asset(p.src) : (urls[p.path ?? ''] ?? ''));
 
-  if (kept.length === 0 && dropped.length === 0) return null;
+  // ⚠ 外される写真は必ず見せる。「文章を直しただけ」のつもりで写真が落ちる事故は、
+  //   この一覧が無いと承認の瞬間に見抜けない。
+  const dropped =
+    op === 'update' && before
+      ? before.images.filter((b) => !photos.some((p) => p.src === b.src))
+      : [];
+
+  if (photos.length === 0 && dropped.length === 0) return null;
 
   return (
     <>
-      {kept.length > 0 && (
+      {photos.length > 0 && (
         <>
-          <p className={s.label}>そのまま残す写真（{kept.length}枚）</p>
-          <ul className={s.photos}>
-            {kept.map((im) => {
-              const old = before.images.find((b) => b.src === im.src);
-              const altChanged = old && old.alt !== im.alt;
-              return (
-                <li key={im.src} className={s.photo}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={im.src} alt={im.alt} className={s.photoImg} />
-                  <p className={s.note}>
-                    説明：{im.alt || <span className={s.error}>（未記入）</span>}
-                    {altChanged && <span className={s.changedTag}>変更</span>}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
+          {/* 表紙は、出る場所ごとの切り抜きまで見せる。 */}
+          {urlOf(photos[0]) && (
+            <PhotoFraming
+              src={urlOf(photos[0])}
+              alt={photos[0].alt}
+              name={name}
+              focus={photos[0].focus ?? DEFAULT_FOCUS}
+              readOnly
+            />
+          )}
+
+          {photos.length > 1 && (
+            <>
+              <p className={s.label}>
+                本文中の写真（{photos.length - 1}枚）
+                <span className={s.meta}>元の比率のまま出ます</span>
+              </p>
+              <ul className={s.photos}>
+                {photos.slice(1).map((im, i) => (
+                  <li key={im.src ?? im.path} className={s.photo}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {urlOf(im) && <img src={urlOf(im)} alt={im.alt} className={s.photoImg} />}
+                    <p className={s.note}>
+                      {i + 1}枚目の説明：
+                      {/* ⚠ 空でも公開は止まらない（check-content.mjs は alt 属性の
+                            有無しか見ていない）。止まると書くのは嘘になる。 */}
+                      {im.alt || (
+                        <span className={s.error}>
+                          （未記入。公開はされますが、目の見えない人に内容が伝わりません）
+                        </span>
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </>
       )}
 
-      {/* ⚠ 外される写真は、必ず目で見せる。「文章を直しただけ」のつもりで
-            写真が落ちる事故は、この一覧が無いと承認の瞬間に見抜けない。 */}
       {dropped.length > 0 && (
         <>
           <p className={s.label}>この提案で外される写真（{dropped.length}枚）</p>
@@ -589,7 +558,7 @@ function KeptPhotos({
             {dropped.map((im) => (
               <li key={im.src} className={`${s.photo} ${s.photoDropped}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={im.src} alt={im.alt} className={s.photoImg} />
+                <img src={asset(im.src)} alt={im.alt} className={s.photoImg} />
               </li>
             ))}
           </ul>

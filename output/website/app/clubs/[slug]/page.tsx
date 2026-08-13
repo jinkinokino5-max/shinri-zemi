@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
 import { Thumb } from '@/components/Thumb';
+import { Gallery } from '@/components/Gallery';
 import { getClubs } from '@/lib/content';
 import { yearMonth, count, textOr } from '@/lib/format';
 import { ORG } from '@/lib/org';
@@ -79,6 +80,10 @@ export default async function ClubPage({ params }: { params: Promise<Params> }) 
                   空欄を隠さず、まだ無いことを正直に示す。 */
             <p className="cap">紹介文は準備中です。</p>
           )}
+
+          {/* ⚠ 2枚目以降。1枚目は上の Thumb に出している。
+                切り抜かずに元の比率のまま並ぶ（components/Gallery.tsx）。 */}
+          <Gallery images={club.images} />
         </div>
       </section>
     </>

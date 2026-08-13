@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
 import { Thumb } from '@/components/Thumb';
+import { Gallery } from '@/components/Gallery';
 import { getEvents, isUpcoming } from '@/lib/content';
 import { ORG, SITE_URL } from '@/lib/org';
 import { formatEventDate, textOr, count } from '@/lib/format';
@@ -95,6 +96,9 @@ export default async function EventPage({ params }: { params: Promise<Params> })
           ) : (
             <p className="cap">詳細は準備中です。</p>
           )}
+
+          {/* ⚠ 2枚目以降。切り抜かずに元の比率のまま並ぶ。 */}
+          <Gallery images={ev.images} />
         </div>
       </section>
     </>

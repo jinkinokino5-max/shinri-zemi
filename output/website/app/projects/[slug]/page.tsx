@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
 import { Thumb } from '@/components/Thumb';
+import { Gallery } from '@/components/Gallery';
 import { getProjects } from '@/lib/content';
 import { textOr, count } from '@/lib/format';
 import { ORG } from '@/lib/org';
@@ -66,6 +67,9 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
           </div>
 
           {pj.body ? <div className="body">{pj.body}</div> : <p className="cap">紹介文は準備中です。</p>}
+
+          {/* ⚠ 2枚目以降。切り抜かずに元の比率のまま並ぶ。 */}
+          <Gallery images={pj.images} />
         </div>
       </section>
     </>

@@ -41,26 +41,9 @@
   white-space: pre-wrap;               /* 投稿された改行をそのまま活かす */
 }
 
-/* 2枚目以降の写真。
-   ⚠ 1列に詰め込まない。作品同士が隣り合うと互いの色が干渉する。 */
-.gallery {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--sp-8);
-  margin-block: var(--sp-12);
-}
-.galleryImg {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: var(--radius);
-  /* ⚠ 寸法が未知のまま読み込むと画面が飛ぶ（CLS）。
-     1-E（sharp によるビルド時の最適化）で width/height を自動付与するまでの
-     暫定措置として、最小の高さだけ確保しておく。 */
-  min-height: 1px;
-  background: var(--paper-card);
-}
+/* ⚠ 2枚目以降の写真（.gallery / .galleryImg）は components/Gallery.module.css へ
+     移した（2026-08-13）。部活・PJ・イベントでも同じ出しかたをするため。
+     ここに書き戻さないこと。2か所に分かれると、片方だけ直されて食い違う。 */
 
 /* 所属先・タグ・外部リンク。⚠ 作品より目立たせない。 */
 .meta {

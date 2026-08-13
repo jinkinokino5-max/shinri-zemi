@@ -270,10 +270,20 @@ Deno.serve(async (req) => {
       //   残しても表示はされないが、外したはずの写真がURLを知る人には
       //   見え続けることになる。「消したつもり」を作らない。
       if (op === 'update') {
+        // ⚠ 残す写真は data.photos の src から拾う（2026-08-13 に keepImages から変更）。
+        //   古い下書きのために keepImages も見る。両方見ておけば、
+        //   どちらの形でも「残すはずの写真を誤って消す」ことは起きない。
+        const d = row.data as {
+          photos?: { src?: string }[];
+          keepImages?: { src: string }[];
+        };
+        const published = [
+          ...(d.photos ?? []).map((im) => im.src),
+          ...(d.keepImages ?? []).map((im) => im.src),
+        ].filter((src): src is string => Boolean(src));
+
         const keep = new Set([
-          ...((row.data as { keepImages?: { src: string }[] }).keepImages ?? []).map(
-            (im) => `${SUBDIR}/public${im.src}`,
-          ),
+          ...published.map((src) => `${SUBDIR}/public${src}`),
           ...files.map((f) => f.path),
         ]);
         // ⚠ 見るのは、この slug の写真フォルダの中だけ。

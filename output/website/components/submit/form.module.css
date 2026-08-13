@@ -328,3 +328,58 @@
 
 /* 外される写真。⚠ 薄くするだけにしない。枠と文字でも示す。 */
 .photoDropped { opacity: .55; outline: 2px dashed var(--shu-on-light); }
+
+/* ── 写真の並び（PhotoList.tsx）───────────────────
+   ⚠ 役割（表紙／本文中）は色ではなく文字で示す。
+     色だけで区別すると、見えない人に伝わらない（06資料 2章）。 */
+
+.roles {
+  margin: var(--sp-2) 0 var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  max-width: var(--measure);
+  display: grid;
+  gap: var(--sp-1);
+}
+.roles p { font-size: 14px; line-height: 1.8; }
+
+.photoList {
+  list-style: none;
+  margin-top: var(--sp-4);
+  display: grid;
+  gap: var(--sp-6);
+}
+.photoRow {
+  background: var(--paper-card);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-2);
+}
+/* 表紙の1枚だけ、面を少し起こす。⚠ 差は装飾。役割は下の文字が示す。 */
+.photoRowCover { background: var(--white); }
+
+.photoHead { display: flex; align-items: baseline; gap: var(--sp-2); }
+
+.roleCover,
+.roleBody {
+  font: 700 13px/1.6 var(--font-sans);
+  letter-spacing: .04em;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+}
+.roleCover { background: var(--shu); color: var(--ink); }        /* 朱地に墨 4.78 AA */
+.roleBody { background: var(--paper); color: var(--sub-on-light); }
+
+.photoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  align-items: center;
+}
+.photoActions button:disabled {
+  color: var(--sub-on-light);
+  cursor: not-allowed;
+  text-decoration: none;
+}

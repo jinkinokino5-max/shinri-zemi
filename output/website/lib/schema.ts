@@ -67,8 +67,16 @@ const base = {
   name: z.string().min(1),
   /** 本文（Markdown）。 */
   body: z.string().default(''),
-  /** ⚠ optional。無いときは 6-4 のフォールバック表示になる。 */
+  /** 一覧・帯・詳細ページの頭に出る1枚。
+   *  ⚠ optional。無いときは 6-4 のフォールバック表示になる。
+   *  ⚠ 出る場所ごとに違う比率へ切り抜かれる。focus で位置を指定できる。 */
   cover: ImageRef.optional(),
+  /** 2枚目以降。詳細ページの本文の下に、元の比率のまま並ぶ。
+   *  ⚠ 2026-08-13 に追加。それまで作品にしか無かったため、部活・PJ・イベントに
+   *    2枚目以降を投稿しても、リポジトリにファイルだけ残って
+   *    どのページからも参照されない状態になっていた（実際に発生した）。
+   *  ⚠ 切り抜かれないので focus は使わない。指定されていても無視される。 */
+  images: z.array(ImageRef).default([]),
 };
 
 /* ── 部活 ───────────────────────────────────────────── */
@@ -134,7 +142,8 @@ export const Work = z.object({
   }),
   year: z.number().int().min(2000).max(2100),
   publishedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  images: z.array(ImageRef).default([]),
+  // ⚠ base.images と同じもの。作品だけは base を展開していないため、ここに書く。
+  images: base.images,
   tags: z.array(z.string()).default([]),
   externalUrl: z.string().url().optional(),
 });

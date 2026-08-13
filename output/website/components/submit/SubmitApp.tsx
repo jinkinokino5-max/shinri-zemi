@@ -15,8 +15,7 @@ import { hasErrors, validate, type Errors } from '@/lib/submission/validate';
 import { canSubmit, type Member } from '@/lib/submission/useMember';
 import { AuthGate } from './AuthGate';
 import { FieldInput, type BelongsToOption } from './FieldInput';
-import { KeepPhotos, type KeptImage } from './KeepPhotos';
-import { PhotoInput, type UploadedImage } from './PhotoInput';
+import { PhotoList, type Photo } from './PhotoList';
 import s from './form.module.css';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -45,7 +44,7 @@ type Row = {
   state: 'draft' | 'pending' | 'returned' | 'published';
   target_slug: string | null;
   data: Record<string, unknown>;
-  images: UploadedImage[];
+  images: { path: string; alt: string }[];
   delete_reason: string | null;
   review_note: string | null;
   updated_at: string;
@@ -98,8 +97,10 @@ function Inner({
   const [targetSlug, setTargetSlug] = useState<string | null>(null);
   const [id, setId] = useState(() => crypto.randomUUID());
   const [data, setData] = useState<Record<string, unknown>>({});
-  const [images, setImages] = useState<UploadedImage[]>([]);
-  const [keepImages, setKeepImages] = useState<KeptImage[]>([]);
+  // ⚠ 公開済みの写真と新しく上げた写真を、1本の並びで持つ。
+  //   分けて持っていたころ、どちらが表紙になるのか誰にも分からなかった
+  //   （PhotoList.tsx の冒頭に経緯がある）。
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [deleteReason, setDeleteReason] = useState('');
   const [consent, setConsent] = useState({ publish: false, portrait: false });
   const [errors, setErrors] = useState<Errors>({});
@@ -129,8 +130,7 @@ function Inner({
     setOp(nextOp);
     setTargetSlug(null);
     setData({});
-    setImages([]);
-    setKeepImages([]);
+    setPhotos([]);
     setDeleteReason('');
     setConsent({ publish: false, portrait: false });
     setErrors({});
@@ -145,8 +145,8 @@ function Inner({
     setKind(e.kind);
     setTargetSlug(e.slug);
     setData({ ...e.data });
-    setImages([]);
-    setKeepImages(e.images.map((im) => ({ ...im })));
+    // ⚠ いま公開されている並びをそのまま写す。1枚目が表紙。
+    setPhotos(e.images.map((im) => ({ src: im.src, alt: im.alt, focus: im.focus })));
     setDeleteReason('');
     setConsent({ publish: false, portrait: false });
     setErrors({});
@@ -155,8 +155,11 @@ function Inner({
 
   /** 下書き・差し戻しを編集用に読み込む。 */
   const edit = (row: Row) => {
-    const { keepImages: kept, ...rest } = (row.data ?? {}) as {
-      keepImages?: KeptImage[];
+    // ⚠ photos は data の中に入れて運んでいる。フォームの項目ではないので外す。
+    //   keepImages は 2026-08-13 より前の下書きの形。開けるようにしておく。
+    const { photos: saved, keepImages: kept, ...rest } = (row.data ?? {}) as {
+      photos?: Photo[];
+      keepImages?: { src: string; alt: string; focus?: Photo['focus'] }[];
     } & Record<string, unknown>;
     setId(row.id);
     setKind(row.kind);
@@ -164,8 +167,7 @@ function Inner({
     setMode(row.op === 'create' ? 'create' : 'change');
     setTargetSlug(row.target_slug);
     setData(rest);
-    setImages(row.images ?? []);
-    setKeepImages(kept ?? []);
+    setPhotos(saved ?? [...(kept ?? []), ...(row.images ?? []).map((im) => ({ ...im }))]);
     setDeleteReason(row.delete_reason ?? '');
     setConsent({ publish: false, portrait: false });
     setErrors({});
@@ -211,10 +213,16 @@ function Inner({
               ? (member.project_slugs[0] ?? null)
               : null;
 
-      // ⚠ keepImages は data の中に入れて運ぶ。
+      // ⚠ 写真の並びは data.photos に入れて運ぶ。
       //   フロントマターには出さない（to-markdown.ts が除外している）。
+      //   ⚠ images 列には「新しく上げた写真」だけを入れる。
+      //     Edge Function が Storage から取り出してリポジトリへ入れるための一覧で、
+      //     並び順の意味は持たない。順番を決めるのは data.photos だけである。
       const payload =
-        op === 'delete' ? {} : keepImages.length > 0 ? { ...data, keepImages } : { ...data };
+        op === 'delete' ? {} : photos.length > 0 ? { ...data, photos } : { ...data };
+      const uploads = photos
+        .filter((p) => p.path)
+        .map((p) => ({ path: p.path!, alt: p.alt, focus: p.focus }));
 
       const { error } = await supabase.from('submissions').upsert({
         id,
@@ -224,7 +232,7 @@ function Inner({
         state: submit ? 'pending' : 'draft',
         target_slug: ownSlug,
         data: payload,
-        images: op === 'delete' ? [] : images,
+        images: op === 'delete' ? [] : uploads,
         delete_reason: op === 'delete' ? deleteReason.trim() : null,
         consent_publish: consent.publish,
         consent_portrait: consent.portrait,
@@ -376,21 +384,15 @@ function Inner({
                 />
               ))}
 
-              {/* ⚠ frameName は「写真が無いときの枠」に出る名前（6-4）。
-                    入力中の作品名・団体名をそのまま渡し、プレビューを
-                    本物と同じ見え方にする。 */}
-              <KeepPhotos
-                images={keepImages}
-                onChange={setKeepImages}
-                frameName={frameName}
-              />
-
-              <PhotoInput
+              {/* ⚠ 公開済みと新規を分けない。1本の並びで持つ。
+                    分けていたころ、どちらが表紙になるのか投稿者に分からなかった
+                    （PhotoList.tsx の冒頭に経緯がある）。
+                  ⚠ frameName は「写真が無いときの枠」に出る名前（6-4）。 */}
+              <PhotoList
                 userId={member.user_id}
                 submissionId={id}
-                images={images}
-                onChange={setImages}
-                label={keepImages.length > 0 ? '写真を足す' : undefined}
+                photos={photos}
+                onChange={setPhotos}
                 frameName={frameName}
               />
 

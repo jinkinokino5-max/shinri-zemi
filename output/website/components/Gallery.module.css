@@ -1,0 +1,20 @@
+/* 2枚目以降の写真。詳細は Gallery.tsx のコメントを参照。
+   ⚠ もとは app/works/[slug]/work.module.css の .gallery だった。
+     部活・PJ・イベントでも使うため切り出した（2026-08-13）。値は変えていない。 */
+
+.gallery {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--sp-8);
+  margin-block: var(--sp-12);
+}
+
+.img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+  /* ⚠ 寸法が未知のまま読み込むと画面が飛ぶ（CLS）。最小の高さだけ確保しておく。 */
+  min-height: 1px;
+}

@@ -358,6 +358,106 @@ check('まん中・等倍を明示的に渡しても、focus は書き出され�
   },
 });
 
+/* ── 写真の並び（data.photos）─────────────────────
+   ⚠ ここは実際に事故が起きた場所である（2026-08-13）。
+     ・部活に2枚目を投稿すると、写真ファイルだけがリポジトリに残り、
+       .md からは参照されないまま消えた（images が作品専用だったため）
+     ・「残す写真」と「足す写真」が別配列で、新しい写真を表紙にできなかった
+     ・投稿画面が両方の先頭を「1枚目」と呼び、投稿者が取り違えた
+   直したのは構造（並びを1本にした）なので、ここで並びを検査する。 */
+
+const belt = check(
+  '部活の2枚目以降が書き出されること（かつて捨てられていた）',
+  {
+    id: 'aaaaaaaa-0000-0000-0000-000000000015',
+    kind: 'club',
+    target_slug: 'dokusho',
+    data: {
+      name: '読書部',
+      status: 'active',
+      body: '写真を3枚入れました。',
+      photos: [
+        { src: '/photos/clubs/dokusho/1.jpg', alt: '表紙' },
+        { src: '/photos/clubs/dokusho/2.jpg', alt: '本文1' },
+        { path: 'uid/sub/eeee5555.jpg', alt: '本文2' },
+      ],
+    },
+  },
+  { photos: [{ path: 'uid/sub/eeee5555.jpg', alt: '本文2' }] },
+);
+
+if (belt) {
+  if (belt.value.cover?.src !== '/photos/clubs/dokusho/1.jpg') {
+    console.error('❌ 並びの1件目が表紙になっていません');
+    failed++;
+  }
+  if ((belt.value.images ?? []).length !== 2) {
+    console.error(`❌ 部活の2枚目以降が書き出されていません（${(belt.value.images ?? []).length}枚）`);
+    failed++;
+  }
+  if (belt.value.images?.[1]?.src !== '/photos/clubs/dokusho/eeee5555.jpg') {
+    console.error('❌ 新しく上げた写真のパスが公開URLに直っていません');
+    failed++;
+  }
+}
+
+const newCover = check(
+  '新しく上げた写真を表紙にできること（並びの1件目が新規）',
+  {
+    id: 'aaaaaaaa-0000-0000-0000-000000000016',
+    kind: 'project',
+    target_slug: 'kaimin',
+    data: {
+      name: '快眠PJ',
+      status: 'active',
+      body: '表紙を新しい写真に差し替えました。',
+      photos: [
+        { path: 'uid/sub/ffff6666.jpg', alt: '新しい表紙', focus: { x: 20, y: 80, zoom: 2 } },
+        { src: '/photos/projects/kaimin/old.jpg', alt: '前の表紙' },
+      ],
+    },
+  },
+  { photos: [{ path: 'uid/sub/ffff6666.jpg', alt: '新しい表紙' }] },
+);
+
+if (newCover) {
+  // ⚠ 並びを1本にする前は、残す写真が必ず先に来るため、これができなかった。
+  if (newCover.value.cover?.src !== '/photos/projects/kaimin/ffff6666.jpg') {
+    console.error('❌ 新しく上げた写真を表紙にできていません');
+    failed++;
+  }
+  if (newCover.value.cover?.focus?.zoom !== 2) {
+    console.error('❌ 表紙の focus が落ちています');
+    failed++;
+  }
+  if (newCover.value.images?.[0]?.src !== '/photos/projects/kaimin/old.jpg') {
+    console.error('❌ 前の表紙が本文中の写真に回っていません');
+    failed++;
+  }
+}
+
+const legacy = check('古い下書き（keepImages ＋ images）も、まだ開けること', {
+  id: 'aaaaaaaa-0000-0000-0000-000000000017',
+  kind: 'event',
+  target_slug: 'doto',
+  data: {
+    name: '道東合宿',
+    date: '2026-09-04',
+    body: '2026-08-13 より前に保存された下書きの形。',
+    keepImages: [{ src: '/photos/events/doto/1.jpg', alt: '前からある写真' }],
+  },
+});
+
+if (legacy && legacy.value.cover?.src !== '/photos/events/doto/1.jpg') {
+  console.error('❌ 古い形の下書きで写真が失われています');
+  failed++;
+}
+
+if (legacy && /photos:|keepImages/.test(legacy.md)) {
+  console.error('❌ 内部の指示（photos / keepImages）がフロントマターに漏れています');
+  failed++;
+}
+
 /* ── 結果 ─────────────────────────────────────────── */
 
 if (failed > 0) {

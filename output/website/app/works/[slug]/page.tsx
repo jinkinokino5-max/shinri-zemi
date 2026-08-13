@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteNav } from '@/components/SiteNav';
 import { Thumb } from '@/components/Thumb';
+import { Gallery } from '@/components/Gallery';
 import { getWorks, resolveBelongsTo } from '@/lib/content';
 import { ORG, SITE_URL } from '@/lib/org';
 import { asset } from '@/lib/asset';
@@ -139,24 +140,9 @@ export default async function WorkPage({ params }: { params: Promise<Params> }) 
 
           {work.body && <div className={`body ${s.text}`}>{work.body}</div>}
 
-          {/* ⚠ 2枚目以降。1枚目は上のヒーローに出している。 */}
-          {work.images.length > 0 && (
-            <ul className={s.gallery}>
-              {work.images.map((im) => (
-                <li key={im.src}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={asset(im.src)}
-                    alt={im.alt}
-                    loading="lazy"
-                    // ⚠ 寸法が分からないと読み込み時に画面が飛ぶ（CLS）。
-                    //   1-E の自動最適化ができるまでは CSS の比率で押さえる。
-                    className={s.galleryImg}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
+          {/* ⚠ 2枚目以降。1枚目は上のヒーローに出している。
+                部活・PJ・イベントと同じ components/Gallery.tsx を使う。 */}
+          <Gallery images={work.images} />
 
           <dl className={s.meta}>
             {origin ? (
