@@ -10,10 +10,12 @@ import {
   type Kind,
   type Op,
 } from '@/lib/submission/fields';
+import { validate, hasErrors, type Errors } from '@/lib/submission/validate';
 import type { DependentMap, PublishedEntry } from '@/lib/submission/published';
 import { asset } from '@/lib/asset';
 import type { Focus } from '@/lib/schema';
 import { AuthGate } from './AuthGate';
+import { FieldInput, type BelongsToOption } from './FieldInput';
 import { DEFAULT_FOCUS, PhotoFraming } from './PhotoFraming';
 import s from './form.module.css';
 
@@ -36,6 +38,12 @@ import s from './form.module.css';
    ⚠ この画面から出せる操作は3つだけ：反映する／差し戻す／（何もしない）。
      投稿そのものを消すボタンは無い（6-1）。差し戻しは記録が残るが、
      削除は記録が残らないので、記録が残る側だけを用意している。
+
+   ⚠ 2026-08-16 追加：代表は中身の文章そのものをここで直せる。
+     差し戻して書き直してもらう往復が、誤字レベルの直しにも毎回発生していた
+     （団体からの指摘）。代表が直接直した内容は、そのまま「公開する」で
+     GitHub に書き込まれる。⚠ 直した内容は投稿者には通知されない。
+     投稿の趣旨そのものを変えるような直しは、差し戻して理由を書くこと。
    ══════════════════════════════════════════════════════════════════ */
 
 type Row = {
@@ -75,14 +83,16 @@ const SLUG_RE = /^[a-z0-9-]+$/;
 export function ReviewApp({
   entries,
   dependents,
+  options,
 }: {
   entries: PublishedEntry[];
   dependents: DependentMap;
+  options: BelongsToOption[];
 }) {
   return (
     <AuthGate requireRep>
       {({ accessToken }) => (
-        <Inner accessToken={accessToken} entries={entries} dependents={dependents} />
+        <Inner accessToken={accessToken} entries={entries} dependents={dependents} options={options} />
       )}
     </AuthGate>
   );
@@ -92,10 +102,12 @@ function Inner({
   accessToken,
   entries,
   dependents,
+  options,
 }: {
   accessToken: string;
   entries: PublishedEntry[];
   dependents: DependentMap;
+  options: BelongsToOption[];
 }) {
   const supabase = getSupabase()!;
   const [rows, setRows] = useState<Row[]>([]);
@@ -134,6 +146,7 @@ function Inner({
           accessToken={accessToken}
           entries={entries}
           dependents={dependents}
+          options={options}
           onDone={load}
         />
       ))}
@@ -146,12 +159,14 @@ function ReviewCard({
   accessToken,
   entries,
   dependents,
+  options,
   onDone,
 }: {
   row: Row;
   accessToken: string;
   entries: PublishedEntry[];
   dependents: DependentMap;
+  options: BelongsToOption[];
   onDone: () => void;
 }) {
   const supabase = getSupabase()!;
@@ -163,6 +178,10 @@ function ReviewCard({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [urls, setUrls] = useState<Record<string, string>>({});
+  // ⚠ row.data の複製。photos など FIELDS に無いキーもそのまま持ち回る。
+  //   FIELDS の項目だけをここで直接書き換える（下の dl を参照）。
+  const [data, setData] = useState<Record<string, unknown>>({ ...row.data });
+  const [fieldErrors, setFieldErrors] = useState<Errors>({});
 
   /** いまサイトに出ている内容。⚠ ビルド時点のもの。 */
   const before = entries.find((e) => e.kind === row.kind && e.slug === row.target_slug) ?? null;
@@ -190,8 +209,21 @@ function ReviewCard({
   const blocked = orphans.length > 0;
 
   const publish = async () => {
-    setBusy(true);
     setMsg('');
+
+    // ⚠ 代表がここで直した内容も、このまま公開される。
+    //   誤字レベルの直しのために差し戻す往復を無くすための機能なので、
+    //   最低限の形式チェックだけは通す（lib/schema.ts が Zod で弾く前に止める）。
+    if (op !== 'delete') {
+      const e = validate(row.kind, data, { publish: true, portrait: true }, op);
+      setFieldErrors(e);
+      if (hasErrors(e)) {
+        setMsg('直した内容に足りないところがあります。赤い文の欄を見てください。');
+        return;
+      }
+    }
+
+    setBusy(true);
     try {
       // 新規のときだけ、代表がここで slug を確定させる。
       // ⚠ 直す・消すの slug は投稿者が対象を選んだ時点で決まっている。
@@ -201,6 +233,14 @@ function ReviewCard({
           .from('submissions')
           .update({ target_slug: slug })
           .eq('id', row.id);
+        if (error) throw new Error(error.message);
+      }
+
+      // ⚠ 代表が直した中身を、公開前にここで書き戻す。
+      //   Edge Function はこのテーブルの行をそのまま読んで Markdown にするため、
+      //   ここで書いておかないと、直した内容が無かったことになる。
+      if (op !== 'delete') {
+        const { error } = await supabase.from('submissions').update({ data }).eq('id', row.id);
         if (error) throw new Error(error.message);
       }
 
@@ -244,7 +284,7 @@ function ReviewCard({
   };
 
   const title = String(
-    row.data?.title ?? row.data?.name ?? before?.label ?? row.target_slug ?? '（名前がまだ）',
+    data.title ?? data.name ?? before?.label ?? row.target_slug ?? '（名前がまだ）',
   );
 
   return (
@@ -273,34 +313,46 @@ function ReviewCard({
                 公開してから気づくのではなく、いま差し戻せる。 */}
           <PhotoReview row={row} urls={urls} name={title} before={before} op={op} />
 
-          {/* ── 中身をそのまま並べる。直す提案なら、変わったところを示す ── */}
-          <dl className={s.dl}>
+          {/* ── 中身。代表はここで直接書き換えられる ──
+                ⚠ 直す提案なら、変わったところに印を付ける（何が変わったかを
+                  自分で思い出させない。5-C-0：確認の形骸化への対策）。
+                ⚠ 投稿者が書いた元の値は必ず出す。代表の直しで消えても、
+                  「元は何だったか」が分かるようにするため。 */}
+          <div className={s.dl}>
             {FIELDS[row.kind].map((f) => {
-              const v = row.data?.[f.key];
+              const v = data[f.key];
               const old = before?.data?.[f.key];
-              const changed = op === 'update' && format(v) !== format(old);
-              if ((v === undefined || v === null || v === '') && !changed) return null;
+              const submitted = row.data?.[f.key];
+              const changedFromBefore = op === 'update' && format(submitted) !== format(old);
+              const editedByRep = format(v) !== format(submitted);
               return (
-                <div key={f.key} className={changed ? `${s.dlRow} ${s.dlChanged}` : s.dlRow}>
-                  <dt>
-                    {f.label}
-                    {changed && <span className={s.changedTag}>変更</span>}
-                  </dt>
-                  <dd>
-                    {/* ⚠ 変更前を必ず並べて出す。新しい値だけを見せると、
-                          代表は「何が変わったのか」を自分で思い出す羽目になり、
-                          結局そのまま押す（＝確認の形骸化）。 */}
-                    {changed && (
-                      <span className={s.beforeText}>
-                        {format(old) === '' ? '（空）' : format(old)}
-                      </span>
-                    )}
-                    {format(v) === '' ? '（空）' : format(v)}
-                  </dd>
+                <div
+                  key={f.key}
+                  className={changedFromBefore ? `${s.dlRow} ${s.dlChanged}` : s.dlRow}
+                >
+                  {changedFromBefore && (
+                    <p className={s.beforeText}>
+                      いま公開されている内容：
+                      {format(old) === '' ? '（空）' : format(old)}
+                    </p>
+                  )}
+                  {editedByRep && (
+                    <p className={s.beforeText}>
+                      投稿された内容：
+                      {format(submitted) === '' ? '（空）' : format(submitted)}
+                    </p>
+                  )}
+                  <FieldInput
+                    field={f}
+                    value={v}
+                    error={fieldErrors[f.key]}
+                    options={options}
+                    onChange={(next) => setData((d) => ({ ...d, [f.key]: next }))}
+                  />
                 </div>
               );
             })}
-          </dl>
+          </div>
 
           {row.kind === 'work' && (
             <p className={s.note}>

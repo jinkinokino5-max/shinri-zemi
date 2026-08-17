@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { SiteNav } from '@/components/SiteNav';
 import { ReviewApp } from '@/components/submit/ReviewApp';
+import type { BelongsToOption } from '@/components/submit/FieldInput';
+import { getClubs, getEvents, getProjects } from '@/lib/content';
 import { getDependents, getPublishedEntries } from '@/lib/submission/published';
 
 /* ══════════════════════════════════════════════════════════════════
@@ -20,6 +22,14 @@ export const metadata: Metadata = {
 };
 
 export default function ReviewPage() {
+  // ⚠ 「作品」の投稿を代表がその場で直すとき、所属先(belongsTo)の
+  //   選択肢が要る。/submit と同じ一覧をビルド時点から渡す。
+  const options: BelongsToOption[] = [
+    ...getClubs().map((c) => ({ kind: 'club' as const, slug: c.slug, name: c.name })),
+    ...getProjects().map((p) => ({ kind: 'project' as const, slug: p.slug, name: p.name })),
+    ...getEvents().map((e) => ({ kind: 'event' as const, slug: e.slug, name: e.name })),
+  ];
+
   return (
     <>
       <SiteNav />
@@ -30,7 +40,11 @@ export default function ReviewPage() {
           {/* ⚠ 「変更前の内容」と「消すと行き場を失う作品」は、ビルド時に
                 content/*.md から数えて渡す。代表のブラウザに調べさせない。
                 調べさせると、調べない日が必ず来る（5-C-0：確認の形骸化）。 */}
-          <ReviewApp entries={getPublishedEntries()} dependents={getDependents()} />
+          <ReviewApp
+            entries={getPublishedEntries()}
+            dependents={getDependents()}
+            options={options}
+          />
         </div>
       </section>
     </>

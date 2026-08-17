@@ -238,20 +238,13 @@
 .photoBody { margin-top: var(--sp-2); display: grid; gap: var(--sp-1); }
 .altLabel { display: grid; gap: 4px; font-size: 14px; color: var(--sub-on-light); }
 
-/* ── 確認画面の内容表示 ───────────────────────────── */
+/* ── 確認画面の内容表示 ───────────────────────────────
+   ⚠ 2026-08-16：ここは読むだけの表(dt/dd)ではなく、代表がその場で
+     直接書き換えられる入力欄（FieldInput）になった。 */
 .dl { margin-bottom: var(--sp-4); }
 .dlRow {
-  display: grid;
-  grid-template-columns: 12em 1fr;
-  gap: var(--sp-2);
-  padding: var(--sp-1) 0;
+  padding: var(--sp-2) 0;
   border-top: 1px solid var(--paper);
-}
-.dlRow dt { font-size: 14px; color: var(--sub-on-light); }
-.dlRow dd { font-size: 16px; line-height: 1.9; white-space: pre-wrap; }
-
-@media (max-width: 640px) {
-  .dlRow { grid-template-columns: 1fr; gap: 0; }
 }
 
 /* ── 自分の投稿一覧 ───────────────────────────────── */
@@ -295,18 +288,15 @@
   background: var(--shu);
   color: var(--ink);
 }
-/* 変更前の値。⚠ 打ち消し線だけにしない。読み上げでは伝わらないため、
-   「変更前：」という文字そのものを ::before で出す。 */
+/* 元の値の参考表示（いま公開されている内容／投稿された内容）。
+   ⚠ 文言（プレフィックス）は呼び出し側がテキストとして書く。ここでは
+     色だけを落として「今の入力欄の値ではない」ことを示す。 */
 .beforeText {
   display: block;
+  margin-bottom: var(--sp-1);
+  font-size: 14px;
   color: var(--sub-on-light);
-  text-decoration: line-through;
-  text-decoration-color: var(--shu-on-light);
-}
-.beforeText::before {
-  content: '変更前：';
-  text-decoration: none;
-  display: inline;
+  white-space: pre-wrap;
 }
 
 /* 消せないときの説明。⚠ ボタンを disabled にするだけで終わらせない。
